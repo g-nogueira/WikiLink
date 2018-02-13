@@ -14,7 +14,7 @@
     "scripts": [
       "repository/Http.js",
       "repository/Manager.js",
-      "repository/WikiRepo.js",
+      "repository/WikiRepoBundle.js",
       "eventPage.js"
     ],
     "persistence": true

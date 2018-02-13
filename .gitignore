@@ -2,4 +2,4 @@
 public/lib/*
 
 # NPM Packages
-server/node_modules
+node_modules/*
