@@ -1,0 +1,20 @@
+{
+  "name": "WikiLink",
+  "homepage": "https://github.com/ghdrn11/WikiLink-Notes",
+  "authors": [
+    "Gustavo Henrique dos Reis Nogueira <gustavornogueir@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "franc": "^3.1.1"
+  }
+}

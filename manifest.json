@@ -1,0 +1,50 @@
+{
+  "manifest_version": 2,
+  "name": "WikiLink",
+  "description": "This extension alows the user to fast search wiki terms.",
+  "version": "0.9",
+  "omnibox": {
+    "keyword": "wl:"
+  },
+  "icons": {
+    "128": "public/images/icon7.png"
+  },
+  "options_page": "optionsPage/index.html",
+  "background": {
+    "scripts": [
+      "repository/Http.js",
+      "repository/Manager.js",
+      "repository/WikiRepo.js",
+      "eventPage.js"
+    ],
+    "persistence": true
+  },
+  "browser_action": {
+    "default_locale": "en",
+    "default_icon": "public/images/icon7.png",
+    "default_popup": "browserAction/index.html",
+    "default_title": "WikiLink Settings"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "popover.js"
+      ],
+      "css": [
+        "popover.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "contextMenus",
+    "<all_urls>"
+  ],
+  "content_security_policy": "script-src 'self' https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js; object-src 'self'"
+}

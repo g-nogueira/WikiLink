@@ -1,0 +1,5 @@
+# Bower Packages
+public/lib/*
+
+# NPM Packages
+server/node_modules
