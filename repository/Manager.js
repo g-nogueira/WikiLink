@@ -58,19 +58,22 @@ class Manager {
     }
 
     /**
-     * @summary Updates an object or an elemt of an object.
+     * @summary Updates an object or an element of an object.
      * @param {object} obj The object to update.
      * @param {String} obj.key The key of the object to update.
+     * @param {String} obj.subkey The subkey of the object to update.
      * @param {*} obj.value The new value of the object.
      * @param {String} [obj.id] The id of the object to update. If none provided, it will update the whole object.
-     * @returns {Promise}
+     * @returns {Promise<object>}
      */
     async update(obj) {
         return new Promise(async (resolve, reject) => {
 
             //If id is provided, update the specified element of the array.
+            
+            const list = await (new Promise((resolve, reject) => chrome.storage.sync.get(obj.key, obj => resolve(obj))));
+
             if (obj.id) {
-                const list = await (new Promise((resolve, reject) => chrome.storage.sync.get(obj.key, obj => resolve(obj))));
                 const arrayCopy = list[obj.key].slice();
                 const index = arrayCopy.findIndex(el => el.id == obj.id);
                 if (index === -1) {
@@ -85,8 +88,14 @@ class Manager {
                     });
                 }
             }
+            else if (obj.subkey) {
+                list[obj.key][obj.subkey] = obj.value;
+                chrome.storage.sync.set({ [obj.key]: list[obj.key] });
+                resolve(list[obj.key]);
+            }
             else {
                 chrome.storage.sync.set({ [obj.key]: obj.value });
+                resolve({ [obj.key]: obj.value });
             }
         });
     }

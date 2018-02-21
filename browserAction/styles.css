@@ -1,0 +1,41 @@
+:root {
+    --sidemenu-width: 240px;
+    --sidemenu-width-negative: -240px;
+    --primary-color: #009688;
+    --primary-text-color: rgba(0, 0, 0, 0.87);
+    --secundary-text-color: rgba(0, 0, 0, 0.54);
+    --disabled-text-color: rgba(0, 0, 0, 0.38);
+}
+
+body {
+    min-width: 200px;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+.list {
+    min-width: max-content;
+    display: flex;
+    flex-flow: column;
+}
+
+.list *::selection {
+    background: rgba(0, 0, 0, 0) !important;
+}
+
+.list .item:hover {
+    background-color: rgba(0, 0, 0, .04);
+}
+
+.list .item {
+    cursor: pointer;
+    color: var(--primary-text-color);
+    font-weight: 300;
+    padding: 12px 16px 12px 16px;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color .3s, box-shadow 0.3s;
+}
+
+.list .item:active {
+    background-color: rgba(0, 0, 0, .1);
+}

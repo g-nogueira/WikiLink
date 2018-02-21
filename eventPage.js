@@ -6,7 +6,7 @@
     function initializeDB() {
         manager.retrieve('wikilink').then(obj => {
             if (typeof obj !== 'object')
-            manager.update({ key: 'wikilink', value: {isEnabled: true, shortcuts: []}});
+            manager.update({ key: 'popover', value: {isEnabled: true, shortcuts: []}});
         });
     }
 

@@ -42,7 +42,7 @@
 
         if (selText != previous && enabled === true) {
             const txtData = await repoRequest(selText, range);
-            const imgData = await imgRequest(selText);
+            const imgData = await imgRequest(txtData.title);
             showData(txtData, imgData);
             previous = selText;
             autoResetSelection();
@@ -78,7 +78,6 @@
             range: range
         };
         return new Promise((resolve, reject) => chrome.runtime.sendMessage(msg, data => resolve(data)));
-        imgRequest(term);
 
     }
 
@@ -97,7 +96,10 @@
         const textSection = popover.querySelector('#popover-text');
 
         textSection.textContent = (txtData.body.length > 0 ? txtData.body : notFound);
-        imageSection.src = imgData.url;
+        if (!imgData || !imgData.url) //if undefined or empty url
+            imageSection.hidden = true;
+            
+        else imageSection.src = imgData.url;
         showDiv();
     }
 

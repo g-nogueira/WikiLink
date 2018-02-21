@@ -21,25 +21,37 @@
          * @returns {Promise.<object>} Returns a Promise that resolves to an object with title and body properties.
          */
         searchTerm(term, range) {
-            const article = { title: '', body: '' };
+            const article = { title: '', body: '' , url: ''};
 
             return new Promise(async (resolve, reject) => {
 
                 let language = this.identifyLanguage(range);
                 language = language.language === 'und' ? 'en' : language.language;
-
+                language = !language ? 'en' : language;
+                
+                
                 const searchResponse = await http.get(`https://${language}.wikipedia.org/w/api.php?action=opensearch&search=${term}&limit=2&namespace=0&format=json`);
+                const wikt = await http.get(`https://${language}.wiktionary.org/w/api.php?action=opensearch&search=${term}&limit=2&namespace=0&format=json`);
                 const resultsArray = JSON.parse(searchResponse);
-
+                
                 const titles = resultsArray[1];
                 const articles = resultsArray[2];
-
+                const urls = resultsArray[3];
+                
+                // const image = await this.searchImage(titles[0]);
                 try {
-                    article.title = titles[0];
-                    article.body = articles[0].includes('refer to:') || articles[0].includes('referir-se a:') ? articles[1] : articles[0];
+                    let index = 0;
+                    //If the first article dosn't have the title in it, will get the second article
+                    if (!articles[0].toLowerCase().includes(titles[0].toLowerCase()) || articles[0].length < 80) { 
+                        index = 1;
+                    }
+                    article.title = titles[index];
+                    article.body = articles[index];
+                    article.url = urls[index];
                 } catch (error) {
                     console.warn(`Couldn't get an article for the term "${term}".`);
                 }
+
 
                 resolve(article);
             });
@@ -54,19 +66,16 @@
             return new Promise(async (resolve, reject) => {
                 const imageInfo = {
                     url: '',
-                    width: 500,
-                    height: 500
+                    width: 250,
+                    height: 250
                 };
                 try {
-                    const imagesNameString = await http.get(`https://en.wikipedia.org/w/api.php?action=query&titles=${term}&prop=images&format=json`);
-                    const imageTitle = JSON.parse(`{${/"images":\[(.*?)\]/g.exec(imagesNameString)[0]}}`).images[0].title;
+                    const resp = await http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=250&format=json`);
+                    const image = findKey(JSON.parse(resp), 'thumbnail');
 
-                    const imageInfoString = await http.get(`https://commons.wikimedia.org/w/api.php?action=query&titles=${imageTitle}&prop=imageinfo&iiprop=url|size&format=json`);
-                    const imageInfoObj = JSON.parse(`{${/"imageinfo":\[(.*?)\]/g.exec(imageInfoString)[0]}}`).imageinfo[0];
-
-                    imageInfo.url = imageInfoObj.url;
-                    imageInfo.width = imageInfoObj.width;
-                    imageInfo.height = imageInfoObj.height;
+                    imageInfo.url = image.source;
+                    imageInfo.width = image.width;
+                    imageInfo.height = image.height;
 
                     resolve(imageInfo);
                 } catch (error) {
@@ -80,16 +89,30 @@
             const regexUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
             const text = extract.match(regexUTF8).toString();
             const whitelist = ['por', 'eng', 'spa', 'deu', 'fra', 'ita', 'rus'];
-            const francRes = { language: franc(extract, { whitelist: whitelist }) };
+            const francRes = franc(extract, { whitelist: whitelist });
             const languages = {
                 por: 'pt', eng: 'en', spa: 'es', deu: 'de',
                 fra: 'fr', ita: 'it', rus: 'ru'
             };
 
 
-            return { language: languages[francRes.language] };
+            return { language: languages[francRes] };
         }
     }
 
     const wikiRepo = new WikiRepo();
+
+    function findKey(obj, key) {
+        let result = {};
+        Object.keys(obj).forEach(el => {
+            if (el === key) {
+                result =  obj[el];
+            }
+            else if (typeof obj[el] == 'object') {
+                result = findKey(obj[el], key);
+            }
+        });
+    
+        return result;
+    }
 })();
