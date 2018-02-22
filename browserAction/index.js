@@ -8,29 +8,28 @@
     const el = (el) => document.querySelector(el);
 
     initEvents();
-    insertTexts();
+    insertElements();
 
 
     function initEvents() {
-        el('#togglePopup').addEventListener('click', togglePopup);
+        el('#togglePopover').addEventListener('click', togglePopover);
 
 
-        async function togglePopup() {
-            const before = await manager.retrieve('popover');;
-            const popover = await manager.update({ key: 'popover', subkey: 'isEnabled', value: !before.isEnabled });
-            togglePopupText();
-        }
+        togglePopover();
     }
 
-    function insertTexts() {
+    function insertElements() {
 
-        togglePopupText();
+        togglePopover();
 
     }
-    async function togglePopupText() {
-        const popover = await manager.retrieve('popover');
-        const isEnabled = popover.isEnabled;
-        el('#togglePopup').textContent = isEnabled ? 'Disable Popup' : 'Enable Popup';
+    async function togglePopover() {
+        const before = await manager.retrieve('popover');
+        const isEnabled = !before.isEnabled;
+        
+        manager
+            .update({ key: 'popover', subkey: 'isEnabled', value: isEnabled })
+            .then(popover => el('#togglePopover').textContent = popover.isEnabled ? 'Disable Popup' : 'Enable Popup');
     }
 
 })();

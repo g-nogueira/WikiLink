@@ -1,0 +1,9 @@
+.self-card{
+    min-height: 150px;
+    border-radius: 2px;
+}
+
+.self-card--large{
+    min-width: 90%;
+    width: 90%;
+}
