@@ -6,15 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+    <link rel="stylesheet" href="../public/lib/material-design-lite/material.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="../public/lib/style.css">
 
     <title>WikiLink Options</title>
 </head>
 
 <body>
-    <div class="self-card self-card--large">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Tenetur corrupti non cupiditate quas placeat, nisi, iste fuga,
-        ab officiis architecto sunt corporis. Libero, fugit culpa voluptate optio labore cupiditate harum!</div>
+    <main class="main self-column">
+        <div class="self-card self-card--large mdl-shadow--2dp">
+            <form class="self-form self-column">
+                <div>
+                    <label for="defaultLang">Default Language</label>
+                    <select name="" id="defaultLang" autofocus>
+                        <option value="rel">Relative</option>
+                        <option value="pt">Português</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="self-card mdl-shadow--2dp">
+            <form class="self-form self-column">
+                <div>
+                    <label for="showPopupShtct">Show Popup</label>
+                    <input type="text" id="showPopupShtct" class="self-js-showKey">
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="index.js"></script>
 </body>
 
 </html>
