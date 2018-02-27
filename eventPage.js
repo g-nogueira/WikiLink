@@ -6,7 +6,12 @@
     function initializeDB() {
         manager.retrieve('popover').then(obj => {
             if (typeof obj !== 'object')
-            manager.update({ key: 'popover', value: {isEnabled: true, shortcuts: []}});
+                manager.update({ key: 'popover', value: { isEnabled: true, shortcuts: [] } });
+        });
+
+        manager.retrieve('language').then(obj => {
+            if (typeof obj !== 'object')
+                manager.update({ key: 'language', value: 'rel' });
         });
     }
 
@@ -18,6 +23,26 @@
             chrome.tabs.create({ url: url });
         }
 
+    });
+
+    chrome.commands.onCommand.addListener(command => {
+        const commands = {
+            'toggle-popup': togglePopover,
+            'show-popup': showPopup
+        };
+        
+        async function togglePopover() {
+            const before = await manager.retrieve('popover');
+            const isEnabled = !before.isEnabled;
+            manager.update({ key: 'popover', subkey: 'isEnabled', value: isEnabled });
+        }
+
+        function showPopup() {
+            
+        }
+
+        commands[command]();
+        
     });
 
 })();

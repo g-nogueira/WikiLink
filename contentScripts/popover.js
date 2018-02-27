@@ -10,10 +10,6 @@
 |                                                |
 |It depends on: css/popover.css                  |
 |                                                |
-| Known issues:                                  |
-| - The popover closes wherever you click,       |
-| trigged by the onmousedown event; toDo.        |
-|                                                |
 @------------------------------------------------@
 */
 
@@ -29,11 +25,17 @@
 
 
     document.addEventListener('mouseup', ev => {
-        if (event.which === 1 && !selection.isCollapsed)
+        if (event.which === 1 && !selection.isCollapsed && !isPopoverChild(ev.target.id))
             searchSelectedAsync();
     });
     document.addEventListener('keypress', ev => key = ev.key)
-    document.addEventListener('mousedown', ev => hideDiv());
+    document.addEventListener('click', ev => {
+        if (!isPopoverChild(ev.target.id))
+            hideDiv()
+        resetSelection();
+
+    });
+
 
     async function searchSelectedAsync() {
         const enabled = await isEnabledAsync();
@@ -43,9 +45,9 @@
         if (selText != previous && enabled === true) {
             const txtData = await repoRequest(selText, range);
             const imgData = await imgRequest(txtData.title);
-            showData(txtData, imgData);
+            const dictData = await wiktRequest(selText);
+            showData(txtData, imgData, dictData);
             previous = selText;
-            autoResetSelection();
         }
     }
 
@@ -57,10 +59,8 @@
         });
     }
 
-    function autoResetSelection() {
-        setTimeout(function () {
-            previous = null;
-        }, 2000);
+    function resetSelection() {
+        previous = null;
     }
 
     function checkSelection(text) {
@@ -72,10 +72,12 @@
 
     function repoRequest(term, range) {
         const msg = {
-            module: 'wikiRepo',
-            method: 'searchTerm',
-            key: term,
-            range: range
+            receiver: 'wikirepo',
+            fnName: 'searchTerm',
+            params: {
+                term: term,
+                range: range
+            }
         };
         return new Promise((resolve, reject) => chrome.runtime.sendMessage(msg, data => resolve(data)));
 
@@ -83,35 +85,72 @@
 
     function imgRequest(term) {
         let msg = {
-            module: 'wikiRepo',
-            method: 'searchImage',
-            key: term
+            receiver: 'wikirepo',
+            fnName: 'searchImage',
+            params: { term: term }
         };
         return new Promise((resolve, reject) => chrome.runtime.sendMessage(msg, imgData => resolve(imgData)))
     }
 
-    function showData(txtData, imgData) {
+    function wiktRequest(term, range) {
+        const msg = {
+            receiver: 'wiktrepo',
+            fnName: 'searchTerm',
+            params: {
+                term: term
+            }
+        };
+        return new Promise((resolve, reject) => chrome.runtime.sendMessage(msg, data => resolve(data)));
+
+    }
+
+    function showData(txtData, imgData, dictData) {
         const notFound = 'Ops: nenhum resultado encontrado...';
         const imageSection = popover.querySelector('#popover-image');
         const textSection = popover.querySelector('#popover-text');
+        const dictTab = popover.querySelector('#dictionaryContent');
 
         textSection.textContent = (txtData.body.length > 0 ? txtData.body : notFound);
         if (!imgData || !imgData.url) //if undefined or empty url
             imageSection.hidden = true;
-            
+
         else imageSection.src = imgData.url;
+
+        const dictSection = createDictSection(dictData);
+        removeChildNodes(dictTab);
+        dictTab.appendChild(dictSection);
+
         showDiv();
     }
 
     function insertDiv() {
-        const fragment = `
+        const fragment =`
         <div class="popover" id="wikilink-popover">
-            <div class="contentGroup">
-                <img id="popover-image" class="popoverImage" src="">
-                <p id="popover-text" class="popoverText"></p>
-            </div>
+            <section class="popover-navbar">
+                <div id="wikiTab" class="tab" target="#wikipediaContent">Wikipedia</div>
+                <div id="dictTab" class="tab" target="#dictionaryContent">Dictionary</div>
+            </section>
+            <main class="contentGroup">
+                <section class="popover-tab-content" id="wikipediaContent">
+                    <img id="popover-image" class="popoverImage" src="">
+                    <p id="popover-text" class="popoverText"></p>
+                </section>
+                <section class="popover-tab-content self-column hidden" id="dictionaryContent">
+                    
+                </section>
+            </main>
         </div>`;
         popover = document.createRange().createContextualFragment(fragment).firstElementChild;
+
+        popover.addEventListener('pointerleave', hideDiv);
+        popover.querySelectorAll('.tab').forEach(el => {
+            el.addEventListener('click', ev => {
+                const pages = popover.querySelectorAll('.popover-tab-content');
+                pages.forEach(elem => elem.classList.add('hidden'));
+                popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden');
+            });
+        });
+
         document.body.appendChild(popover);
     }
 
@@ -151,6 +190,61 @@
 
     function hideDiv() {
         popover.classList.remove('popover--enabled');
+    }
+
+    function isPopoverChild(id) {
+        try {
+            return document.querySelector(`#wikilink-popover #${id}`) === null ? false : true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function createDictSection(obj) {
+
+        const section = document.createDocumentFragment();
+
+        Object.keys(obj).forEach(el => { //foreach language
+            const key = obj[el];
+
+            const span = document.createElement('span');
+            const ul = document.createElement('ul');
+            
+            
+            span.innerText = key[0].language;
+            key.forEach(pOS => { //foreach partOfSpeach
+               let liFrag =  `
+                <li>
+                    <span class="dict-partofspeach">${pOS.partOfSpeech}</span>
+                    <ol type="1" id="dictDefs" class="dict-definition">
+                    </ol>
+                </li>`;
+
+                liFrag = document.createRange().createContextualFragment(liFrag).firstElementChild;
+
+                pOS.definitions.forEach(def => {
+                    const liDef = document.createElement('li');
+                    liDef.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g,'');
+                    liFrag.querySelector('#dictDefs').appendChild(liDef);
+                });
+
+                ul.appendChild(liFrag);
+            });
+
+            ul.classList.add('dict-lang--sections');
+            span.classList.add('dict-lang');
+
+            section.appendChild(span);
+            section.appendChild(ul);
+        });
+
+        return section;
+    }
+
+    function removeChildNodes(element) {
+        while (element.hasChildNodes()) {
+            element.removeChild(element.lastChild);
+        }
     }
 
 })();

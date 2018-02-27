@@ -17,6 +17,7 @@
       "repository/Http.js",
       "repository/Manager.js",
       "repository/WikiRepoBundle.js",
+      "repository/WiktRepo.js",
       "eventPage.js"
     ],
     "persistence": true
@@ -40,6 +41,16 @@
       "run_at": "document_end"
     }
   ],
+
+  "commands": {
+    "toggle-popup": {
+      "suggested_key":{
+        "default": "Ctrl+Shift+W",
+        "mac": "Command+Shift+W"
+      },
+      "description": "Toggle Wikipedia popup"
+    }
+  },
   "permissions": [
     "activeTab",
     "storage",
