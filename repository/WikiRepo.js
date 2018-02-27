@@ -2,7 +2,6 @@
     'using strict';
 
     const franc = require('franc');
-    const defaultLang = await manager.retrieve('language');
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.receiver === 'wikirepo') {
@@ -20,28 +19,30 @@
         /**
          * @summary It searches a given term on wikipedia.
          * @param {String} term The term to be searched on wikipedia.
+         * @param {object} data The respective params to be passed
+         * @param {string} [data.language = 'rel'] The default language to be used. If undefined, 'rel'.
+         * @param {string} data.term The term to be searched.
+         * @param {string} data.range The context to detect the language.
          * @returns {Promise.<object>} Returns a Promise that resolves to an object with title and body properties.
          */
         searchTerm(data) {
             const article = { title: '', body: '', url: '' };
 
             return new Promise(async (resolve, reject) => {
-                
-                let language = defaultLang;
-                if (defaultLang === 'rel') {
-                    language = identifyLanguage(data.range);
+
+                let language = data.language || 'rel';
+                if (data.language === 'rel') {
+                    language = identifyLanguage(data.range) || 'en';
                 }
-                
-                language = !language ? 'en' : language;
+
 
                 const searchResponse = await http.get(`https://${language}.wikipedia.org/w/api.php?action=opensearch&search=${data.term}&limit=2&namespace=0&format=json`);
-                const resultsArray = JSON.parse(searchResponse);
+                const parsedResponse = JSON.parse(searchResponse);
 
-                const titles = resultsArray[1];
-                const articles = resultsArray[2];
-                const urls = resultsArray[3];
+                const titles = parsedResponse[1],
+                    articles = parsedResponse[2],
+                    urls = parsedResponse[3];
 
-                // const image = await this.searchImage(titles[0]);
                 try {
                     let index = 0;
                     //If the first article dosn't have the title in it, will get the second article
@@ -61,8 +62,9 @@
         }
 
         /**
-         * @summary It searches an image on wikipedia by the given term.
-         * @param {String} term The term to be searched on wikipedia.
+         * @summary Searches an image on wikipedia by the given term.
+         * @param {object} data The object containing the parameters.
+         * @param {String} data.term The term to be searched on wikipedia.
          * @returns {Promise.<object>} Returns a promise that resolves to an object with url, width, and height properties.
          */
         searchImage(data) {
@@ -91,6 +93,11 @@
 
     }
 
+    /**
+     * @summary Deep searches given key in the given object.
+     * @param {object} obj The object to be deep searched.
+     * @param {string} key The key to deep search in the object.
+     */
     function findKey(obj, key) {
         let result = {};
         Object.keys(obj).forEach(el => {
@@ -109,11 +116,10 @@
     function identifyLanguage(extract) {
         const regexUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
         const text = extract.match(regexUTF8).toString();
-        const whitelist = ['por', 'eng', 'spa', 'deu', 'fra', 'ita', 'rus'];
+        const whitelist = ['por', 'eng', 'spa', 'rus'];
         const francRes = franc(extract, { whitelist: whitelist });
         const languages = {
-            por: 'pt', eng: 'en', spa: 'es', deu: 'de',
-            fra: 'fr', ita: 'it', rus: 'ru'
+            por: 'pt', eng: 'en', spa: 'es', rus: 'ru'
         };
 
 

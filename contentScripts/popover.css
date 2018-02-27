@@ -11,6 +11,8 @@
     transform: translateY(100%);
     transition: transform .3s cubic-bezier(0.4, 0.0, 1, 1), opacity .3s cubic-bezier(0.4, 0.0, 1, 1);
     border-radius: 5px;
+    font-family: 'Roboto', sans-serif !important;
+    color: var(--primary-text-color);
 }
 
 .popover.popover--enabled{
@@ -106,6 +108,8 @@ section.popover-navbar .tab::selection {
 
 .popover-tab-content .dict-lang--sections {
     list-style: none;
+    padding: initial;
+    margin: initial;
 }
 
 .popover-tab-content:hover::-webkit-scrollbar,

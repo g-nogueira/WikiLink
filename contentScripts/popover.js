@@ -70,13 +70,17 @@
         return previous;
     }
 
-    function repoRequest(term, range) {
+    async function repoRequest(term, range) {
+        const lang = await new Promise((resolve, reject) => {
+            chrome.storage.sync.get('language', obj => (obj) ? resolve(obj['language']) : reject(this._errorCode[1]));
+        });
         const msg = {
             receiver: 'wikirepo',
             fnName: 'searchTerm',
             params: {
                 term: term,
-                range: range
+                range: range,
+                language: lang
             }
         };
         return new Promise((resolve, reject) => chrome.runtime.sendMessage(msg, data => resolve(data)));
