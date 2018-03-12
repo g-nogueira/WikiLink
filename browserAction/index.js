@@ -1,44 +1,61 @@
 (async function () {
     'use strict';
     /**
-     * 
+     * Shorthand function for querySelector
      * @param {string} el 
      * @returns {HTMLElement} 
      */
-    const q = el => document.querySelector(el);
+    const DOM = el => document.querySelector(el);
 
-    initDOMEvents();
-    initDOMValues();
-    initOnChangedEvents();
-
-
-    function initDOMEvents() {
-        q('#togglePopover').addEventListener('click', togglePopover);
-        q('#openShortcuts').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
+    initializer().DOMEvents()
+    initializer().elementsValues()
+    initializer().storageEvents()
 
 
-        async function togglePopover() {
-            const popoverState = await manager.retrieve('popover', 'isEnabled');
-            const popover = await manager.update('popover').property('isEnabled', !popoverState);
+    
+    ////////////////// IMPLEMENTATION //////////////////
+
+    function initializer() {
+
+        /**
+         * Initializes DOM events listeners
+         */
+        function DOMEvents() {
+
+            DOM('#togglePopover').addEventListener('click', toggleDOMPopover);
+            DOM('#openShortcuts').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
+
+
+            var toggleDOMPopover = async () => {
+                const popoverState = await manager.retrieve('popover', 'isEnabled');
+                manager.update('popover').property('isEnabled', !popoverState);
+            }
         }
-    }
 
-    async function initDOMValues() {
-        var popoverState = await manager.retrieve('popover', 'isEnabled');
-        q('#togglePopover').textContent = popoverState ? 'Disable Popup' : 'Enable Popup';
-    }
+        /**
+         * Initializes DOM Elements values
+         */
+        async function elementsValues() {
 
-    function initOnChangedEvents() {
+            manager.retrieve('popover', 'isEnabled').then(popoverState => {
+                DOM('#togglePopover').textContent = popoverState ? 'Disable Popup' : 'Enable Popup';
+            });
 
-        chrome.storage.onChanged.addListener(changesListener);
-        
-        
-        function changesListener(changes, areaName) {
-            //Popover enabled state changed
-            if (changes.popover) {
-                q('#togglePopover').textContent = changes.popover.newValue.isEnabled ? 'Disable Popup' : 'Enable Popup';
-            };
         }
+
+        /**
+         * Initializes storage changes listeners.
+         */
+        function storageEvents() {
+
+            manager.changesListener('popover').execute(popoverOnChange);
+
+            var popoverOnChange = (oldV, newV) => {
+                DOM('#togglePopover').textContent = newV.isEnabled ? 'Disable Popup' : 'Enable Popup';
+            }
+        }
+
+        return { DOMEvents, elementsValues, storageEvents };
     }
 
     function openTab(url) {

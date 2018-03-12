@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Manages and facilitate storage (chrome.storage.sync) requests and watchers.
+ */
 class Manager {
     constructor() {
         this._errorCode = {
@@ -13,7 +16,6 @@ class Manager {
     /**
      * Stores an key-value pair object ({[objName]: [value]}) in the storage
      * @param {object} obj The key-value pair object to be stored.
-     * object = {[key]: [value]}
      * @returns {Promise}
      */
     create(obj) {
@@ -23,7 +25,7 @@ class Manager {
     }
 
     /**
-     * @summary Inserts a new element in a list and gives an unique id to it.
+     * Inserts a new element in a list and gives an unique id to it.
      * @param {string} objName The name of the list of items.
      * @param {any} value The value to be pushed to the list.
      * @returns {Promise}
@@ -41,7 +43,7 @@ class Manager {
     }
 
     /**
-     * @summary Retrieves an object or object property by given key and property name.
+     * Retrieves an object or object property by given key and property name.
      * @param {string} key The type of the objects to retrieve.
      * @param {string} [property = ''] The specific property to return.
      * @param {function} onSuccess The function to execute on success.
@@ -65,7 +67,7 @@ class Manager {
     }
 
     /**
-     * @summary Updates an object or an element of an object.
+     * Updates an object or an element of an object.
      * @param {String} obj.objName The name of the object to update.
      * @returns { property, update }
      */
@@ -151,6 +153,26 @@ class Manager {
         }
 
         return { propExists: verifyProperty, isObject: verifyObject }
+    }
+
+    /**
+     * Listens to storage changes in given object and executes a function in a onChanged event.
+     * @param {*} objName The name of the object in the storage to listens.
+     * @returns {object} A function to pass as an argument the function to execute on event.
+     */
+    changesListener(objName){
+
+        function execute(fn){
+            var name = objName
+            chrome.storage.onChanged.addListener((changes, areaName) => {
+                //Popover enabled state changed
+                if (changes[objName]) {
+                    fn(changes[objName].oldValue, changes[objName].newValue);
+                };
+            });
+        }
+
+        return {execute};
     }
 }
 

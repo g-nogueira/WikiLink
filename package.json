@@ -4,7 +4,8 @@
   "description": "A handy chrome extension to fast search terms on Wikipedia and write quick notes.\r It will be compatible with Evernote and perhaps OneNote.",
   "main": "eventPage.js",
   "dependencies": {
-    "franc": "^3.1.1"
+    "franc": "^3.1.1",
+    "material-design-lite": "^1.3.0"
   },
   "devDependencies": {},
   "scripts": {

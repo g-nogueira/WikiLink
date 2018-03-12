@@ -14,6 +14,10 @@
     });
 
 
+    /**
+     * Executes wikipedia calls for articles or images of given words
+     * and returns a promise that resolves to an object with the response.
+     */
     class WikiRepo {
         constructor() { }
 
@@ -73,10 +77,10 @@
             return new Promise(async (resolve, reject) => {
                 try {
                     const resp = await http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=250&format=json`);
-                    const responseFinder = keyFinder(JSON.parse(resp));
 
+                    const responseFinder = keyFinder(JSON.parse(resp));
                     let image = responseFinder.find('thumbnail');
-                    let { source: url, width, height } = image; //Destructuring image into vars.
+                    let { source: url, width, height } = image; //Destructuring image var into vars.
                     let imageInfo = { url, width, height };
 
                     resolve(imageInfo);
