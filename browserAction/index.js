@@ -1,41 +1,44 @@
-(function () {
-    'using strict';
+(async function () {
+    'use strict';
     /**
      * 
      * @param {string} el 
      * @returns {HTMLElement} 
      */
-    const el = (el) => document.querySelector(el);
+    const q = el => document.querySelector(el);
 
-    initEvents();
-    updateElement();
+    initDOMEvents();
+    initDOMValues();
+    initOnChangedEvents();
 
 
-    function initEvents() {
-        el('#togglePopover').addEventListener('click', togglePopover);
-        el('#openShortcuts').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
+    function initDOMEvents() {
+        q('#togglePopover').addEventListener('click', togglePopover);
+        q('#openShortcuts').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
 
 
         async function togglePopover() {
-            const before = await manager.retrieve('popover');
-            const popover = await manager.update({ key: 'popover', subkey: 'isEnabled', value: !before.isEnabled });
-            updateElement('popoverState');
+            const popoverState = await manager.retrieve('popover', 'isEnabled');
+            const popover = await manager.update('popover').property('isEnabled', !popoverState);
         }
     }
 
-    async function updateElement(elId) {
+    async function initDOMValues() {
+        var popoverState = await manager.retrieve('popover', 'isEnabled');
+        q('#togglePopover').textContent = popoverState ? 'Disable Popup' : 'Enable Popup';
+    }
 
-        const elementsValue = {
-            popoverState: async () => {
-                const popover = await manager.retrieve('popover');
-                el('#togglePopover').textContent = popover.isEnabled ? 'Disable Popup' : 'Enable Popup';
-            }
+    function initOnChangedEvents() {
+
+        chrome.storage.onChanged.addListener(changesListener);
+        
+        
+        function changesListener(changes, areaName) {
+            //Popover enabled state changed
+            if (changes.popover) {
+                q('#togglePopover').textContent = changes.popover.newValue.isEnabled ? 'Disable Popup' : 'Enable Popup';
+            };
         }
-
-        if (elId)
-            elementsValue[elId]();
-        else
-            Object.keys(elementsValue).forEach(key => elementsValue[key]());
     }
 
     function openTab(url) {

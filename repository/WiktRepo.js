@@ -1,5 +1,5 @@
 (async function () {
-    'using strict';
+    'use strict';
 
     const defaultLang = await manager.retrieve('language');
 

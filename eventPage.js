@@ -4,14 +4,17 @@
     initializeDB();
 
     function initializeDB() {
-        manager.retrieve('popover').then(obj => {
-            if (typeof obj !== 'object')
-                manager.update({ key: 'popover', value: { isEnabled: true, shortcuts: [] } });
-        });
+        manager.retrieve('popover')
+            .then(obj => {
+                if (typeof obj !== 'object')
+                    manager.update('popover').value({ isEnabled: true, shortcuts: [] });
+            })
+            .catch(error => manager.create({ 'popover':{isEnabled: true, shortcuts: [] }}));
+
 
         manager.retrieve('language').then(obj => {
             if (typeof obj !== 'object')
-                manager.update({ key: 'language', value: 'rel' });
+                manager.update('language').value('rel');
         });
     }
 
@@ -30,19 +33,18 @@
             'toggle-popup': togglePopover,
             'show-popup': showPopup
         };
-        
+
         async function togglePopover() {
-            const before = await manager.retrieve('popover');
-            const isEnabled = !before.isEnabled;
-            manager.update({ key: 'popover', subkey: 'isEnabled', value: isEnabled });
+            const isEnabled = await manager.retrieve('popover', 'isEnabled');
+            manager.update('popover').property('isEnabled', !isEnabled);
         }
 
         function showPopup() {
-            
+
         }
 
         commands[command]();
-        
+
     });
 
 })();

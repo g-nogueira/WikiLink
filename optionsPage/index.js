@@ -1,6 +1,6 @@
 (function (){
     'use strict';
-    const el = elem => document.querySelector(elem);
+    const q = elem => document.querySelector(elem);
     const els = elem => document.querySelectorAll(elem);
 
     name();

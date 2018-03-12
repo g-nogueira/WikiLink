@@ -1,132 +1,156 @@
-'using strict';
+'use strict';
 
 class Manager {
     constructor() {
         this._errorCode = {
-            1: 'Object key not found on DB',
-            2: 'Object key found, but the id was not'
+            1: key => `Object "${key}" not found`,
+            2: (key, property) => `Object property "${key}.${property}" not found in storage.`,
+            3: property => `Object property ".${property}" not found in storage.`
         }
+
     }
 
     /**
-     * 
-     * @param {object} object pair object.
-     * @param {String} object.key the key of the object.
-     * @param {String} object.value the value of the object.
-     * object = {key: value}
+     * Stores an key-value pair object ({[objName]: [value]}) in the storage
+     * @param {object} obj The key-value pair object to be stored.
+     * object = {[key]: [value]}
      * @returns {Promise}
      */
-    async create(object) {
-
+    create(obj) {
         return new Promise((resolve, reject) => {
-            chrome.storage.sync.set(object, () => resolve());
+            chrome.storage.sync.set(obj, () => resolve());
         });
     }
 
     /**
-     * @summary Inserts a new element in a list.
-     * @param {*} key The key of the list of items.
-     * @param {object} value The value to be pushed to the list.
+     * @summary Inserts a new element in a list and gives an unique id to it.
+     * @param {string} objName The name of the list of items.
+     * @param {any} value The value to be pushed to the list.
      * @returns {Promise}
      */
-    async push(key, value) {
-        return new Promise((resolve, reject) => {
+    push(objName, value) {
+        return new Promise(async (resolve, reject) => {
+            var list = await new Promise(resolve => chrome.storage.sync.get(objName, list => resolve(list[objName])));
+            var valueCopy = value;
 
-            chrome.storage.sync.get(key, list => {
-                const arrayCopy = list[key].slice();
-                const valueCopy = value;
-                valueCopy.id = (new Date()).getTime();
-                arrayCopy.push(valueCopy);
+            valueCopy.id = idGenerator().generate();
+            list.push(valueCopy);
 
-                chrome.storage.sync.set({ [key]: arrayCopy }, () => resolve(valueCopy));
-            });
+            chrome.storage.sync.set({ [objName]: arrayCopy }, () => resolve(valueCopy));
         });
     }
 
     /**
-     * @summary Retrieves an object of provided key.
+     * @summary Retrieves an object or object property by given key and property name.
      * @param {string} key The type of the objects to retrieve.
+     * @param {string} [property = ''] The specific property to return.
      * @param {function} onSuccess The function to execute on success.
      * @returns {Promise}
      */
-    async retrieve(key) {
+    retrieve(key, property = '') {
+        return new Promise(async (resolve, reject) => {
+            try {
+                var resp = await new Promise(resolve => chrome.storage.sync.get(key, obj => resolve(obj[key])));
 
-        //⚠ It has to be of type "notes"
-        return new Promise((resolve, reject) => {
-            chrome.storage.sync.get(key, obj => (obj) ? resolve(obj[key]) : reject(this._errorCode[1]));
+                if (property !== '') {
+                    let verifiedProp = this.objectVerifier(resp).propExists(property);
+                    verifiedProp.exists ? resolve(verifiedProp.value) : reject(verifiedProp.error);
+                }
+                else resolve(resp);
+
+            } catch (error) {
+                reject(this._errorCode[1](key));
+            }
         });
     }
 
     /**
      * @summary Updates an object or an element of an object.
-     * @param {object} obj The object to update.
-     * @param {String} obj.key The key of the object to update.
-     * @param {String} obj.subkey The subkey of the object to update.
-     * @param {*} obj.value The new value of the object.
-     * @param {String} [obj.id] The id of the object to update. If none provided, it will update the whole object.
-     * @returns {Promise<object>}
+     * @param {String} obj.objName The name of the object to update.
+     * @returns { property, update }
      */
-    async update(obj) {
-        return new Promise(async (resolve, reject) => {
+    update(objName) {
+        /**
+         * Updates just given object property.
+         * @param {*} property The property of the object to update.
+         * @param {*} value The new value of the property.
+         * @returns {Promise<object>}
+         */
+        function updateProperty(property, value) {
+            return new Promise(async (resolve, reject) => {
+                const obj = await (new Promise((resolve, reject) => chrome.storage.sync.get(objName, obj => resolve(obj[objName]))));
 
-            //If id is provided, update the specified element of the array.
-            
-            const list = await (new Promise((resolve, reject) => chrome.storage.sync.get(obj.key, obj => resolve(obj))));
+                obj[property] = value;
+                chrome.storage.sync.set({ [objName]: obj });
+                resolve(obj);
+            });
+        }
 
-            if (obj.id) {
-                const arrayCopy = list[obj.key].slice();
-                const index = arrayCopy.findIndex(el => el.id == obj.id);
-                if (index === -1) {
-                    reject(`Object of id ${obj.id} not found`);
-                }
-                else {
-                    arrayCopy[index] = obj.value;
-                    arrayCopy[index].id = obj.id;
+        /**
+         * Updates the whole object with given value.
+         * @param {*} value The new value of the object.
+         * @returns {Promise<object>}
+         */
+        function update(value) {
+            return new Promise(resolve => {
+                chrome.storage.sync.set({ [objName]: value });
 
-                    chrome.storage.sync.set({ [obj.key]: arrayCopy }, () => {
-                        resolve(arrayCopy[index]);
-                    });
-                }
-            }
-            else if (obj.subkey) {
-                list[obj.key][obj.subkey] = obj.value;
-                chrome.storage.sync.set({ [obj.key]: list[obj.key] });
-                resolve(list[obj.key]);
-            }
-            else {
-                chrome.storage.sync.set({ [obj.key]: obj.value });
-                resolve({ [obj.key]: obj.value });
-            }
-        });
+                resolve({ [objName]: value });
+            });
+        }
+
+        return { property: updateProperty, value: update }
+
     }
 
     /**
-     * @summary Deletes an object or an element of an object.
+     * Deletes an object or a object's property.
      * @param {String} key The key of the object to remove.
      * @param {*} [id] The id of the element inside the object to be deleted. If none provided, it will delete the whole object.
-     * @returns {Promise}
+     * @returns {Promise<object>}
      */
-    async delete(key, id) {
+    delete(key) {
+        return new Promise(async (resolve, reject) => {
+            var resp = await new Promise(resolve => chrome.storage.sync.get(key, obj => obj[key]));
+            var obj = resp ? resp : undefined;
 
-        return new Promise((resolve, reject) => {
-
-            //If id is provided, delete of the array the element that has the id provided.
-            if (id) {
-                chrome.storage.sync.get(key, list => {
-                    const arrayCopy = list[key].slice();
-                    const index = arrayCopy.findIndex(el => el.id == id);
-                    const deletedItem = arrayCopy.splice(index, 1);
-                    const obj = {};
-
-                    obj[key] = arrayCopy;
-
-                    chrome.storage.sync.set(obj, () => resolve(deletedItem));
-                });
+            if (obj !== undefined) {
+                chrome.storage.sync.remove(key, () => resolve(obj));
             }
-            else {
-                chrome.storage.sync.remove(key, () => resolve());
-            }
+            else reject(this._errorCode[2](key));
         });
+    }
+
+    idGenerator() {
+
+        function generateUnique() {
+            return (new Date()).getTime();
+        }
+
+        return { generate: generateUnique };
+    }
+
+    objectVerifier(obj) {
+        var context = this;
+
+        function verifyProperty(propName) {
+            if (obj) {
+                if (obj[propName] !== undefined) {
+                    return { exists: true, error: null, value: obj[propName] };
+                }
+                else return { exists: false, error: context._errorCode[3](propName) };
+            }
+            else return { exists: false, error: (context._errorCode[1]('')) };
+        }
+
+        function verifyObject() {
+            if (obj) {
+                return { isReal: true, error: null, value: obj };
+            }
+            else return { isReal: false, error: (context._errorCode[2]('')) }
+        }
+
+        return { propExists: verifyProperty, isObject: verifyObject }
     }
 }
 
