@@ -1,36 +1,41 @@
 'use strict';
 
-class PopoverFrontEnd {
-    constructor() {
-        this.html = this.gerenateHTML();
-        this.header = {
-            wikiTab: this.html.querySelector('#wikiTab'),
-            wiktTab: this.html.querySelector('#dictTab'),
-        };
-        this.main = {
-            wikiContent: this.html.querySelector('#wikipediaContent'),
-            wiktContent: this.html.querySelector('#dictionaryContent')
-        };
+function popoverAPI(popover) {
 
-        this.displayData()
+
+    return {
+        generateHTML: generateHTML,
+        dictionarySection: createDictSection,
+        displayIt: displayPopover,
+        hideIt: hidePopover,
+        displayError: displayError,
+        insertData: insertData,
+        popover: popover,
+        isChild: isPopoverChild
     }
+
+    var popover = popover;
 
     /**
      * 
-     * @param {string} errorString The error string to show to the user.
-     * @param {string} tab The tab name to display the message.
+     * @param {object} obj The parameters.
+     * @param {string} obj.errorString The error string to show to the user.
+     * @param {string} obj.tab The tab name to display the message.
      */
-    error(errorString, tab) {
-        this.main.wikiContent.querySelector('#wikiText').textContent = errorString;
-        this.main.wiktContent.querySelector('#wikiText').textContent = errorString;
+    function displayError(errorString, tab) {
+        var wikiContent = popover.querySelector('#wikipediaContent');
+        var wiktContent = popover.querySelector('#dictionaryContent');
+
+        wikiContent.querySelector('#wikiText').textContent = errorString;
+        wiktContent.querySelector('#wikiText').textContent = errorString;
     }
 
     /**
      * @returns {Element}
      */
-    gerenateHTML() {
+    function generateHTML() {
         //<div class="popover-arrow"></div>
-        const styleString = `
+        var styleString = `
         <style>
             :root{
             --primary-text-color: rgba(0, 0, 0, 0.87);
@@ -46,7 +51,7 @@ class PopoverFrontEnd {
             max-width: 500px;
             box-shadow:0 30px 90px -20px rgba(0,0,0,0.3), 0 0 1px #a2a9b1;
             text-align: left;
-            z-index: 10;
+            z-index: -10;
             transform: translateY(100%);
             transition: transform .3s cubic-bezier(0.4, 0.0, 1, 1), opacity .3s cubic-bezier(0.4, 0.0, 1, 1);
             border-radius: 5px;
@@ -58,8 +63,9 @@ class PopoverFrontEnd {
             }
 
             .popover.popover--enabled{
-            opacity: 1;
-            transform: translateY(0);
+                opacity: 1;
+                z-index: 10;
+                transform: translateY(0);
         
             }
 
@@ -196,30 +202,32 @@ class PopoverFrontEnd {
             }
         </style>
         `;
-        const popoverString = `
+        var popoverString = `
         <div class="popover" id="wikilink-popover">
             <section id="popoverNavbar" class="popover-navbar">
                 <div id="wikiTab" class="tab" target="#wikipediaContent">Wikipedia</div>
                 <div id="dictTab" class="tab" target="#dictionaryContent">Dictionary</div>
             </section>
-            <main class="contentGroup">
-                <section class="popover-tab-content" id="wikipediaContent">
-                    <img id="popover-image" class="popoverImage" src="">
+            <main id="popoverMain" class="contentGroup">
+                <section id="wikipediaContent" class="popover-tab-content">
+                    <img id="popoverImage" class="popoverImage" src="">
                     <p id="wikiText" class="popoverText"></p>
                 </section>
-                <section class="popover-tab-content self-column hidden" id="dictionaryContent">
+                <section id="dictionaryContent" class="popover-tab-content self-column hidden">
                 </section>
             </main>
         </div>`;
-        
 
-        const popover = document.createRange().createContextualFragment(`${styleString} ${popoverString}`);
-        // popover.addEventListener('pointerleave', hideDiv);
+        var popover = document.createRange().createContextualFragment(`${styleString} ${popoverString}`);
+
+
+
         popover.querySelectorAll('.tab').forEach(el => {
             el.addEventListener('click', ev => {
-                const pages = popover.querySelectorAll('.popover-tab-content');
+                const pv = ev.path.find(el => el.id === 'wikilink-popover');
+                const pages = pv.querySelectorAll('.popover-tab-content');
                 pages.forEach(elem => elem.classList.add('hidden'));
-                popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden');
+                pv.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden');
             });
         });
 
@@ -227,24 +235,106 @@ class PopoverFrontEnd {
     }
 
     /**
-     * 
-     * @param {object} wikiData The data to show on wikipedia's tab.
-     * @param {string} wikiData.body The text body of the definition.
-     * @param {string} wikiData.title The text title of the definition.
-     * @param {string} wikiData.url The sorce url of the data.
-     * @param {object} wiktData The data to show on wiktionary's tab.
-     * @param {object} coordinates The coordinates to show the popup.
-     * @param {number} coordinates.x The x coordinate to show the popup.
-     * @param {number} coordinates.y The y coordinate to show the popup.
+     * @param {object} obj The parameters
      */
-    displayData(wikiData, wiktData, coordinates){
-        const titleIndex = text.indexOf(wikiData.title);
-        const text = wikiData.body.slice(0);
-        const newT = text[titleIndex]//will insert an b tag before title
+    function displayPopover(selection, cal1, cal2) {
+        /**From:
+         * https://stackoverflow.com/questions/39283159/how-to-keep-selection-but-also-press-button
+         */
+        var selRange = selection.getRangeAt(0).getBoundingClientRect();
+        var rb1 = DOMRect(cal1);
+        var rb2 = DOMRect(cal2);
 
-        this.main.wikiContent.querySelector('#wikiText').textContent = wikiData.body;
+        popover.style.top = `${(selRange.bottom - rb2.top) * 100 / (rb1.top - rb2.top)}px`;
+        popover.style.left = `${(selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)}px`;
+        // popover.style.display = 'block';
+        popover.classList.add('popover--enabled');
 
-        //Inserts a <b> tag on title string.
-        this.main.wikiContent.querySelector('#wikiText').textContent = wikiData.body;
+        function DOMRect(element) {
+            const r = document.createRange()
+            r.selectNode(element)
+            return r.getBoundingClientRect();
+        }
+    }
+
+    function createDictSection(dictData) {
+
+        var section = document.createDocumentFragment();
+
+        Object.keys(dictData).forEach(el => { //foreach language
+            const key = dictData[el];
+
+            const span = document.createElement('span');
+            const ul = document.createElement('ul');
+
+
+            span.innerText = key[0].language;
+            key.forEach(pOS => { //foreach partOfSpeach
+                let liFrag = `
+                <li>
+                    <span class="dict-partofspeach">${pOS.partOfSpeech}</span>
+                    <ol type="1" id="dictDefs" class="dict-definition">
+                    </ol>
+                </li>`;
+
+                liFrag = document.createRange().createContextualFragment(liFrag).firstElementChild;
+
+                pOS.definitions.forEach(def => {
+                    const liDef = document.createElement('li');
+                    liDef.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
+                    liFrag.querySelector('#dictDefs').appendChild(liDef);
+                });
+
+                ul.appendChild(liFrag);
+            });
+
+            ul.classList.add('dict-lang--sections');
+            span.classList.add('dict-lang');
+
+            section.appendChild(span);
+            section.appendChild(ul);
+        });
+
+        return section;
+    }
+
+    function hidePopover() {
+        popover.classList.remove('popover--enabled');
+    }
+
+    function insertData(article, image, dictionary) {
+        var errorMessage = 'Ops: nenhum resultado encontrado...';
+        var imgSection = popover.querySelector('#popoverImage');
+        var wikiText = popover.querySelector('#wikiText');
+        var dictTab = removeChildNodes(popover.querySelector('#dictionaryContent'));
+        var dictSection = createDictSection(dictionary);
+
+        wikiText.textContent = (article.body.length > 0 ? article.body : errorMessage);
+
+        if (image.url) {
+            imgSection.src = image.url;
+        }
+        else
+            imgSection.hidden = true;
+
+        dictTab.appendChild(dictSection);
+
+        return popover;
+    }
+
+    function removeChildNodes(element) {
+        while (element.hasChildNodes()) {
+            element.removeChild(element.lastChild);
+        }
+
+        return element;
+    }
+
+    function isPopoverChild(elemId) {
+        try {
+            return popover.querySelector(`#${elemId}`) === null ? false : true;
+        } catch (error) {
+            return false;
+        }
     }
 }

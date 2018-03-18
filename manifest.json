@@ -35,6 +35,7 @@
       "js": [
         "repository/Manager.js",
         "repository/messageHandler.js",
+        "contentScripts/popoverAPI.js",
         "contentScripts/popover.js"
       ],
       "css": [
