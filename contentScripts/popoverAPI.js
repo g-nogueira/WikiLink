@@ -1,11 +1,15 @@
 'use strict';
 
+/**
+ * A popover DOM management API
+ * @param {Element} popover 
+ */
 function popoverAPI(popover) {
 
 
     return {
-        generateHTML: generateHTML,
-        dictionarySection: createDictSection,
+        generateHTML: generateShell,
+        dictionarySection: generateDictionary,
         displayIt: displayPopover,
         hideIt: hidePopover,
         displayError: displayError,
@@ -33,7 +37,7 @@ function popoverAPI(popover) {
     /**
      * @returns {Element}
      */
-    function generateHTML() {
+    function generateShell() {
         //<div class="popover-arrow"></div>
         var styleString = `
         <style>
@@ -257,7 +261,7 @@ function popoverAPI(popover) {
         }
     }
 
-    function createDictSection(dictData) {
+    function generateDictionary(dictData) {
 
         var section = document.createDocumentFragment();
 
@@ -265,13 +269,14 @@ function popoverAPI(popover) {
             const key = dictData[el];
 
             const span = document.createElement('span');
+            span.id = `s${uniqueId()}`;
             const ul = document.createElement('ul');
 
 
             span.innerText = key[0].language;
             key.forEach(pOS => { //foreach partOfSpeach
                 let liFrag = `
-                <li>
+                <li id="\`li${uniqueId()}\`">
                     <span class="dict-partofspeach">${pOS.partOfSpeech}</span>
                     <ol type="1" id="dictDefs" class="dict-definition">
                     </ol>
@@ -307,7 +312,7 @@ function popoverAPI(popover) {
         var imgSection = popover.querySelector('#popoverImage');
         var wikiText = popover.querySelector('#wikiText');
         var dictTab = removeChildNodes(popover.querySelector('#dictionaryContent'));
-        var dictSection = createDictSection(dictionary);
+        var dictSection = generateDictionary(dictionary);
 
         wikiText.textContent = (article.body.length > 0 ? article.body : errorMessage);
 
@@ -319,6 +324,7 @@ function popoverAPI(popover) {
 
         dictTab.appendChild(dictSection);
 
+        popover = popover;
         return popover;
     }
 
@@ -337,4 +343,9 @@ function popoverAPI(popover) {
             return false;
         }
     }
+
+    function uniqueId() {
+        return (new Date()).getTime();
+    }
+
 }

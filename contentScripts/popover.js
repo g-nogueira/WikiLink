@@ -47,9 +47,10 @@
     function onMouseOver(ev) {
         isMouseOver = true;
     }
-    
+
     function onMouseOut(ev) {
-        if (!ppvAPI.isChild(ev.toElement.id)) {
+        if (ev.path[ev.path.length - 2].id !== 'wikilink-popover') {
+            //The path will stop at shadow-root; shadow-root - 1 is the popover
             ppvAPI.hideIt()
         }
         isMouseOver = false;
@@ -82,7 +83,7 @@
     function appendHTML(popover) {
         const div = document.createElement('div');
         const shadow = div.attachShadow({ mode: 'open' });
-        
+
         div.id = 'wikilink';
         shadow.appendChild(popover);
         document.body.appendChild(div);
@@ -146,6 +147,12 @@
         if (selection && /\S/.test(selection))
             return false;
         return true;
+    }
+
+
+    function isIdInList(list, id) {
+        return list.includes(el => el.id === id);
+        list.length - 2
     }
 
 
