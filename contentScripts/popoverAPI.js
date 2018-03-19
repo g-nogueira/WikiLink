@@ -27,7 +27,7 @@ function popoverAPI(popover) {
      * @param {string} obj.tab The tab name to display the message.
      */
     function displayError(errorString, tab) {
-        var wikiContent = popover.querySelector('#wikipediaContent');
+    var wikiContent = popover.querySelector('#wikipediaContent');
         var wiktContent = popover.querySelector('#dictionaryContent');
 
         wikiContent.querySelector('#wikiText').textContent = errorString;
@@ -35,7 +35,8 @@ function popoverAPI(popover) {
     }
 
     /**
-     * @returns {Element}
+     * Generates the popover main structure without any data.
+     * @returns {DocumentFragment} A popover documentFragment.
      */
     function generateShell() {
         //<div class="popover-arrow"></div>
@@ -239,7 +240,10 @@ function popoverAPI(popover) {
     }
 
     /**
-     * @param {object} obj The parameters
+     * Displays the popover based on given selection, cal1 and cal2 coordinates.
+     * @param {Selection} selection The current window selection on DOM.
+     * @param {*} cal1 
+     * @param {*} cal2 
      */
     function displayPopover(selection, cal1, cal2) {
         /**From:
@@ -261,6 +265,11 @@ function popoverAPI(popover) {
         }
     }
 
+    /**
+     * Generates the dictionary section based on given data argument.
+     * @param {object} dictData The data returned from the wiktionary.
+     * @returns {DocumentFragment} The dictionary section to be inserted on the popover.
+     */
     function generateDictionary(dictData) {
 
         var section = document.createDocumentFragment();
@@ -307,6 +316,16 @@ function popoverAPI(popover) {
         popover.classList.remove('popover--enabled');
     }
 
+    /**
+     * 
+     * @param {object} article The term definition response returned from somewhere.
+     * @param {string} article.body The text body of the article.
+     * @param {object} image The image response returned from somewhere.
+     * @param {string} image.url The url of the image.
+     * @param {number} image.width The width of the image.
+     * @param {number} image.height The height of the image.
+     * @param {object} dictionary The definitions response returned from Wiktionary.
+     */
     function insertData(article, image, dictionary) {
         var errorMessage = 'Ops: nenhum resultado encontrado...';
         var imgSection = popover.querySelector('#popoverImage');
