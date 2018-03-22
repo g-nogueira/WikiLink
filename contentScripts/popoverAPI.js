@@ -27,7 +27,7 @@ function popoverAPI(popover) {
      * @param {string} obj.tab The tab name to display the message.
      */
     function displayError(errorString, tab) {
-    var wikiContent = popover.querySelector('#wikipediaContent');
+        var wikiContent = popover.querySelector('#wikipediaContent');
         var wiktContent = popover.querySelector('#dictionaryContent');
 
         wikiContent.querySelector('#wikiText').textContent = errorString;
@@ -254,14 +254,23 @@ function popoverAPI(popover) {
         var rb2 = DOMRect(cal2);
 
         popover.style.top = `${(selRange.bottom - rb2.top) * 100 / (rb1.top - rb2.top)}px`;
-        popover.style.left = `${(selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)}px`;
-        // popover.style.display = 'block';
+
+        if (calcLeftPos(selRange, rb1, rb2) + popover.clientWidth > window.innerWidth) {
+            popover.style.left = `${calcLeftPos(selRange, rb1, rb2) - popover.clientWidth + selRange.width}px`
+        } else {
+            popover.style.left = `${(selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)}px`;
+        }
+
         popover.classList.add('popover--enabled');
 
         function DOMRect(element) {
             const r = document.createRange()
             r.selectNode(element)
             return r.getBoundingClientRect();
+        }
+
+        function calcLeftPos(selRange, rb1, rb2) {
+            return (selRange.left - rb2.left) * 100 / (rb1.left - rb2.left);
         }
     }
 
@@ -337,8 +346,7 @@ function popoverAPI(popover) {
 
         if (image.url) {
             imgSection.src = image.url;
-        }
-        else
+        } else
             imgSection.hidden = true;
 
         dictTab.appendChild(dictSection);

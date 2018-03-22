@@ -25,11 +25,11 @@
             DOM('#togglePopover').addEventListener('click', toggleDOMPopover);
             DOM('#openShortcuts').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
 
-
-            var toggleDOMPopover = async () => {
+            async function toggleDOMPopover () {
                 const popoverState = await manager.retrieve('popover', 'isEnabled');
                 manager.update('popover').property('isEnabled', !popoverState);
             }
+
         }
 
         /**
@@ -50,7 +50,7 @@
 
             manager.changesListener('popover').execute(popoverOnChange);
 
-            var popoverOnChange = (oldV, newV) => {
+            function popoverOnChange (oldV, newV) {
                 DOM('#togglePopover').textContent = newV.isEnabled ? 'Disable Popup' : 'Enable Popup';
             }
         }
@@ -62,4 +62,4 @@
         chrome.tabs.create({ url: url });
     }
 
-})();
+}());

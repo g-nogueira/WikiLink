@@ -145,4 +145,4 @@
         return languages[francRes] || 'en';
     }
     const wikiRepo = Object.freeze(new WikiRepo());
-})();
+}());

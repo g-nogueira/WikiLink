@@ -36,4 +36,4 @@
         }
     }
     const wiktRepo = new WiktRepo();
-})();
+}());

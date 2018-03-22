@@ -1,6 +1,6 @@
 {
   "name": "wikilink",
-  "version": "1.0.0",
+  "version": "0.9",
   "description": "A handy chrome extension to fast search terms on Wikipedia and write quick notes.\r It will be compatible with Evernote and perhaps OneNote.",
   "main": "eventPage.js",
   "dependencies": {
