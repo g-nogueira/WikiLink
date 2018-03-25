@@ -9,3 +9,4 @@ A handy chrome extension to fast and efficiently search terms on Wikipedia.
 - [ ] Implement options page.
 - [ ] Favorite words.
 - [ ] Option to choose betwen "show a wikipedia result list in the popup" or "show first result".
+- [ ] Black List sites.

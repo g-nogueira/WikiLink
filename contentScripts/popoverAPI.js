@@ -26,12 +26,10 @@ function popoverAPI(popover) {
      * @param {string} obj.errorString The error string to show to the user.
      * @param {string} obj.tab The tab name to display the message.
      */
-    function displayError(errorString, tab) {
-        var wikiContent = popover.querySelector('#wikipediaContent');
-        var wiktContent = popover.querySelector('#dictionaryContent');
-
-        wikiContent.querySelector('#wikiText').textContent = errorString;
-        wiktContent.querySelector('#wikiText').textContent = errorString;
+    function displayError(errorString, id = []) {
+        id.forEach(el => {
+            popover.querySelector(`#${id}`).textContent = errorString;;
+        });
     }
 
     /**
@@ -284,38 +282,42 @@ function popoverAPI(popover) {
         var section = document.createDocumentFragment();
 
         Object.keys(dictData).forEach(el => { //foreach language
-            const key = dictData[el];
+            try {
+                const key = dictData[el];
+                const span = document.createElement('span');
 
-            const span = document.createElement('span');
-            span.id = `s${uniqueId()}`;
-            const ul = document.createElement('ul');
+                let ul = document.createElement('ul');
+                key.forEach(pOS => { //foreach partOfSpeach
+                    let liFrag = `
+                    <li id="\`li${uniqueId()}\`">
+                        <span class="dict-partofspeach">${pOS.partOfSpeech}</span>
+                        <ol type="1" id="dictDefs" class="dict-definition">
+                        </ol>
+                    </li>`;
 
+                    liFrag = document.createRange().createContextualFragment(liFrag).firstElementChild;
 
-            span.innerText = key[0].language;
-            key.forEach(pOS => { //foreach partOfSpeach
-                let liFrag = `
-                <li id="\`li${uniqueId()}\`">
-                    <span class="dict-partofspeach">${pOS.partOfSpeech}</span>
-                    <ol type="1" id="dictDefs" class="dict-definition">
-                    </ol>
-                </li>`;
+                    pOS.definitions.forEach(def => {
+                        const liDef = document.createElement('li');
+                        liDef.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
+                        liFrag.querySelector('#dictDefs').appendChild(liDef);
+                    });
 
-                liFrag = document.createRange().createContextualFragment(liFrag).firstElementChild;
+                    span.id = `s${uniqueId()}`;
+                    span.innerText = key[0].language;
+                    span.classList.add('dict-lang');
+                    ul.appendChild(liFrag);
+                    ul.classList.add('dict-lang--sections');
+                    section.appendChild(span);
+                    section.appendChild(ul);
 
-                pOS.definitions.forEach(def => {
-                    const liDef = document.createElement('li');
-                    liDef.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
-                    liFrag.querySelector('#dictDefs').appendChild(liDef);
+        
                 });
+            } catch (error) {
+                displayError('Ops... Term not found', ['dictionaryContent']);
+            }
 
-                ul.appendChild(liFrag);
-            });
 
-            ul.classList.add('dict-lang--sections');
-            span.classList.add('dict-lang');
-
-            section.appendChild(span);
-            section.appendChild(ul);
         });
 
         return section;
