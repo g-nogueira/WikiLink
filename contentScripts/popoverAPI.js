@@ -41,170 +41,209 @@ function popoverAPI(popover) {
         var styleString = `
         <style>
             :root{
-            --primary-text-color: rgba(0, 0, 0, 0.87);
-            --secundary-text-color: rgba(0, 0, 0, 0.54);
-            --disabled-text-color: rgba(0, 0, 0, 0.38);
+                --primary-text-color: rgba(0, 0, 0, 0.87);
+                --secundary-text-color: rgba(0, 0, 0, 0.54);
+                --disabled-text-color: rgba(0, 0, 0, 0.38);
+            }
+            .popover{
+                all: initial;
             }
             .popover {
-            position:absolute;
-            opacity: 0;
-            display:block;
-            background:#ffffff;
-            width:auto;
-            max-width: 500px;
-            box-shadow:0 30px 90px -20px rgba(0,0,0,0.3), 0 0 1px #a2a9b1;
-            text-align: left;
-            z-index: -10;
-            transform: translateY(100%);
-            transition: transform .3s cubic-bezier(0.4, 0.0, 1, 1), opacity .3s cubic-bezier(0.4, 0.0, 1, 1);
-            border-radius: 5px;
-            font-size: 14px;
-            font-family: 'Roboto', sans-serif !important;
-            color: var(--primary-text-color);
-            font-weight: 400;
-            line-height: 20px;
+                position:absolute;
+                opacity: 0;
+                display:block;
+                background:#ffffff;
+                width:auto;
+                max-width: 500px;
+                box-shadow:0 30px 90px -20px rgba(0,0,0,0.3), 0 0 1px #a2a9b1;
+                text-align: left;
+                z-index: -1;
+                transform: translateY(100%);
+                transition: transform .3s cubic-bezier(0.4, 0.0, 1, 1), opacity .3s cubic-bezier(0.4, 0.0, 1, 1);
+                border-radius: 5px;
+                font-size: 14px;
+                font-family: 'Roboto', sans-serif !important;
+                color: var(--primary-text-color);
+                font-weight: 400;
+                line-height: 20px;
             }
-
+            
             .popover.popover--enabled{
                 opacity: 1;
-                z-index: 10;
                 transform: translateY(0);
-        
+                z-index: 10;
             }
-
+            
             #cal1{
-            position:absolute;
-            height:0px;
-            width:0px;
-            top:100px;
-            left:100px;
-            overflow:none;
-            z-index:-100;
+                position:absolute;
+                height:0px;
+                width:0px;
+                top:100px;
+                left:100px;
+                overflow:none;
+                z-index:-100;
             }
             #cal2{
-            position:absolute;
-            height:0px;
-            width:0px;
-            top:0px;
-            left:0px;
-            overflow:none;
-            z-index:-100;
+                position:absolute;
+                height:0px;
+                width:0px;
+                top:0px;
+                left:0px;
+                overflow:none;
+                z-index:-100;
             }
-
+            
             .contentGroup{
-            min-height: 100px;
-            min-width: 500px;
-            transition: height .3s cubic-bezier(0.4, 0.0, 1, 1);
+                min-height: 100px;
+                min-width: 500px;
+                transition: height .3s cubic-bezier(0.4, 0.0, 1, 1);
             }
-
+            
             .popoverImage{
-            max-width: 200px;
-            max-height: 200px;
-            background-size: contain;
-            border-radius: 0 0 5px 0;
+                max-width: 200px;
+                max-height: 200px;
+                background-size: contain;
+                border-radius: 0 0 5px 0;
             }
-
+            
             .popoverText{
-            color:#777;
+                font-family: sans-serif;
+                font-size: 14px;
+                line-height: 20px;
+                color:#777;
             }
-
+            
             .popover-navbar{
-            display: inline-flex;
-            width: -webkit-fill-available;
-            align-items: center;
+                display: inline-flex;
+                width: -webkit-fill-available;
+                align-items: center;
             }
-
+            
             .popover-navbar .tab {
-            padding-top: 13px;
-            padding-bottom: 13px;
-            flex-grow: 1;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color .3s;
+                padding-top: 13px;
+                padding-bottom: 13px;
+                flex-grow: 1;
+                text-align: center;
+                cursor: pointer;
+                transition: background-color .3s;
             }
-
+            
             section.popover-navbar .tab::selection {
-            background: rgba(0, 0, 0, 0);
+                background: rgba(0, 0, 0, 0) !important;
             }
-
+            
             .popover-navbar .tab:hover{
-            background-color: rgba(0, 0, 0, .04);
+                background-color: rgba(0, 0, 0, .04);
             }
-
+            
             .dict-lang--sections:last-child{
-            margin-bottom: 10px !important;
+                margin-bottom: 10px !important;
             }
-
+            
             .popover-tab-content{
-            display: flex;
-            flex-flow: row-reverse;
-            padding-left: 10px;
-            overflow-x: hidden;
-            overflow-y: scroll;
-            max-height: 230px;
-
+                display: flex;
+                flex-flow: row-reverse;
+                padding-left: 10px;
+                overflow-x: hidden;
+                overflow-y: scroll;
+                max-height: 230px;
+                
             }
-
+            
             .hidden{
-            display: none !important;
+                display: none !important;
             }
-
+            
             .popover-tab-content .dict-lang {
-            font-weight: bold;
-            font-size: 120%;
-            border-bottom: 1px solid rgba(0,0,0,.20);
-            margin-bottom: 10px;
+                font-weight: bold;
+                font-size: 120%;
+                border-bottom: 1px solid rgba(0,0,0,.20);
+                margin-bottom: 10px;
             }
-
+            
             .popover-tab-content .dict-lang:not(:first-child) {
-            margin-top: 10px;
+                margin-top: 10px;
             }
-
+            
             .popover-tab-content .dict-partofspeach {
-            font-size: 105%;
-            font-weight: 500;
+                font-size: 105%;
+                font-weight: 500;
             }
-
+            
             .popover-tab-content .dict-lang--sections {
-            list-style: none;
-            padding: initial;
-            margin: initial;
+                list-style: none;
+                padding: initial;
+                margin: initial;
             }
-
+            
             .popover-tab-content:hover::-webkit-scrollbar,
             .popover-tab-content:hover::-webkit-scrollbar-thumb {
-            visibility: visible;
+                visibility: visible !important;
             }
-
+            
             .popover-tab-content::-webkit-scrollbar {
-            visibility: hidden;
-            width: .2em;
+                visibility: hidden;
+                width: .2em !important;
             }
-
+            
             .popover-tab-content::-webkit-scrollbar-thumb {
-            visibility: hidden;
-            background-color: darkgrey;
-            outline: 1px solid slategrey;
+                visibility: hidden;
+                background-color: darkgrey !important;
+                outline: 1px solid slategrey !important;
             }
-
+            
             .self-column{
-            display: flex;
-            flex-flow: column;
+                display: flex;
+                flex-flow: column;
+            }
+            
+            ol{
+                -webkit-padding-start: 40px !important;
+                margin: 0 !important;
+            }
+            
+            ol li{
+                list-style-type: decimal !important;
+            }
+            
+            .popover-arrow{
+                width: 0;
+                height: 0;
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-bottom: 10px solid white;
+                z-index: 100000;
+                top: -10px;
+                position: relative;
+                right: -10px;
             }
 
-            .popover-arrow{
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 10px solid white;
-            z-index: 100000;
-            top: -10px;
-            position: relative;
-            right: -10px;
+            #wikipediaContent.list{
+                display: flex;
+                flex-direction: column;
             }
-        </style>
-        `;
+            
+            #wikipediaContent.list #item{
+                display: inline-flex;
+                padding: 5px 8px 5px 8px;
+            }
+            
+            #wikipediaContent.list .title{
+                font-weight: 500;
+                font-size: 100%;
+            }
+            
+            #wikipediaContent.list .description{
+                color: var(--secundary-text-color);
+                font-size: 90%;
+            }
+            
+            #wikipediaContent.list .image{
+                width: 35px;
+                height: 35px;
+                padding: 0 10px 0 0;
+            }
+        </style>`;
         var popoverString = `
         <div class="popover" id="wikilink-popover">
             <section id="popoverNavbar" class="popover-navbar">
@@ -252,10 +291,13 @@ function popoverAPI(popover) {
         var rb2 = DOMRect(cal2);
 
         popover.style.top = `${(selRange.bottom - rb2.top) * 100 / (rb1.top - rb2.top)}px`;
+        let leftPosition = calcLeftPos(selRange, rb1, rb2);
 
-        if (calcLeftPos(selRange, rb1, rb2) + popover.clientWidth > window.innerWidth) {
+        if (leftPosition + popover.clientWidth > window.innerWidth) {
+            // popover.attributeStyleMap.set('left', CSS.px(leftPosition) - popover.clientWidth + selRange.width);
             popover.style.left = `${calcLeftPos(selRange, rb1, rb2) - popover.clientWidth + selRange.width}px`
         } else {
+            // popover.attributeStyleMap.set('left', CSS.px((selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)));
             popover.style.left = `${(selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)}px`;
         }
 
@@ -311,8 +353,36 @@ function popoverAPI(popover) {
                     section.appendChild(span);
                     section.appendChild(ul);
 
-        
+
                 });
+            } catch (error) {
+                displayError('Ops... Term not found', ['dictionaryContent']);
+            }
+
+
+        });
+
+        return section;
+    }
+
+    function generateWikiList(wikiData) {
+
+        var section = document.createDocumentFragment();
+
+        wikiData.forEach(el => {
+            try {
+                let frag = `
+                    <div id="item">
+                        <img class="image" src="${el.img}" alt="">
+                        <section class="group">
+                            <div class="title">${el.title}</div>
+                            <div class="description">${el.body}</div>
+                        </section>
+                    </div>`;
+
+                section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+
+
             } catch (error) {
                 displayError('Ops... Term not found', ['dictionaryContent']);
             }
@@ -337,19 +407,31 @@ function popoverAPI(popover) {
      * @param {number} image.height The height of the image.
      * @param {object} dictionary The definitions response returned from Wiktionary.
      */
-    function insertData(article, image, dictionary) {
+    function insertData(article, image, dictionary, list = [], isList = false) {
         var errorMessage = 'Ops: nenhum resultado encontrado...';
         var imgSection = popover.querySelector('#popoverImage');
         var wikiText = popover.querySelector('#wikiText');
+        var contentSection = popover.querySelector('#wikipediaContent');
         var dictTab = removeChildNodes(popover.querySelector('#dictionaryContent'));
         var dictSection = generateDictionary(dictionary);
 
-        wikiText.textContent = (article.body.length > 0 ? article.body : errorMessage);
+        if (isList) {
+            list.forEach(el => {
+                el.body = `${el.body.substr(0, 180)}...`;
+            });
+            let content = generateWikiList(list);
+            removeChildNodes(contentSection);
+            contentSection.classList.add('list');
+            contentSection.appendChild(content);
 
-        if (image.url) {
-            imgSection.src = image.url;
-        } else
-            imgSection.hidden = true;
+        } else {
+            wikiText.textContent = (article.body.length > 0 ? article.body : errorMessage);
+
+            if (image.url) {
+                imgSection.src = image.url;
+            } else
+                imgSection.hidden = true;
+        }
 
         dictTab.appendChild(dictSection);
 

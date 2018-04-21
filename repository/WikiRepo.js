@@ -35,6 +35,8 @@
                 const lang = language === 'rel' ? identifyLanguage(range) : language;
                 const searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${term}&limit=2&namespace=0&format=json`);
 
+                this.searchTermList(range, term, language);
+
                 try { //⚠ This area still needs to be improved.
                     const parsedResponse = JSON.parse(searchResponse);
                     const titles = parsedResponse[1];
@@ -52,6 +54,43 @@
                     response.title = titles[index];
                     response.body = articles[index];
                     response.url = urls[index];
+
+                    resolve(response);
+
+                } catch (error) {
+
+                    let response = {};
+                    response.title = '';
+                    response.body = `Couldn't get an article for the term "${term}".`;
+                    response.url = '';
+
+                    resolve(response);
+                }
+            });
+        }
+
+        searchTermList({ range = '', term, language = 'rel' }){
+            return new Promise(async (resolve, reject) => {
+
+                const lang = language === 'rel' ? identifyLanguage(range) : language;
+                const searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${term}&limit=3&namespace=0&format=json`);
+
+                try { //⚠ This area still needs to be improved.
+                    const parsedResponse = JSON.parse(searchResponse);
+                    const titles = parsedResponse[1];
+                    const articles = parsedResponse[2];
+                    const urls = parsedResponse[3];
+                    let response = [];
+
+                    titles.forEach((el, i) => {
+                        response.push({
+                            title: el,
+                            body: articles[i],
+                            url: urls[i],
+                        });
+                    });
+
+                    //If the first article dosn't have the title in it, will get the second article
 
                     resolve(response);
 

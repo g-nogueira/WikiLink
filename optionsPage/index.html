@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../node_modules/material-design-lite/material.min.css">
     <link rel="stylesheet" href="../contentScripts/popover.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="wl.css">
 
     <title>WikiLink Options</title>
 </head>
@@ -37,6 +38,40 @@
             </form>
         </div>
     </main>
+
+    <div class="popover popover--enabled" id="wikilink-popover" style="top: 322px; left: 837px;">
+        <section id="popoverNavbar" class="popover-navbar">
+            <div id="wikiTab" class="tab" target="#wikipediaContent">Wikipedia</div>
+            <div id="dictTab" class="tab" target="#dictionaryContent">Dictionary</div>
+        </section>
+        <main id="popoverMain" class="contentGroup">
+            <section id="wikipediaContent" class="popover-tab-content list">
+                <div id="item">
+                    <img class="image" src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Ferdinand_Magellan.jpg" alt="">
+                    <section class="group">
+                        <div class="title">Ferdinand Magellan</div>
+                        <div class="description">Portuguese explorer</div>
+                    </section>
+                </div>
+                <div id="item">
+                    <img class="image" src="https://upload.wikimedia.org/wikipedia/commons/b/b6/Magellan_Railcar.JPG" alt="">
+                    <section class="group">
+                        <div class="title">Ferdinand Magellan (railcar)</div>
+                        <div class="description">US Presidential railroad car</div>
+                    </section>
+                </div>
+                <div id="item">
+                    <img class="image" src="https://upload.wikimedia.org/wikipedia/commons/8/8b/Magellan_Railcar_PresidentsStateroom.JPG" alt="">
+                    <section class="group">
+                        <div class="title">Magellan</div>
+                        <div class="description">Wikimedia disambiguation</div>
+                    </section>
+                </div>
+            </section>
+            <section id="dictionaryContent" class="popover-tab-content self-column hidden">Ops... Term not found</section>
+        </main>
+    </div>
+
 
     <script src="index.js"></script>
 </body>

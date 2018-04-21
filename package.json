@@ -1,24 +1,24 @@
 {
   "name": "wikilink",
-  "version": "0.9",
-  "description": "A handy chrome extension to fast search terms on Wikipedia and write quick notes.\r It will be compatible with Evernote and perhaps OneNote.",
+  "version": "1.0.0",
+  "description": "A handy chrome extension to fast and efficiently search terms on Wikipedia.",
   "main": "eventPage.js",
+  "scripts": {
+    "start": "browserify repository/WikiRepo.js -o repository/WikiRepoBundle.js",
+    "test": "browser-sync optionsPage -w"
+  },
   "dependencies": {
     "franc": "^3.1.1",
     "material-design-lite": "^1.3.0"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ghdrn11/WikiLink.git"
+    "url": "git+https://github.com/ghdrn11/Wikilink.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ghdrn11/WikiLink/issues"
+    "url": "https://github.com/ghdrn11/Wikilink/issues"
   },
-  "homepage": "https://github.com/ghdrn11/WikiLink#readme"
+  "homepage": "https://github.com/ghdrn11/Wikilink#readme"
 }

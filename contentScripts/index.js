@@ -18,7 +18,7 @@
     "use strict";
 
     var HTML = popoverAPI().generateHTML();
-    var popover = appendHTML(HTML);
+    var popover = appendOnBody(HTML);
     var ppvAPI = popoverAPI(popover);
     var cals = insertCals();
 
@@ -35,7 +35,7 @@
         if (event.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString())) {
 
             let resp = await searchSelection(selection);
-            ppvAPI.insertData(resp.article, resp.image, resp.definition);
+            ppvAPI.insertData(resp.article, resp.image, resp.definition, resp.list, true);
             ppvAPI.displayIt(selection, cals[0], cals[1]);
         }
     }
@@ -52,22 +52,39 @@
         var popover = await manager.retrieve('popover');
 
         if (popover.isEnabled) {
-            let selText = selection.toString();
-            let range = selection.focusNode.data;
-            let data = {};
+            return new Promise(async (resolve, reject) => {
+                let selText = selection.toString();
+                let range = selection.focusNode.data;
+                let data = {};
 
-            data.article = await request(selText).wikipedia(range);
-            data.image = await request(data.article.title).image();
-            data.definition = await request(selText).wiktionary();
+                // data.article = await request(selText).wikipedia(range);
+                // data.image = await request(data.article.title).image();
+                data.list = await request(selText).wikiList(range);
 
-            return data;
-        }
-        else return null;
+                var promises = [];
+                data.list.forEach(el => promises.push(request(el.title).image()));
+                let resp = await Promise.all(promises);
+
+                data.list.forEach((el, i) => {
+                    try {
+                        data.list[i].img = resp[i].url;
+                    } catch (error) {
+                        data.list[i].img = '';
+                    }
+                });
+                data.definition = await request(selText).wiktionary();
+
+                resolve(data);
+
+            });
+        } else return null;
     }
 
-    function appendHTML(popover) {
+    function appendOnBody(popover) {
         const div = document.createElement('div');
-        const shadow = div.attachShadow({ mode: 'open' });
+        const shadow = div.attachShadow({
+            mode: 'open'
+        });
 
         div.id = 'wikilink';
         shadow.appendChild(popover);
@@ -97,6 +114,7 @@
 
         return {
             wikipedia: repoRequest,
+            wikiList: listRequest,
             image: imgRequest,
             wiktionary: wiktRequest
         }
@@ -109,6 +127,15 @@
             params.language = await manager.retrieve('language');
 
             return sendMessage('wikirepo', 'searchTerm', params);
+        }
+
+        async function listRequest(range) {
+            var params = {}
+            params.term = term;
+            params.range = range;
+            params.language = await manager.retrieve('language');
+
+            return sendMessage('wikirepo', 'searchTermList', params);
         }
 
         function imgRequest() {

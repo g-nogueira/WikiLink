@@ -11,7 +11,7 @@
     "48": "public/images/icon01/01wikilink48.png",
     "128": "public/images/icon01/01wikilink128.png"
   },
-  "options_page": "",
+  "options_page": "optionsPage/index.html",
   "background": {
     "scripts": [
       "repository/Http.js",
