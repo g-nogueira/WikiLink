@@ -687,7 +687,7 @@ exports.right = function(str){
      * and returns a promise that resolves to an object with the response.
      */
     class WikiRepo {
-        constructor() { }
+        constructor() {}
 
         /**
          * It searches a given term on wikipedia.
@@ -697,7 +697,11 @@ exports.right = function(str){
          * @param {string} [data.range = ''] The context to detect the language.
          * @returns {Promise.<object>} Returns a Promise that resolves to an object with title and body properties.
          */
-        searchTerm({ range = '', term, language = 'rel' }) {
+        searchTerm({
+            range = '',
+            term,
+            language = 'rel'
+        }) {
             return new Promise(async (resolve, reject) => {
 
                 const lang = language === 'rel' ? identifyLanguage(range) : language;
@@ -713,8 +717,8 @@ exports.right = function(str){
                     let index = 0;
 
                     //If the first article dosn't have the title in it, will get the second article
-                    if (!articles[0].toLowerCase().includes(titles[0].toLowerCase())
-                        || articles[0].length < 80) {
+                    if (!articles[0].toLowerCase().includes(titles[0].toLowerCase()) ||
+                        articles[0].length < 80) {
                         index = 1;
                     }
 
@@ -737,11 +741,15 @@ exports.right = function(str){
             });
         }
 
-        searchTermList({ range = '', term, language = 'rel' }){
+        searchTermList({
+            range = '',
+            term,
+            language = 'rel'
+        }) {
             return new Promise(async (resolve, reject) => {
 
                 const lang = language === 'rel' ? identifyLanguage(range) : language;
-                const searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${term}&limit=2&namespace=0&format=json`);
+                const searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${term}&limit=4&namespace=0&format=json`);
 
                 try { //⚠ This area still needs to be improved.
                     const parsedResponse = JSON.parse(searchResponse);
@@ -780,15 +788,26 @@ exports.right = function(str){
          * @param {String} obj.term The term to be searched on wikipedia.
          * @returns {Promise.<object>} Returns a promise that resolves to an object with url, width, and height properties.
          */
-        searchImage({ term }) {
+        searchImage({
+            term,
+            size
+        }) {
             return new Promise(async (resolve, reject) => {
                 try {
-                    const resp = await http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=250&format=json`);
+                    const resp = await http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`);
 
                     const responseFinder = keyFinder(JSON.parse(resp));
                     let image = responseFinder.find('thumbnail');
-                    let { source: url, width, height } = image; //Destructuring image var into vars.
-                    let imageInfo = { url, width, height };
+                    let {
+                        source: url,
+                        width,
+                        height
+                    } = image; //Destructuring image var into vars.
+                    let imageInfo = {
+                        url,
+                        width,
+                        height
+                    };
 
                     resolve(imageInfo);
                 } catch (error) {
@@ -823,8 +842,7 @@ exports.right = function(str){
             Object.keys(obj).forEach(el => {
                 if (el === key) {
                     result = obj[el];
-                }
-                else if (typeof obj[el] == 'object') {
+                } else if (typeof obj[el] == 'object') {
                     result = keyFinder(obj[el]).find(key);
                 }
             });
@@ -832,7 +850,10 @@ exports.right = function(str){
             return result;
         }
 
-        return { find: keyToFind, obj: objArg};
+        return {
+            find: keyToFind,
+            obj: objArg
+        };
     }
 
     /**
@@ -840,18 +861,29 @@ exports.right = function(str){
      * @param {string} extract The string to identify the language.
      */
     function identifyLanguage(extract) {
-        const regexUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
-        const text = extract.match(regexUTF8).toString();
-        const whitelist = ['por', 'eng', 'spa', 'rus'];
-        const francRes = franc(extract, { whitelist: whitelist });
-        const languages = {
-            por: 'pt', eng: 'en', spa: 'es', rus: 'ru'
-        };
+        try {
 
 
-        return languages[francRes] || 'en';
+            const regexUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
+            const text = extract.match(regexUTF8).toString();
+            const whitelist = ['por', 'eng', 'spa', 'rus'];
+            const francRes = franc(extract, {
+                whitelist: whitelist
+            });
+            const languages = {
+                por: 'pt',
+                eng: 'en',
+                spa: 'es',
+                rus: 'ru'
+            };
+
+
+            return languages[francRes] || 'en';
+
+        } catch (error) {
+            return 'en';
+        }
     }
     const wikiRepo = Object.freeze(new WikiRepo());
 }());
-
 },{"franc":4}]},{},[8]);

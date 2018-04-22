@@ -19,11 +19,15 @@
 
     var HTML = popoverAPI().generateHTML();
     var popover = appendOnBody(HTML);
+    var wikilink = document.body.querySelector('.js-wikilink');
     var ppvAPI = popoverAPI(popover);
     var cals = insertCals();
+    var messageHand = messageHandler();
+    
 
     document.addEventListener('mouseup', onMouseUp);
-    popover.addEventListener('mouseout', onMouseOut);
+    wikilink.addEventListener('mouseenter', onMouseIn);
+    wikilink.addEventListener('mouseleave', onMouseOut);
 
 
 
@@ -35,34 +39,50 @@
         if (event.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString())) {
 
             let resp = await searchSelection(selection);
-            ppvAPI.insertData(resp.article, resp.image, resp.definition, resp.list, true);
+            ppvAPI.insertData(resp.article, resp.image, resp.definition, true, resp.list);
+            ppvAPI.querySelectorAll('.js-item').forEach(item => {
+                item.addEventListener('click', async (click) => {
+
+                    let data = {};
+                    let term = click.currentTarget.querySelector('.js-title').textContent;
+
+                    data.article = await messageHand.request(term).wikipedia();
+                    data.image = await messageHand.request(term).image(250);
+                    data.definition = await messageHand.request(term).wiktionary();
+                    
+                    ppvAPI.insertData(data.article, data.image, data.definition, false);
+                });
+            });
             ppvAPI.displayIt(selection, cals[0], cals[1]);
         }
     }
 
+    function onMouseIn(ev) {
+            document.body.style.overflow = 'hidden';
+    }
+
     function onMouseOut(ev) {
-        if (ev.path[ev.path.length - 2].id !== 'wikilink-popover') {
-            //The path will stop at shadow-root; shadow-root - 1 is the popover
+            document.body.style.overflow = 'auto';
             ppvAPI.hideIt()
-        }
     }
 
     async function searchSelection(selection) {
 
-        var popover = await manager.retrieve('popover');
+        var popoverPrefs = await manager.retrieve('popover');
 
-        if (popover.isEnabled) {
+        if (popoverPrefs.isEnabled) {
             return new Promise(async (resolve, reject) => {
+            
                 let selText = selection.toString();
                 let range = selection.focusNode.data;
                 let data = {};
 
-                // data.article = await request(selText).wikipedia(range);
-                // data.image = await request(data.article.title).image();
-                data.list = await request(selText).wikiList(range);
+                // data.article = await messageHandler.request(selText).wikipedia(range);
+                // data.image = await messageHandler.request(data.article.title).image(250);
+                data.list = await messageHand.request(selText).wikiList(range);
 
                 var promises = [];
-                data.list.forEach(el => promises.push(request(el.title).image()));
+                data.list.forEach(el => promises.push(messageHand.request(el.title).image(70)));
                 let resp = await Promise.all(promises);
 
                 data.list.forEach((el, i) => {
@@ -72,12 +92,12 @@
                         data.list[i].img = '';
                     }
                 });
-                data.definition = await request(selText).wiktionary();
+                data.definition = await messageHand.request(selText).wiktionary();
 
                 resolve(data);
 
             });
-        } else return null;
+        }
     }
 
     function appendOnBody(popover) {
@@ -86,11 +106,11 @@
             mode: 'open'
         });
 
-        div.id = 'wikilink';
+        div.classList.add('js-wikilink');
         shadow.appendChild(popover);
         document.body.appendChild(div);
 
-        return shadow.querySelector('#wikilink-popover');
+        return shadow.querySelector('.js-popover');
     }
 
     function insertCals() {
@@ -138,9 +158,10 @@
             return sendMessage('wikirepo', 'searchTermList', params);
         }
 
-        function imgRequest() {
+        function imgRequest(size) {
             var params = {};
             params.term = term;
+            params.size = size;
 
             return sendMessage('wikirepo', 'searchImage', params);
         }

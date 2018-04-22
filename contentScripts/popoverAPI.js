@@ -15,7 +15,9 @@ function popoverAPI(popover) {
         displayError: displayError,
         insertData: insertData,
         popover: popover,
-        isChild: isPopoverChild
+        isChild: isPopoverChild,
+        querySelector: querySelector,
+        querySelectorAll: querySelectorAll
     }
 
     var popover = popover;
@@ -28,7 +30,7 @@ function popoverAPI(popover) {
      */
     function displayError(errorString, id = []) {
         id.forEach(el => {
-            popover.querySelector(`#${id}`).textContent = errorString;;
+            popover.querySelector(`${id}`).textContent = errorString;;
         });
     }
 
@@ -45,10 +47,10 @@ function popoverAPI(popover) {
                 --secundary-text-color: rgba(0, 0, 0, 0.54);
                 --disabled-text-color: rgba(0, 0, 0, 0.38);
             }
-            .popover{
+            #popover{
                 all: initial;
             }
-            .popover {
+            #popover {
                 position:absolute;
                 opacity: 0;
                 display:block;
@@ -63,12 +65,12 @@ function popoverAPI(popover) {
                 border-radius: 5px;
                 font-size: 14px;
                 font-family: 'Roboto', sans-serif !important;
-                color: var(--primary-text-color);
+                color: rgba(0,0,0,.87);
                 font-weight: 400;
                 line-height: 20px;
             }
             
-            .popover.popover--enabled{
+            #popover.popover--enabled{
                 opacity: 1;
                 transform: translateY(0);
                 z-index: 10;
@@ -113,13 +115,13 @@ function popoverAPI(popover) {
                 color:#777;
             }
             
-            .popover-navbar{
+            #navbar{
                 display: inline-flex;
                 width: -webkit-fill-available;
                 align-items: center;
             }
             
-            .popover-navbar .tab {
+            #navbar .tab {
                 padding-top: 13px;
                 padding-bottom: 13px;
                 flex-grow: 1;
@@ -128,11 +130,11 @@ function popoverAPI(popover) {
                 transition: background-color .3s;
             }
             
-            section.popover-navbar .tab::selection {
+            #navbar .tab::selection {
                 background: rgba(0, 0, 0, 0) !important;
             }
             
-            .popover-navbar .tab:hover{
+            #navbar .tab:hover{
                 background-color: rgba(0, 0, 0, .04);
             }
             
@@ -140,7 +142,7 @@ function popoverAPI(popover) {
                 margin-bottom: 10px !important;
             }
             
-            .popover-tab-content{
+            .info-section{
                 display: flex;
                 flex-flow: row-reverse;
                 padding-left: 10px;
@@ -154,39 +156,39 @@ function popoverAPI(popover) {
                 display: none !important;
             }
             
-            .popover-tab-content .dict-lang {
+            .info-section .dict-lang {
                 font-weight: bold;
                 font-size: 120%;
                 border-bottom: 1px solid rgba(0,0,0,.20);
                 margin-bottom: 10px;
             }
             
-            .popover-tab-content .dict-lang:not(:first-child) {
+            .info-section .dict-lang:not(:first-child) {
                 margin-top: 10px;
             }
             
-            .popover-tab-content .dict-partofspeach {
+            .info-section .dict-partofspeach {
                 font-size: 105%;
                 font-weight: 500;
             }
             
-            .popover-tab-content .dict-lang--sections {
+            .info-section .dict-lang--sections {
                 list-style: none;
                 padding: initial;
                 margin: initial;
             }
             
-            .popover-tab-content:hover::-webkit-scrollbar,
-            .popover-tab-content:hover::-webkit-scrollbar-thumb {
+            .info-section:hover::-webkit-scrollbar,
+            .info-section:hover::-webkit-scrollbar-thumb {
                 visibility: visible !important;
             }
             
-            .popover-tab-content::-webkit-scrollbar {
+            .info-section::-webkit-scrollbar {
                 visibility: hidden;
                 width: .2em !important;
             }
             
-            .popover-tab-content::-webkit-scrollbar-thumb {
+            .info-section::-webkit-scrollbar-thumb {
                 visibility: hidden;
                 background-color: darkgrey !important;
                 outline: 1px solid slategrey !important;
@@ -218,44 +220,58 @@ function popoverAPI(popover) {
                 right: -10px;
             }
 
-            #wikipediaContent.list{
+            #wikiSect.list{
                 display: flex;
                 flex-direction: column;
             }
             
-            #wikipediaContent.list #item{
+            #wikiSect.list #item{
                 display: inline-flex;
-                padding: 5px 8px 5px 8px;
+                align-items: center;
+                flex-shrink: 0;
+                padding: 5px 8px 5px 0;
+                border-bottom: 1px solid rgba(0,0,0, .2);
+                cursor: pointer;
             }
             
-            #wikipediaContent.list .title{
+            #wikiSect.list .title{
                 font-weight: 500;
                 font-size: 100%;
             }
             
-            #wikipediaContent.list .description{
-                color: var(--secundary-text-color);
+            #wikiSect.list .description{
                 font-size: 90%;
+                line-height: initial;
+                color: rgba(0, 0, 0, 0.54);
             }
             
-            #wikipediaContent.list .image{
-                width: 35px;
-                height: 35px;
-                padding: 0 10px 0 0;
+            #wikiSect.list .image{
+                width: 70px;
+                height: 70px;
+                display: flex;
+                align-items: center;
+                margin: 0 10px 0 0;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+
+            #wikiSect a{
+                text-decoration: none;
+                color: inherit;
             }
         </style>`;
         var popoverString = `
-        <div class="popover" id="wikilink-popover">
-            <section id="popoverNavbar" class="popover-navbar">
-                <div id="wikiTab" class="tab" target="#wikipediaContent">Wikipedia</div>
-                <div id="dictTab" class="tab" target="#dictionaryContent">Dictionary</div>
+        <div id="popover" class="js-popover">
+            <section id="navbar">
+                <div class="tab js-tab" target=".js-wikiSect">Wikipedia</div>
+                <div class="tab js-tab" target=".js-dictSect">Dictionary</div>
             </section>
-            <main id="popoverMain" class="contentGroup">
-                <section id="wikipediaContent" class="popover-tab-content">
+            <main class="contentGroup">
+                <section id="wikiSect" class="js-wikiSect js-infoSect info-section">
                     <img id="popoverImage" class="popoverImage" src="">
-                    <p id="wikiText" class="popoverText"></p>
+                    <p class="js-wikiInfo popoverText"></p>
                 </section>
-                <section id="dictionaryContent" class="popover-tab-content self-column hidden">
+                <section id="dictionaryContent" class="js-dictSect js-infoSect info-section self-column hidden">
                 </section>
             </main>
         </div>`;
@@ -264,16 +280,24 @@ function popoverAPI(popover) {
 
 
 
-        popover.querySelectorAll('.tab').forEach(el => {
+        popover.querySelectorAll('.js-tab').forEach(el => {
             el.addEventListener('click', ev => {
-                const pv = ev.path.find(el => el.id === 'wikilink-popover');
-                const pages = pv.querySelectorAll('.popover-tab-content');
-                pages.forEach(elem => elem.classList.add('hidden'));
-                pv.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden');
+                const popover = ev.path.find(el => el.classList.contains('js-popover'));
+                const infoSections = popover.querySelectorAll('.js-infoSect');
+
+                infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
+                popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
             });
         });
-
         return popover;
+    }
+
+    function querySelector(element) {
+        return popover.querySelector(element);
+    }
+
+    function querySelectorAll(element) {
+        return popover.querySelectorAll(element);
     }
 
     /**
@@ -356,11 +380,24 @@ function popoverAPI(popover) {
 
                 });
             } catch (error) {
-                displayError('Ops... Term not found', ['dictionaryContent']);
+                displayError('Ops... Term not found', ['.js-dictSect']);
             }
 
 
         });
+
+        return section;
+    }
+
+    function generateWikiInfo(article, image) {
+        var section = document.createDocumentFragment();
+
+        let frag = `
+                    <img id="popoverImage" class="popoverImage" ${image.url?'':'hidden'} src="${image.url}">
+                    <p class="js-wikiInfo popoverText">${article.body}</p>
+                `;
+
+        section.appendChild(document.createRange().createContextualFragment(frag));
 
         return section;
     }
@@ -372,19 +409,21 @@ function popoverAPI(popover) {
         wikiData.forEach(el => {
             try {
                 let frag = `
-                    <div id="item">
-                        <img class="image" src="${el.img}" alt="">
-                        <section class="group">
-                            <div class="title">${el.title}</div>
-                            <div class="description">${el.body}</div>
-                        </section>
-                    </div>`;
+                <div id="item" class="js-item">
+                    <section class="image">
+                        <img src="${el.img}" alt="">
+                    </section>
+                    <section class="info">
+                        <div class="js-title title">${el.title}</div>
+                        <div class="description">${el.body}</div>
+                    </section>
+                </div>`;
 
                 section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
 
 
             } catch (error) {
-                displayError('Ops... Term not found', ['dictionaryContent']);
+                displayError('Ops... Term not found', ['.js-wikiSect']);
             }
 
 
@@ -407,33 +446,37 @@ function popoverAPI(popover) {
      * @param {number} image.height The height of the image.
      * @param {object} dictionary The definitions response returned from Wiktionary.
      */
-    function insertData(article, image, dictionary, list = [], isList = false) {
+    function insertData(article, image, dictionary, isList = false, list = []) {
+
         var errorMessage = 'Ops: nenhum resultado encontrado...';
-        var imgSection = popover.querySelector('#popoverImage');
-        var wikiText = popover.querySelector('#wikiText');
-        var contentSection = popover.querySelector('#wikipediaContent');
-        var dictTab = removeChildNodes(popover.querySelector('#dictionaryContent'));
-        var dictSection = generateDictionary(dictionary);
+        var wikiSect = popover.querySelector('.js-wikiSect');
+        var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
+        var dictResult = generateDictionary(dictionary);
 
         if (isList) {
             list.forEach(el => {
                 el.body = `${el.body.substr(0, 180)}...`;
             });
             let content = generateWikiList(list);
-            removeChildNodes(contentSection);
-            contentSection.classList.add('list');
-            contentSection.appendChild(content);
+            removeChildNodes(wikiSect);
+            wikiSect.classList.add('list');
+            wikiSect.appendChild(content);
 
         } else {
-            wikiText.textContent = (article.body.length > 0 ? article.body : errorMessage);
+            // wikiInfoSect.textContent = (article.body.length > 0 ? article.body : errorMessage);
 
-            if (image.url) {
-                imgSection.src = image.url;
-            } else
-                imgSection.hidden = true;
+            // if (image.url) {
+            //     imgSection.src = image.url;
+            // } else
+            //     imgSection.hidden = true;
+            let content = generateWikiInfo(article, image);
+            wikiSect.classList.remove('list');
+            removeChildNodes(wikiSect);
+            wikiSect.appendChild(content);
+
         }
 
-        dictTab.appendChild(dictSection);
+        dictSect.appendChild(dictResult);
 
         popover = popover;
         return popover;
