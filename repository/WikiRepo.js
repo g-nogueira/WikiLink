@@ -1,3 +1,15 @@
+/******************************************
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ ******************************************/
+
+
 (async function () {
     'use strict';
 
@@ -14,50 +26,73 @@
     });
 
 
-    /**
-     * Executes wikipedia calls for articles or images of given words
-     * and returns a promise that resolves to an object with the response.
-     */
     class WikiRepo {
         constructor() {}
 
-        /**
-         * It searches a given term on wikipedia.
-         * @param {object} data The respective params to be passed.
-         * @param {string} [data.language = 'rel'] The default language to be used. If undefined, 'rel'.
-         * @param {string} data.term The term to be searched.
-         * @param {string} [data.range = ''] The context to detect the language.
-         * @returns {Promise.<object>} Returns a Promise that resolves to an object with title and body properties.
-         */
-        searchTerm({
+        searchByTerm({
             range = '',
             term,
             language = 'rel'
         }) {
             return new Promise(async (resolve, reject) => {
 
-                const lang = language === 'rel' ? identifyLanguage(range) : language;
-                const searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${term}&limit=2&namespace=0&format=json`);
+                var definitions = {
+                    langLinks: true,
+                    sentences: 3
+                };
+                var lang = language === 'rel' ? identifyLanguage(range) : language;
+                var searchResponse = await http.get(`https:///${lang}.wikipedia.org/w/api.php?action=query&format=jsonfm&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}`);
 
-                this.searchTermList(range, term, language);
-
-                try { //⚠ This area still needs to be improved.
-                    const parsedResponse = JSON.parse(searchResponse);
-                    const titles = parsedResponse[1];
-                    const articles = parsedResponse[2];
-                    const urls = parsedResponse[3];
-                    let index = 0;
-
-                    //If the first article dosn't have the title in it, will get the second article
-                    if (!articles[0].toLowerCase().includes(titles[0].toLowerCase()) ||
-                        articles[0].length < 80) {
-                        index = 1;
+                try {
+                    let parsedResponse = JSON.parse(searchResponse);
+                    let pages = keyFinder(parsedResponse).find('pages');
+                    let response = {
+                        title: pages[0].title,
+                        body: pages[0].extract,
+                        image: pages[0].thumbnail,
+                        url: pages[0].fullurl
                     }
 
+                    resolve(response);
+
+                } catch (error) {
+
+                    let response = {
+                        title: '',
+                        body: `Couldn't get an article for the term "${term}".`,
+                        image: {},
+                        url: ''
+                    }
+
+                    resolve(response);
+                }
+            });
+        }
+
+        searchById({
+            pageId,
+            language = 'en',
+            imageSize = 250
+        }) {
+            return new Promise(async (resolve, reject) => {
+
+                var definitions = {
+                    langLinks: true,
+                    sentences: 3
+                };
+
+                var searchResponse = await http.get(`https://${language==='rel'?'en':language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url`);
+
+                try {
+                    let parsedResponse = JSON.parse(searchResponse);
+                    let pages = keyFinder(parsedResponse).find('pages');
+
                     let response = {};
-                    response.title = titles[index];
-                    response.body = articles[index];
-                    response.url = urls[index];
+
+                    response.title = pages[0].title || '';
+                    response.body = pages[0].extract || '';
+                    response.image = pages[0].thumbnail || {};
+                    response.url = pages[0].fullurl || '';
 
                     resolve(response);
 
@@ -66,6 +101,7 @@
                     let response = {};
                     response.title = '';
                     response.body = `Couldn't get an article for the term "${term}".`;
+                    response.image = {};
                     response.url = '';
 
                     resolve(response);
@@ -80,35 +116,39 @@
         }) {
             return new Promise(async (resolve, reject) => {
 
-                const lang = language === 'rel' ? identifyLanguage(range) : language;
-                const searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${term}&limit=4&namespace=0&format=json`);
+                var lang = language === 'rel' ? identifyLanguage(range) : language;
+                var searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`);
 
-                try { //⚠ This area still needs to be improved.
-                    const parsedResponse = JSON.parse(searchResponse);
-                    const titles = parsedResponse[1];
-                    const articles = parsedResponse[2];
-                    const urls = parsedResponse[3];
+                try {
+                    let parsedResponse = JSON.parse(searchResponse);
+                    let result = keyFinder(parsedResponse).find('pages');
+
                     let response = [];
-
-                    titles.forEach((el, i) => {
+                    result.forEach(el => {
                         response.push({
-                            title: el,
-                            body: articles[i],
-                            url: urls[i],
+                            index: el.index,
+                            pageId: el.pageid,
+                            title: el.title,
+                            body: el.terms ? el.terms.description[0] : '',
+                            img: el.thumbnail ? el.thumbnail.source : '',
+                            lang: lang
                         });
                     });
 
-                    //If the first article dosn't have the title in it, will get the second article
+                    response.sort((elA, elB) => elA.index - elB.index);
 
                     resolve(response);
 
                 } catch (error) {
 
-                    let response = {};
-                    response.title = '';
-                    response.body = `Couldn't get an article for the term "${term}".`;
-                    response.url = '';
-
+                    let response = {
+                        body: `Couldn't get an article for the term "${term}".`,
+                        index: '',
+                        pageid: '',
+                        title: '',
+                        body: '',
+                        img: ''
+                    }
                     resolve(response);
                 }
             });
@@ -125,23 +165,15 @@
             size
         }) {
             return new Promise(async (resolve, reject) => {
+                let resp = await http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`);
+
+
                 try {
-                    const resp = await http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`);
 
-                    const responseFinder = keyFinder(JSON.parse(resp));
+                    let responseFinder = keyFinder(JSON.parse(resp));
                     let image = responseFinder.find('thumbnail');
-                    let {
-                        source: url,
-                        width,
-                        height
-                    } = image; //Destructuring image var into vars.
-                    let imageInfo = {
-                        url,
-                        width,
-                        height
-                    };
 
-                    resolve(imageInfo);
+                    resolve(image);
                 } catch (error) {
 
                     let imageInfo = {};
@@ -193,28 +225,46 @@
      * @param {string} extract The string to identify the language.
      */
     function identifyLanguage(extract) {
+        var testUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
+        var testDiacritics = /[\u00C0-\u00FF]/g;
+        var text = extract.match(testUTF8).toString();
+        var isDiacritic = testDiacritics.test(text);
+
+        var languages = {
+            por: 'pt',
+            eng: 'en',
+            spa: 'es',
+            rus: 'ru',
+            und: 'en'
+        };
+
+
         try {
+            let francRes = '';
 
+            if (isDiacritic) {
+                let whitelist = {
+                    whitelist: ['por', 'spa', 'rus']
+                };
 
-            const regexUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
-            const text = extract.match(regexUTF8).toString();
-            const whitelist = ['por', 'eng', 'spa', 'rus'];
-            const francRes = franc(extract, {
-                whitelist: whitelist
-            });
-            const languages = {
-                por: 'pt',
-                eng: 'en',
-                spa: 'es',
-                rus: 'ru'
-            };
+                languages.und = 'pt';
+                delete languages.eng;
 
+                francRes = franc(extract, whitelist);
+            } else {
+                let whitelist = {
+                    whitelist: ['por', 'eng', 'spa', 'rus']
+                };
 
-            return languages[francRes] || 'en';
+                francRes = franc(extract, whitelist);
+            }
+
+            return languages[francRes];
 
         } catch (error) {
             return 'en';
         }
     }
-    const wikiRepo = Object.freeze(new WikiRepo());
+
+    const wikiRepo = new WikiRepo();
 }());

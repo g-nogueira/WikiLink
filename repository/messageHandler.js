@@ -2,28 +2,39 @@
 
 function messageHandler() {
 
-    
+
     return {
         request: request
     }
-    
-    function request(term) {
 
+    function request(termArg) {
+        
+        var term = termArg;
+        
         return {
-            wikipedia: repoRequest,
-            wikiList: listRequest,
-            image: imgRequest,
+            getArticle: repoRequest,
+            getArticles: listRequest,
+            getImage: imgRequest,
             wiktionary: wiktRequest
         }
 
 
-        async function repoRequest(range) {
-            var params = {}
-            params.term = term;
-            params.range = range;
-            params.language = await manager.retrieve('language');
+        async function repoRequest({pageId, imageSize, lang}) {
 
-            return sendMessage('wikirepo', 'searchTerm', params);
+            if (pageId) {
+                var params = {};
+                params.pageId = pageId;
+                params.language = lang;
+                params.imgSize = imageSize;
+
+                return sendMessage('wikirepo', 'searchById', params);
+            } else {
+                var params = {}
+                params.term = term;
+                params.language = await manager.retrieve('language');
+
+                return sendMessage('wikirepo', 'searchTerm', params);
+            }
         }
 
         async function listRequest(range) {

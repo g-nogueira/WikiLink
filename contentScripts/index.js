@@ -23,81 +23,81 @@
     var ppvAPI = popoverAPI(popover);
     var cals = insertCals();
     var messageHand = messageHandler();
-    
+
 
     document.addEventListener('mouseup', onMouseUp);
-    wikilink.addEventListener('mouseenter', onMouseIn);
-    wikilink.addEventListener('mouseleave', onMouseOut);
+    wikilink.addEventListener('mouseenter', onMouseEnter);
+    wikilink.addEventListener('mouseleave', onMouseLeave);
 
 
 
     ////////////////// IMPLEMENTATION //////////////////
 
     async function onMouseUp(ev) {
-        var selection = window.getSelection();
 
-        if (event.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString())) {
+        var selection = window.getSelection();
+        var popoverPrefs = await manager.retrieve('popover');
+
+        if (popoverPrefs.isEnabled && (ev.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString()))) {
 
             let resp = await searchSelection(selection);
-            ppvAPI.insertData(resp.article, resp.image, resp.definition, true, resp.list);
+
+            let data = {
+                article: resp.article,
+                image: resp.image,
+                dictionary: resp.definition,
+                isList : true,
+                list : resp.list
+            };
+            ppvAPI.insertData(data);
             ppvAPI.querySelectorAll('.js-item').forEach(item => {
                 item.addEventListener('click', async (click) => {
 
                     let data = {};
-                    let term = click.currentTarget.querySelector('.js-title').textContent;
+                    // let term = click.currentTarget.querySelector('.js-title').textContent;
+                    let lang = click.currentTarget.attributes.getNamedItem('lang').value;
+                    let id = click.currentTarget.id;
+                    var termHandler = messageHand.request();
 
-                    data.article = await messageHand.request(term).wikipedia();
-                    data.image = await messageHand.request(term).image(250);
-                    data.definition = await messageHand.request(term).wiktionary();
-                    
-                    ppvAPI.insertData(data.article, data.image, data.definition, false);
+                    let req = await termHandler.getArticle({pageId: id, imageSize: 250, lang: lang});
+
+                    data.article = req.body;
+                    data.image = req.image;
+                    data.dictionary = await termHandler.wiktionary();
+                    data.isList = false;
+
+                    ppvAPI.insertData(data);
                 });
             });
+
             ppvAPI.displayIt(selection, cals[0], cals[1]);
         }
     }
 
-    function onMouseIn(ev) {
-            document.body.style.overflow = 'hidden';
+    function onMouseEnter(ev) {
+        document.body.style.overflow = 'hidden';
     }
 
-    function onMouseOut(ev) {
-            document.body.style.overflow = 'auto';
-            ppvAPI.hideIt()
+    function onMouseLeave(ev) {
+        document.body.style.overflow = 'auto';
+        setTimeout(() => ppvAPI.hideIt(), 300);
+        
     }
 
-    async function searchSelection(selection) {
+    async function searchSelection(selectionObj) {
+        
+        var selection = selectionObj.toString();
+        var selContext = selectionObj.focusNode.data;
+        var selectionHandler = messageHand.request(selection);
+        var results = {};
 
-        var popoverPrefs = await manager.retrieve('popover');
+        return new Promise(async (resolve, reject) => {
 
-        if (popoverPrefs.isEnabled) {
-            return new Promise(async (resolve, reject) => {
-            
-                let selText = selection.toString();
-                let range = selection.focusNode.data;
-                let data = {};
+            results.list = await selectionHandler.getArticles(selContext);
+            results.definition = await selectionHandler.wiktionary();
 
-                // data.article = await messageHandler.request(selText).wikipedia(range);
-                // data.image = await messageHandler.request(data.article.title).image(250);
-                data.list = await messageHand.request(selText).wikiList(range);
-
-                var promises = [];
-                data.list.forEach(el => promises.push(messageHand.request(el.title).image(70)));
-                let resp = await Promise.all(promises);
-
-                data.list.forEach((el, i) => {
-                    try {
-                        data.list[i].img = resp[i].url;
-                    } catch (error) {
-                        data.list[i].img = '';
-                    }
-                });
-                data.definition = await messageHand.request(selText).wiktionary();
-
-                resolve(data);
-
-            });
-        }
+            resolve(results);
+        });
     }
 
     function appendOnBody(popover) {
@@ -114,7 +114,7 @@
     }
 
     function insertCals() {
-        let cal1, cal2;
+        var cal1, cal2;
         cal1 = createCal('cal1');
         cal2 = createCal('cal2');
         document.body.appendChild(cal1);
@@ -122,57 +122,12 @@
 
 
         function createCal(id) {
-            const calString = `<div id="${id}">&nbsp;</div>`;
+            var calString = `<div id="${id}">&nbsp;</div>`;
             const cal = document.createRange().createContextualFragment(calString);
             return cal;
         }
 
         return [document.querySelector('#cal1'), document.querySelector('#cal2')];
-    }
-
-    function request(term) {
-
-        return {
-            wikipedia: repoRequest,
-            wikiList: listRequest,
-            image: imgRequest,
-            wiktionary: wiktRequest
-        }
-
-
-        async function repoRequest(range) {
-            var params = {}
-            params.term = term;
-            params.range = range;
-            params.language = await manager.retrieve('language');
-
-            return sendMessage('wikirepo', 'searchTerm', params);
-        }
-
-        async function listRequest(range) {
-            var params = {}
-            params.term = term;
-            params.range = range;
-            params.language = await manager.retrieve('language');
-
-            return sendMessage('wikirepo', 'searchTermList', params);
-        }
-
-        function imgRequest(size) {
-            var params = {};
-            params.term = term;
-            params.size = size;
-
-            return sendMessage('wikirepo', 'searchImage', params);
-        }
-
-        function wiktRequest(range) {
-            var params = {};
-            params.term = term;
-
-            return sendMessage('wiktrepo', 'searchTerm', params);
-        }
-
     }
 
     function isEmptySelection(selection) {

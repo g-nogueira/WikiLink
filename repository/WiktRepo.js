@@ -28,7 +28,6 @@
             return new Promise(async (resolve, reject) => {
 
                 const wikt = await http.get(`https://en.wiktionary.org/api/rest_v1/page/definition/${term}`);
-                // const wikt = await http.get(`http://appservice.wmflabs.org/${language}.wiktionary.org/v1/page/definition/${data.term}`);
                 const response = JSON.parse(wikt);
 
                 resolve(response);
