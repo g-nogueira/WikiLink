@@ -22,12 +22,12 @@
          * @param {String} obj.term The term to be searched on wiktionary.
          * @returns {Promise.<object>} Returns a Promise that resolves to an object with ....
          */
-        searchTerm({term}) {
+        searchTerm({term=''}) {
             const definition = {};
 
             return new Promise(async (resolve, reject) => {
 
-                const wikt = await http.get(`https://en.wiktionary.org/api/rest_v1/page/definition/${term}`);
+                const wikt = await http.get(`https://en.wiktionary.org/api/rest_v1/page/definition/${term.toLowerCase()}`);
                 const response = JSON.parse(wikt);
 
                 resolve(response);

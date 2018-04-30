@@ -34,38 +34,36 @@
             term,
             language = 'rel'
         }) {
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
+                var lang = language === 'rel' ? identifyLanguage(range) : language;
                 var definitions = {
                     langLinks: true,
                     sentences: 3
                 };
-                var lang = language === 'rel' ? identifyLanguage(range) : language;
-                var searchResponse = await http.get(`https:///${lang}.wikipedia.org/w/api.php?action=query&format=jsonfm&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}`);
 
-                try {
-                    let parsedResponse = JSON.parse(searchResponse);
-                    let pages = keyFinder(parsedResponse).find('pages');
-                    let response = {
-                        title: pages[0].title,
-                        body: pages[0].extract,
-                        image: pages[0].thumbnail,
-                        url: pages[0].fullurl
-                    }
+                http.get(`https:///${lang}.wikipedia.org/w/api.php?action=query&format=jsonfm&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}`)
+                    .then(response => {
+                        let pages = findKey(JSON.parse(response), 'pages');
+                        let data = {
+                            title: pages[0].title,
+                            body: pages[0].extract,
+                            image: pages[0].thumbnail,
+                            url: pages[0].fullurl
+                        }
 
-                    resolve(response);
+                        resolve(data);
 
-                } catch (error) {
+                    }).catch(error => {
 
-                    let response = {
-                        title: '',
-                        body: `Couldn't get an article for the term "${term}".`,
-                        image: {},
-                        url: ''
-                    }
-
-                    resolve(response);
-                }
+                        let data = {
+                            title: '',
+                            body: `Couldn't get an article for the term "${term}".`,
+                            image: {},
+                            url: ''
+                        }
+                        resolve(data);
+                    })
             });
         }
 
@@ -74,38 +72,36 @@
             language = 'en',
             imageSize = 250
         }) {
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
                 var definitions = {
                     langLinks: true,
                     sentences: 3
                 };
 
-                var searchResponse = await http.get(`https://${language==='rel'?'en':language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url`);
+                http.get(`https://${language==='rel'?'en':language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url`)
+                    .then(response => {
 
-                try {
-                    let parsedResponse = JSON.parse(searchResponse);
-                    let pages = keyFinder(parsedResponse).find('pages');
+                        let pages = findKey(JSON.parse(response), 'pages');
+                        let data = {};
 
-                    let response = {};
+                        data.title = pages[0].title || '';
+                        data.body = pages[0].extract || '';
+                        data.image = pages[0].thumbnail || {};
+                        data.url = pages[0].fullurl || '';
 
-                    response.title = pages[0].title || '';
-                    response.body = pages[0].extract || '';
-                    response.image = pages[0].thumbnail || {};
-                    response.url = pages[0].fullurl || '';
+                        resolve(data);
 
-                    resolve(response);
+                    }).catch(error => {
 
-                } catch (error) {
+                        let data = {};
+                        data.title = '';
+                        data.body = `Couldn't get an article for the term "${term}".`;
+                        data.image = {};
+                        data.url = '';
 
-                    let response = {};
-                    response.title = '';
-                    response.body = `Couldn't get an article for the term "${term}".`;
-                    response.image = {};
-                    response.url = '';
-
-                    resolve(response);
-                }
+                        resolve(data);
+                    });
             });
         }
 
@@ -114,43 +110,43 @@
             term,
             language = 'rel'
         }) {
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
                 var lang = language === 'rel' ? identifyLanguage(range) : language;
-                var searchResponse = await http.get(`https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`);
 
-                try {
-                    let parsedResponse = JSON.parse(searchResponse);
-                    let result = keyFinder(parsedResponse).find('pages');
+                http.get(`https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`)
+                    .then(response => {
 
-                    let response = [];
-                    result.forEach(el => {
-                        response.push({
-                            index: el.index,
-                            pageId: el.pageid,
-                            title: el.title,
-                            body: el.terms ? el.terms.description[0] : '',
-                            img: el.thumbnail ? el.thumbnail.source : '',
-                            lang: lang
+                        let result = findKey(JSON.parse(response), 'pages');
+                        let data = [];
+                        result.forEach(el => {
+                            data.push({
+                                index: el.index,
+                                pageId: el.pageid,
+                                title: el.title,
+                                body: el.terms ? el.terms.description[0] : '',
+                                img: el.thumbnail ? el.thumbnail.source : '',
+                                lang: lang
+                            });
                         });
+
+                        data.sort((elA, elB) => elA.index - elB.index);
+
+                        resolve(data);
+                    })
+                    .catch(rejection => {
+
+                        let data = {
+                            body: `Couldn't get an article for the term "${term}".`,
+                            index: '',
+                            pageid: '',
+                            title: '',
+                            body: '',
+                            img: ''
+                        }
+                        resolve(data);
                     });
 
-                    response.sort((elA, elB) => elA.index - elB.index);
-
-                    resolve(response);
-
-                } catch (error) {
-
-                    let response = {
-                        body: `Couldn't get an article for the term "${term}".`,
-                        index: '',
-                        pageid: '',
-                        title: '',
-                        body: '',
-                        img: ''
-                    }
-                    resolve(response);
-                }
             });
         }
 
@@ -165,25 +161,22 @@
             size
         }) {
             return new Promise(async (resolve, reject) => {
-                let resp = await http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`);
+                http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`)
+                    .then(response => {
 
+                        let image = findKey(JSON.parse(response), 'thumbnail');
 
-                try {
+                        resolve(image);
+                    }).catch(error => {
 
-                    let responseFinder = keyFinder(JSON.parse(resp));
-                    let image = responseFinder.find('thumbnail');
+                        let imageInfo = {};
+                        imageInfo.url = '';
+                        imageInfo.width = 250;
+                        imageInfo.height = 250;
 
-                    resolve(image);
-                } catch (error) {
-
-                    let imageInfo = {};
-                    imageInfo.url = '';
-                    imageInfo.width = 250;
-                    imageInfo.height = 250;
-
-                    resolve(imageInfo);
-                    console.warn(`Couldn't get image for term "${term}"`);
-                }
+                        resolve(imageInfo);
+                        console.warn(`Couldn't get image for term "${term}"`);
+                    })
             });
         }
     }
@@ -191,15 +184,15 @@
     /**
      * @summary Deep searches given key in the given object.
      * @param {object} obj The object to be deep searched.
+     * @param {string} key The key to deep search in the object.
+     * 
      */
-    function keyFinder(obj) {
+    function findKey(obj, key) {
 
         var objArg = obj;
 
-        /**
-         * 
-         * @param {string} key The key to deep search in the object.
-         */
+        return keyToFind(key);
+
         function keyToFind(key) {
             var result = {};
 
@@ -207,17 +200,13 @@
                 if (el === key) {
                     result = obj[el];
                 } else if (typeof obj[el] == 'object') {
-                    result = keyFinder(obj[el]).find(key);
+                    result = findKey(obj[el], key);
                 }
             });
 
             return result;
         }
 
-        return {
-            find: keyToFind,
-            obj: objArg
-        };
     }
 
     /**
