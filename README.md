@@ -16,12 +16,17 @@ When the user selects a text, it will make a quick call to Wikipedia API and ret
     <img style="max-width: 50%;" src="https://github.com/g-nogueira/WikiLink/blob/master/public/images/readme/popup-demo.svg" alt="">
  </p>
  
-After the user have selected an option, it will be displayed there, too. If he wants to see the wiktionary definitions, tha tab [Dictionary] can be clicked
+After the user have selected an option, it will be displayed there, too. If he wants to see the wiktionary definitions, tha tab [Dictionary] can be clicked.
 
- <div align="center" style="display: inline-flex;">
-    <img src="https://github.com/g-nogueira/WikiLink/blob/master/public/images/readme/Wikipedia-Info.png" alt="">
-    <img src="https://github.com/g-nogueira/WikiLink/blob/master/public/images/readme/Dictionary-info.png" alt="">
- </div>
+<table>
+    <tr>
+    <td>
+        <img src="https://github.com/g-nogueira/WikiLink/blob/master/public/images/readme/Wikipedia-Info.png" alt="">
+    <td>
+    <td>
+        <img src="https://github.com/g-nogueira/WikiLink/blob/master/public/images/readme/Dictionary-info.png" alt=""><td>
+    <tr>
+</table>
 
 
  
