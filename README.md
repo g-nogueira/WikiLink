@@ -18,20 +18,7 @@ When the user selects a text, it will make a quick call to Wikipedia API and ret
  
 After the user have selected an option, it will be displayed there, too. If he wants to see the wiktionary definitions, tha tab [Dictionary] can be clicked.
 
-
-<table>
-    <tr>
-        <td>
-            <img    src="https://github.com/g-nogueira/WikiLink/blob/mas   ter/public/images/readme/Wikipedia-Info.png" alt="">
-        </td>
-        <td>
-            <img    src="https://github.com/g-nogueira/WikiLink/blob/mas   ter/public/images/readme/Dictionary-info.png"  alt="">
-        </td>
-    </tr>
-</table>
-
-
-![wikipedia tab](https://github.com/g-nogueira/WikiLink/blob/mas   ter/public/images/readme/Wikipedia-Info.png) ![dictionary tab](https://github.com/g-nogueira/WikiLink/blob/mas   ter/public/images/readme/Dictionary-info.png)
+![wikipedia tab](https://github.com/g-nogueira/WikiLink/blob/master/public/images/readme/Wikipedia-Info.png) ![dictionary tab](https://github.com/g-nogueira/WikiLink/blob/master/public/images/readme/Dictionary-info.png)
 
 ## Todo List
 - [x] Fix popup out screen boundary.
