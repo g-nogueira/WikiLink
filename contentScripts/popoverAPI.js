@@ -429,7 +429,7 @@ function popoverAPI(popover) {
                 let frag = `
                 <div id="${el.pageId}" lang="${el.lang}" class="js-item item">
                     <section class="image">
-                        <img src="${el.img}" alt="">
+                        <img src="${el.img || "https://github.com/ghdrn11/Wikilink/public/404/image404.png"}" alt="">
                     </section>
                     <section class="info">
                         <div class="js-title title">${el.title}</div>
