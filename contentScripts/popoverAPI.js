@@ -411,7 +411,7 @@ function popoverAPI(popover) {
 
         let frag = `
                 <div id="wikiArticle" class="js-wikiArticle">
-                    <img id="popoverImage" class="popoverImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/image404--200.png'}">
+                    <img id="popoverImage" class="popoverImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png'}">
                     <p class="js-wikiInfo popoverText">${article}</p>
                 </div>
                 `;
@@ -429,7 +429,7 @@ function popoverAPI(popover) {
                 let frag = `
                 <div id="${el.pageId}" lang="${el.lang}" class="js-item item">
                     <section class="image">
-                        <img src="${el.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/image404.png"}" alt="">
+                        <img src="${el.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
                     </section>
                     <section class="info">
                         <div class="js-title title">${el.title}</div>
