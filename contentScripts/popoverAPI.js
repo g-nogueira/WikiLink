@@ -9,11 +9,12 @@ function popoverAPI(popover) {
 
     return {
         generateHTML: generateShell,
-        dictionarySection: generateDictionary,
         displayIt: insertPopover,
         hideIt: hidePopover,
         displayError: displayError,
         insertData: insertData,
+        insertDictionary: insertDictionary,
+        insertBlankData: insertBlankData,
         popover: popover,
         isChild: isPopoverChild,
         querySelector: querySelector,
@@ -87,7 +88,7 @@ function popoverAPI(popover) {
             }
             
             .contentGroup{
-                min-height: 100px;
+                min-height: 200px;
                 min-width: 500px;
                 transition: height .3s cubic-bezier(0.4, 0.0, 1, 1);
             }
@@ -96,12 +97,29 @@ function popoverAPI(popover) {
                 display: flex;
                 flex-flow: row-reverse;
             }
+
+            #wikiSect .wikiArticle--blank{
+                width: 100%;
+            }
+
+            #wikiSect .wikiArticle--blank .text--blank{
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+            }
             
-            .popoverImage{
+            .popoverImage,
+            .popoverImage--blank{
                 max-width: 200px;
                 max-height: 200px;
                 background-size: contain;
                 border-radius: 0 0 5px 0;
+            }
+
+            .popoverImage--blank{
+                width: 200px;
+                height: 200px;
+                background-color: #fafafa;
             }
             
             .popoverText{
@@ -151,7 +169,12 @@ function popoverAPI(popover) {
                 padding-left: 10px;
                 overflow: hidden;
                 max-height: 230px;
-                
+            }
+
+            .info{
+                width: 100%;
+                height: auto;
+                align-self: flex-start;
             }
             
             #wikiSect:not(.list){
@@ -259,6 +282,14 @@ function popoverAPI(popover) {
                 font-weight: 500;
                 font-size: 100%;
             }
+
+            #wikiSect.list .title--blank{
+                width: 50%;
+                height: 15px;
+                margin-bottom: 10px;
+                background-color: #fafafa;
+            }
+            
             
             #wikiSect.list .description{
                 font-size: 90%;
@@ -266,7 +297,30 @@ function popoverAPI(popover) {
                 color: rgba(0, 0, 0, 0.54);
             }
             
-            #wikiSect.list .image{
+            #wikiSect.list .description--blank{
+                width: 80%;
+                height: 10px;
+                margin-top: 2.5px;
+                background-color: #fafafa;
+            }
+            
+            #wikiSect .description--blank{
+                width: 95%;
+                height: 13px;
+                margin-top: 8px;
+                background-color: #fafafa;
+            }
+            #wikiSect .description--blank:nth-child(3n+0){
+                width: 70%;
+            }
+
+            #wikiSect.list .description--blank:last-child,
+            #wikiSect .description--blank:last-child{
+                width: 70%;
+            }
+            
+            #wikiSect.list .image,
+            #wikiSect.list .image--blank{
                 width: 70px;
                 height: 70px;
                 display: flex;
@@ -274,6 +328,10 @@ function popoverAPI(popover) {
                 margin: 0 10px 0 0;
                 overflow: hidden;
                 flex-shrink: 0;
+            }
+
+            #wikiSect.list .image--blank{
+                background-color: #fafafa;
             }
 
             #wikiSect a{
@@ -323,8 +381,8 @@ function popoverAPI(popover) {
     function insertData({article, image, dictionary, isList = false, list = []}) {
 
         var wikiSect = popover.querySelector('.js-wikiSect');
-        var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
-        var dictResult = generateDictionary(dictionary);
+        // var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
+        // var dictResult = generateDictionary(dictionary);
         var wikiList = document.createElement('div');
         wikiList.id = 'wikiSearches';
         wikiList.classList.add('js-wikiSearches');
@@ -342,7 +400,8 @@ function popoverAPI(popover) {
             
             let content = generateWikiInfo(article, image);
             
-            // removeChildNodes(wikiSect);
+            let blankArticle = wikiSect.querySelector('.js-wikiArticle');
+            wikiSect.removeChild(blankArticle);
             wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
             wikiSect.classList.remove('list');
             wikiSect.setAttribute('style', image.height>=200?'':`height: ${image.height}px;`);
@@ -350,9 +409,47 @@ function popoverAPI(popover) {
             wikiSect.appendChild(content);
         }
 
-        dictSect.appendChild(dictResult);
+        // dictSect.appendChild(dictResult);
 
         return popover;
+    }
+
+    function insertBlankData({isList = false}) {
+
+        var wikiSect = popover.querySelector('.js-wikiSect');
+        var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
+        var wikiList = document.createElement('div');
+        wikiList.id = 'wikiSearches';
+        wikiList.classList.add('js-wikiSearches');
+
+        if (isList) {
+
+            let content = generateBlankWikiList();
+            removeChildNodes(wikiSect);
+
+            wikiSect.classList.add('list');
+            wikiSect.appendChild(wikiList);
+            wikiList.appendChild(content);
+            
+        } else {
+            
+            let content = generateBlankWikiInfo();
+            
+            // removeChildNodes(wikiSect);
+            wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
+            wikiSect.classList.remove('list');
+
+            wikiSect.appendChild(content);
+        }
+
+        return popover;
+    }
+
+    function insertDictionary(data) {
+        var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
+        var dictResult = generateDictionary(data);
+        
+        dictSect.appendChild(dictResult);
     }
 
     /**
@@ -421,6 +518,30 @@ function popoverAPI(popover) {
         return section;
     }
 
+    function generateBlankWikiInfo() {
+        var section = document.createDocumentFragment();
+
+        let frag = `
+                <div id="wikiArticle" class="js-wikiArticle wikiArticle--blank">
+                    <div id="popoverImage" class="popoverImage--blank"></div>
+                    <section class="text--blank">
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                    </section>
+                </>
+                `;
+
+        section.appendChild(document.createRange().createContextualFragment(frag));
+
+        return section;
+    }
+
     function generateWikiList(wikiData) {
 
         var section = document.createDocumentFragment();
@@ -447,6 +568,27 @@ function popoverAPI(popover) {
 
         });
 
+        return section;
+    }
+
+    function generateBlankWikiList() {
+
+        var section = document.createDocumentFragment();
+
+        for (let i = 0; i < 6; i++) {
+            let frag = `
+                <div class="js-item item item--blank">
+                    <section class="image--blank"></section>
+                    <section class="info">
+                        <div class="js-title title--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                    </section>
+                </div>`;
+
+                section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+        }
+        
         return section;
     }
 

@@ -54,9 +54,9 @@ function messageHandler() {
             return sendMessage('wikirepo', 'searchImage', params);
         }
 
-        function wiktRequest(range) {
+        function wiktRequest(word) {
             var params = {};
-            params.term = term;
+            params.term = word || term;
 
             return sendMessage('wiktrepo', 'searchTerm', params);
         }

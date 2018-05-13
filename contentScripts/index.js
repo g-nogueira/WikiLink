@@ -40,36 +40,24 @@
 
         if (popoverPrefs.isEnabled && (ev.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString()))) {
 
-            let resp = await searchSelection(selection);
+            searchSelection(selection).then(resp => {
 
-            let data = {
-                article: resp.article,
-                image: resp.image,
-                dictionary: resp.definition,
-                isList : true,
-                list : resp.list
-            };
-            ppvAPI.insertData(data);
-            ppvAPI.querySelectorAll('.js-item').forEach(item => {
-                item.addEventListener('click', async (click) => {
+                let data = {
+                    article: resp.article,
+                    image: resp.image,
+                    // dictionary: resp.definition,
+                    isList : true,
+                    list : resp.list
+                };
 
-                    let data = {};
-                    // let term = click.currentTarget.querySelector('.js-title').textContent;
-                    let lang = click.currentTarget.attributes.getNamedItem('lang').value;
-                    let id = click.currentTarget.id;
-                    var termHandler = messageHand.request();
-
-                    let req = await termHandler.getArticle({pageId: id, imageSize: 250, lang: lang});
-
-                    data.article = req.body;
-                    data.image = req.image;
-                    data.dictionary = await termHandler.wiktionary();
-                    data.isList = false;
-
-                    ppvAPI.insertData(data);
+                ppvAPI.insertDictionary(resp.definition);
+                ppvAPI.insertData(data);
+                ppvAPI.querySelectorAll('.js-item').forEach(item => {
+                    item.addEventListener('click', showArticle);
                 });
             });
 
+            ppvAPI.insertBlankData({isList: true});
             ppvAPI.displayIt(selection, cals[0], cals[1]);
         }
     }
@@ -84,6 +72,26 @@
         
     }
 
+    function showArticle(ev) {
+        let data = {};
+        let lang = ev.currentTarget.attributes.getNamedItem('lang').value;
+        let id = ev.currentTarget.id;
+        var termHandler = messageHand.request();
+
+        ppvAPI.insertBlankData({isList: false});
+
+        termHandler.getArticle({pageId: id, imageSize: 250, lang: lang}).then(async resp => {
+            
+            data.article = resp.body;
+            data.image = resp.image;
+            data.isList = false;
+            ppvAPI.insertData(data);
+            
+            let dictionary = await termHandler.wiktionary(resp.title);
+            ppvAPI.insertDictionary(dictionary);
+        });
+        
+    }
     async function searchSelection(selectionObj) {
         
         var selection = selectionObj.toString();
