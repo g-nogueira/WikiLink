@@ -8,71 +8,64 @@
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
     <link rel="stylesheet" href="../node_modules/material-design-lite/material.min.css">
-    <link rel="stylesheet" href="../contentScripts/popover.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="wl.css">
 
     <title>WikiLink Options</title>
 </head>
 
 <body>
-    <main class="main self-column" style="margin-left:10px;">
-        <div class="self-card self-card--large mdl-shadow--2dp">
-            <form class="self-form self-column">
-                <div>
-                    <label for="defaultLang">Default Language</label>
-                    <select name="" id="defaultLang" autofocus>
-                        <option value="rel">Relative</option>
-                        <option value="pt">Português</option>
+    <main class="main" style="margin-left:10px;">
+        <div class="card card--large mdl-shadow--4dp">
+            <form class="form js-form">
+                <div class="form-section">
+                    <label for="defaultLang">Main Language</label>
+                    <select name="" id="defaultLang" class="js-fallbackLanguage">
                         <option value="en">English</option>
+                        <option value="pt">Português</option>
+                        <option value="es">Spanish</option>
+                        <option value="ru">Russian</option>
                     </select>
                 </div>
 
-                <div>
+                <div class="form-section">
                     <label for="popupMode">Popup Mode</label>
-                    <select name="" id="popupMode">
-                        <option value="normal">Immediately</option>
+                    <select class="js-popupMode" id="popupMode">
+                        <option value="default">Immediately</option>
                         <option value="shortcut">On Shortcut</option>
                     </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="shortcut">Shortcut</label>
+                    <input type="text" id="shortcut" class="js-popupShortcut" placeholder="Enter your shortcut here!">
+                </div>
+
+                <div class="form-section">
+                    <label for="popupMode">AI Languages</label>
+                    <fieldset class="js-nlpLanguages">
+                        <div>
+                            <input type="checkbox" id="pt" value="pt">
+                            <label for="pt">Portuguese</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="en" value="en">
+                            <label for="en">English</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="es" value="es">
+                            <label for="es">Spanish</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="ru" value="ru">
+                            <label for="ru">Russian</label>
+                        </div>
+                    </fieldset>
                 </div>
             </form>
         </div>
     </main>
 
-    <div class="popover popover--enabled" id="wikilink-popover" style="top: 322px; left: 837px;">
-        <section id="popoverNavbar" class="popover-navbar">
-            <div id="wikiTab" class="tab" target="#wikipediaContent">Wikipedia</div>
-            <div id="dictTab" class="tab" target="#dictionaryContent">Dictionary</div>
-        </section>
-        <main id="popoverMain" class="contentGroup">
-            <section id="wikipediaContent" class="popover-tab-content list">
-                <div id="item">
-                    <img class="image" src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Ferdinand_Magellan.jpg" alt="">
-                    <section class="group">
-                        <div class="title">Ferdinand Magellan</div>
-                        <div class="description">Portuguese explorer</div>
-                    </section>
-                </div>
-                <div id="item">
-                    <img class="image" src="https://upload.wikimedia.org/wikipedia/commons/b/b6/Magellan_Railcar.JPG" alt="">
-                    <section class="group">
-                        <div class="title">Ferdinand Magellan (railcar)</div>
-                        <div class="description">US Presidential railroad car</div>
-                    </section>
-                </div>
-                <div id="item">
-                    <img class="image" src="https://upload.wikimedia.org/wikipedia/commons/8/8b/Magellan_Railcar_PresidentsStateroom.JPG" alt="">
-                    <section class="group">
-                        <div class="title">Magellan</div>
-                        <div class="description">Wikimedia disambiguation</div>
-                    </section>
-                </div>
-            </section>
-            <section id="dictionaryContent" class="popover-tab-content self-column hidden">Ops... Term not found</section>
-        </main>
-    </div>
-
-
+    <script src="../repository/StorageManager.js"></script>
     <script src="index.js"></script>
 </body>
 

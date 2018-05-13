@@ -1,16 +1,42 @@
-(function (){
+(function () {
     'use strict';
-    const q = elem => document.querySelector(elem);
-    const els = elem => document.querySelectorAll(elem);
 
-    name();
+    const DOM = elem => document.body.querySelector(elem);
 
-    function name() {
-        const shortcuts = els('.self-js-showKey');
-        shortcuts.forEach(el => {
-            el.addEventListener('keypress', ev => {
-                ev.currentTarget.textContent += `+ ${String.fromCharCode(ev.charCode)}`;
-            });
-        });
+
+    DOM('.js-form').addEventListener('change', saveForm);
+    DOM('.js-popupShortcut').addEventListener('keydown', insertKeyString);
+
+
+
+
+    function saveForm(ev) {
+        // saveLanguage();
+        // savePopupMode();
+
+    }
+
+    function saveLanguage() {
+        var fallbackLanguage = DOM.querySelector('.js-fallbackLanguage').value;
+        manager.update('fallbackLanguage').value(fallbackLanguage);
+    }
+
+    function savePopupMode() {
+        var popupMode = DOM.querySelector('.js-popupMode').value;
+        manager.update('popupMode').value(popupMode);
+    }
+
+    function saveShortcut() {
+        var shortcut = DOM.querySelector('.js-popupShortcut').value;
+        manager.update('shortcut').value(shortcut);
+    }
+
+    function saveNlpLanguages() {
+        var languages = DOM.querySelector('.js-popupShortcut').value;
+        manager.update('nlpLanguages').value(shortcut);
+    }
+
+    function insertKeyString(ev) {
+        ev.currentTarget.value += `${ev.code}`;
     }
 }());

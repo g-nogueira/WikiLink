@@ -69,7 +69,7 @@ class Manager {
     /**
      * Updates an object or an element of an object.
      * @param {String} obj.objName The name of the object to update.
-     * @returns { property, update }
+     * @returns { property, value }
      */
     update(objName) {
         /**

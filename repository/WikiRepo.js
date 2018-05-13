@@ -113,6 +113,11 @@
             return new Promise((resolve, reject) => {
 
                 var lang = language === 'rel' ? identifyLanguage(range) : language;
+                var disambiguation = {
+                    en: 'disambiguation',
+                    pt: 'desambiguação',
+                    es: 'desambiguación'
+                };
 
                 http.get(`https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`)
                     .then(response => {
@@ -120,34 +125,25 @@
                         let result = findKey(JSON.parse(response), 'pages');
                         let data = [];
                         result.forEach(el => {
-                            data.push({
-                                index: el.index,
-                                pageId: el.pageid,
-                                title: el.title,
-                                body: el.terms ? el.terms.description[0] : '',
-                                img: el.thumbnail ? el.thumbnail.source : '',
-                                lang: lang
-                            });
+                            if (el.terms?!el.terms.description[0].includes(disambiguation[lang]):true) {
+                                data.push({
+                                    index: el.index,
+                                    pageId: el.pageid,
+                                    title: el.title,
+                                    body: el.terms ? el.terms.description[0] : '',
+                                    img: el.thumbnail ? el.thumbnail.source : '',
+                                    lang: lang
+                                });
+                            }
                         });
 
                         data.sort((elA, elB) => elA.index - elB.index);
 
                         resolve(data);
-                    })
-                    .catch(rejection => {
-
-                        let data = {
-                            body: `Couldn't get an article for the term "${term}".`,
-                            index: '',
-                            pageid: '',
-                            title: '',
-                            body: '',
-                            img: ''
-                        }
-                        resolve(data);
                     });
-
             });
+
+
         }
 
         /**

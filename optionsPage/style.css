@@ -7,6 +7,11 @@
     --disabled-text-color: rgba(0, 0, 0, 0.38);
 }
 
+body{
+    height: 100%;
+    background-color: #fafafa;
+}
+
 .main{
     display: flex;
     justify-content: center;
@@ -14,20 +19,60 @@
     color: var(--primary-text-color);
 }
 
-.self-card{
+.card{
     min-height: 150px;
     width: fit-content;
     border-radius: 2px;
+    background-color: #fff;
     margin: 10px;
-    padding: 15px;
 }
 
-.self-card--large{
-    min-width: 90%;
-    width: 90%;
+.card--large{
+    min-width: 40%;
+    width: 40%;
 }
 
-.self-column{
+.form > *{
+    padding: 20px 15px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    font-size: 13px;
+
+}
+
+.form-section{
     display: flex;
-    flex-flow: column;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+input, select{
+    color: rgb(117, 117, 117);
+    outline: none;
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,.12);
+    padding: 4px 0;
+    
+}
+
+input:focus,
+select:focus{
+    color: initial;
+    border-bottom: 2px solid #3f51b5;
+}
+
+select{
+    cursor: pointer;
+}
+
+.d-column{
+    display: flex;
+    flex-direction: column;
+}
+
+fieldset{
+    border: none;
+}
+
+.mdl-shadow--4dp{
+    box-shadow: 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12), 0 2px 4px -1px rgba(0,0,0,.2);
 }

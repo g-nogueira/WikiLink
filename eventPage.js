@@ -16,6 +16,11 @@
             if (typeof obj !== 'object')
                 manager.update('language').value('rel');
         });
+
+        manager.retrieve('fallbackLanguage').then(obj => {
+            if (typeof obj !== 'object')
+                manager.update('fallbackLanguage').value('en');
+        });
     }
 
     chrome.contextMenus.create({
