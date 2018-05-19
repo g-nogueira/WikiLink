@@ -11,7 +11,6 @@ function popoverAPI(popover) {
         generateHTML: generateShell,
         displayIt: insertPopover,
         hideIt: hidePopover,
-        displayError: displayError,
         insertData: insertData,
         insertDictionary: insertDictionary,
         insertBlankData: insertBlankData,
@@ -153,6 +152,15 @@ function popoverAPI(popover) {
             
             #navbar .tab:hover{
                 background-color: rgba(0, 0, 0, .04);
+            }
+
+            #navbar .tab[disabled]{
+                color: rgba(0,0,0,.50);
+                cursor: unset;
+            }
+
+            #navbar .tab[disabled]:hover{
+                background-color: #fff;
             }
             
             #dictionaryContent{
@@ -342,8 +350,8 @@ function popoverAPI(popover) {
         var popoverString = `
         <div id="popover" class="js-popover">
             <section id="navbar">
-                <div class="tab js-tab" target=".js-wikiSect">Wikipedia</div>
-                <div class="tab js-tab" target=".js-dictSect">Dictionary</div>
+                <div class="tab js-tab js-wikiTab" target=".js-wikiSect">Wikipedia</div>
+                <div class="tab js-tab js-wiktTab" target=".js-dictSect">Dictionary</div>
             </section>
             <main class="contentGroup">
                 <section id="wikiSect" class="js-wikiSect js-infoSect info-section">
@@ -362,8 +370,10 @@ function popoverAPI(popover) {
                 const popover = ev.path.find(el => el.classList.contains('js-popover'));
                 const infoSections = popover.querySelectorAll('.js-infoSect');
 
-                infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
-                popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
+                if (!el.hasAttribute('disabled')) {
+                    infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
+                    popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
+                }
             });
         });
         return popover;
@@ -378,7 +388,13 @@ function popoverAPI(popover) {
      * @param {number} image.height The height of the image.
      * @param {object} dictionary The definitions response returned from Wiktionary.
      */
-    function insertData({article, image, dictionary, isList = false, list = []}) {
+    function insertData({
+        article,
+        image,
+        dictionary,
+        isList = false,
+        list = []
+    }) {
 
         var wikiSect = popover.querySelector('.js-wikiSect');
         // var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
@@ -395,16 +411,16 @@ function popoverAPI(popover) {
             wikiSect.classList.add('list');
             wikiList.appendChild(content);
             wikiSect.appendChild(wikiList);
-            
+
         } else {
-            
+
             let content = generateWikiInfo(article, image);
-            
+
             let blankArticle = wikiSect.querySelector('.js-wikiArticle');
             wikiSect.removeChild(blankArticle);
             wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
             wikiSect.classList.remove('list');
-            wikiSect.setAttribute('style', image.height>=200?'':`height: ${image.height}px;`);
+            wikiSect.setAttribute('style', image.height >= 200 ? '' : `height: ${image.height}px;`);
 
             wikiSect.appendChild(content);
         }
@@ -414,7 +430,9 @@ function popoverAPI(popover) {
         return popover;
     }
 
-    function insertBlankData({isList = false}) {
+    function insertBlankData({
+        isList = false
+    }) {
 
         var wikiSect = popover.querySelector('.js-wikiSect');
         var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
@@ -430,11 +448,11 @@ function popoverAPI(popover) {
             wikiSect.classList.add('list');
             wikiSect.appendChild(wikiList);
             wikiList.appendChild(content);
-            
+
         } else {
-            
+
             let content = generateBlankWikiInfo();
-            
+
             // removeChildNodes(wikiSect);
             wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
             wikiSect.classList.remove('list');
@@ -447,9 +465,15 @@ function popoverAPI(popover) {
 
     function insertDictionary(data) {
         var dictSect = removeChildNodes(popover.querySelector('.js-dictSect'));
-        var dictResult = generateDictionary(data);
-        
-        dictSect.appendChild(dictResult);
+
+        if (data) {
+            var dictResult = generateDictionary(data);
+            dictSect.appendChild(dictResult);
+            enableTab(2);
+        } else {
+            disableTab(2);
+        }
+
     }
 
     /**
@@ -494,7 +518,7 @@ function popoverAPI(popover) {
 
                 });
             } catch (error) {
-                displayError('Ops... Term not found', ['.js-dictSect']);
+                disableTab(2);
             }
 
 
@@ -562,7 +586,7 @@ function popoverAPI(popover) {
 
 
             } catch (error) {
-                displayError('Ops... Term not found', ['.js-wikiSect']);
+                alert('Wikilinks error on line 590 - PopoverAPI.js');
             }
 
 
@@ -586,9 +610,9 @@ function popoverAPI(popover) {
                     </section>
                 </div>`;
 
-                section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+            section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
         }
-        
+
         return section;
     }
 
@@ -630,18 +654,6 @@ function popoverAPI(popover) {
         }
     }
 
-    /**
-     * 
-     * @param {object} obj The parameters.
-     * @param {string} obj.errorString The error string to show to the user.
-     * @param {string} obj.tab The tab name to display the message.
-     */
-    function displayError(errorString, id = []) {
-        id.forEach(el => {
-            popover.querySelector(`${id}`).textContent = errorString;;
-        });
-    }
-
     function removeChildNodes(element) {
         while (element.hasChildNodes()) {
             element.removeChild(element.lastChild);
@@ -672,5 +684,23 @@ function popoverAPI(popover) {
 
     function querySelectorAll(element) {
         return popover.querySelectorAll(element);
+    }
+
+    function disableTab(tabId) {
+        var tabs = {
+            1: '.js-wikiTab',
+            2: '.js-wiktTab'
+        }
+        popover.querySelector(tabs[tabId]).setAttribute('disabled', 'disabled');;
+    }
+    
+    function enableTab(tabId) {
+        var tabs = {
+            1: '.js-wikiTab',
+            2: '.js-wiktTab'
+        }
+        if (popover.querySelector(tabs[tabId]).hasAttribute('disabled')) {
+            popover.querySelector(tabs[tabId]).removeAttribute('disabled');
+        }
     }
 }

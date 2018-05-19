@@ -3,177 +3,108 @@
 /**
  * Manages and facilitate storage (chrome.storage.sync) requests and watchers.
  */
-class Manager {
+class PopoverDB {
     constructor() {
         this._errorCode = {
             1: key => `Object "${key}" not found`,
             2: (key, property) => `Object property "${key}.${property}" not found in storage.`,
             3: property => `Object property ".${property}" not found in storage.`
+        };
+
+        this._encodeProp = propertyName => {
+
+            let props = {
+                isEnabled: 5,
+                fallbackLang: 1,
+                nlpLangs: 4,
+                shortcut: 3,
+                popupMode: 2
+            }
+
+            return props[propertyName];
+        }
+
+        this._decodeProp = propertyName => {
+
+            let props = {
+                5: 'isEnabled',
+                1: 'fallbackLang',
+                4: 'nlpLangs',
+                3: 'shortcut',
+                2: 'popupMode'
+            }
+
+            return props[propertyName];
+        }
+
+        this._decodeObj = obj => {
+            let decodedObj = {};
+            Object.keys(obj).forEach(key => {
+                decodedObj[this._decodeProp(key)] = obj[key];
+            });
+
+            return decodedObj;
         }
 
     }
 
-    /**
-     * Stores an key-value pair object ({[objName]: [value]}) in the storage
-     * @param {object} obj The key-value pair object to be stored.
-     * @returns {Promise}
-     */
-    create(obj) {
-        return new Promise((resolve, reject) => {
-            chrome.storage.sync.set(obj, () => resolve());
+
+    update(property, value) {
+        return new Promise(async (resolve, reject) => {
+
+            var dataString = await new Promise(resolve => chrome.storage.sync.get('wldt', obj => resolve(obj['wldt'])));
+            var data = JSON.parse(dataString);
+
+            data[this._encodeProp(property)] = value;
+            dataString = JSON.stringify(data);
+
+            chrome.storage.sync.set({
+                wldt: dataString
+            }, () => resolve(true));
         });
     }
 
-    /**
-     * Inserts a new element in a list and gives an unique id to it.
-     * @param {string} objName The name of the list of items.
-     * @param {any} value The value to be pushed to the list.
-     * @returns {Promise}
-     */
-    push(objName, value) {
+    retrieve(property = '') {
         return new Promise(async (resolve, reject) => {
-            var list = await new Promise(resolve => chrome.storage.sync.get(objName, list => resolve(list[objName])));
-            var valueCopy = value;
-
-            valueCopy.id = idGenerator().generate();
-            list.push(valueCopy);
-
-            chrome.storage.sync.set({ [objName]: arrayCopy }, () => resolve(valueCopy));
-        });
-    }
-
-    /**
-     * Retrieves an object or object property by given key and property name.
-     * @param {string} key The type of the objects to retrieve.
-     * @param {string} [property = ''] The specific property to return.
-     * @param {function} onSuccess The function to execute on success.
-     * @returns {Promise}
-     */
-    retrieve(key, property = '') {
-        return new Promise(async (resolve, reject) => {
+            var dataString = '';
             try {
-                var resp = await new Promise(resolve => chrome.storage.sync.get(key, obj => resolve(obj[key])));
+                dataString = await new Promise(resolve => chrome.storage.sync.get('wldt', obj => resolve(obj['wldt'])));
+                var data = JSON.parse(dataString);
 
-                if (property !== '') {
-                    let verifiedProp = this.objectVerifier(resp).propExists(property);
-                    verifiedProp.exists ? resolve(verifiedProp.value) : reject(verifiedProp.error);
-                }
-                else resolve(resp);
+                if (property.length > 0)
+                    resolve(data[this._encodeProp(property)])
+                else resolve(data);
 
             } catch (error) {
-                reject(this._errorCode[1](key));
+                reject(error);
             }
+
         });
     }
 
-    /**
-     * Updates an object or an element of an object.
-     * @param {String} obj.objName The name of the object to update.
-     * @returns { property, value }
-     */
-    update(objName) {
-        /**
-         * Updates just given object property.
-         * @param {*} property The property of the object to update.
-         * @param {*} value The new value of the property.
-         * @returns {Promise<object>}
-         */
-        function updateProperty(property, value) {
-            return new Promise(async (resolve, reject) => {
-                const obj = await (new Promise((resolve, reject) => chrome.storage.sync.get(objName, obj => resolve(obj[objName]))));
-
-                obj[property] = value;
-                chrome.storage.sync.set({ [objName]: obj });
-                resolve(obj);
-            });
-        }
-
-        /**
-         * Updates the whole object with given value.
-         * @param {*} value The new value of the object.
-         * @returns {Promise<object>}
-         */
-        function update(value) {
-            return new Promise(resolve => {
-                chrome.storage.sync.set({ [objName]: value });
-
-                resolve({ [objName]: value });
-            });
-        }
-
-        return { property: updateProperty, value: update }
-
-    }
-
-    /**
-     * Deletes an object or a object's property.
-     * @param {String} key The key of the object to remove.
-     * @param {*} [id] The id of the element inside the object to be deleted. If none provided, it will delete the whole object.
-     * @returns {Promise<object>}
-     */
-    delete(key) {
-        return new Promise(async (resolve, reject) => {
-            var resp = await new Promise(resolve => chrome.storage.sync.get(key, obj => obj[key]));
-            var obj = resp ? resp : undefined;
-
-            if (obj !== undefined) {
-                chrome.storage.sync.remove(key, () => resolve(obj));
-            }
-            else reject(this._errorCode[2](key));
-        });
-    }
-
-    idGenerator() {
-
-        function generateUnique() {
-            return (new Date()).getTime();
-        }
-
-        return { generate: generateUnique };
-    }
-
-    objectVerifier(obj) {
-        var context = this;
-
-        function verifyProperty(propName) {
-            if (obj) {
-                if (obj[propName] !== undefined) {
-                    return { exists: true, error: null, value: obj[propName] };
-                }
-                else return { exists: false, error: context._errorCode[3](propName) };
-            }
-            else return { exists: false, error: (context._errorCode[1]('')) };
-        }
-
-        function verifyObject() {
-            if (obj) {
-                return { isReal: true, error: null, value: obj };
-            }
-            else return { isReal: false, error: (context._errorCode[2]('')) }
-        }
-
-        return { propExists: verifyProperty, isObject: verifyObject }
-    }
 
     /**
      * Listens to storage changes in given object and executes a function in a onChanged event.
      * @param {*} objName The name of the object in the storage to listens.
      * @returns {object} A function to pass as an argument the function to execute on event.
      */
-    changesListener(objName){
+    watchChanges() {
 
-        function execute(fn){
-            var name = objName
+        var decodedObj = this._decodeObj;
+
+        function execute(fn) {
             chrome.storage.onChanged.addListener((changes, areaName) => {
                 //Popover enabled state changed
-                if (changes[objName]) {
-                    fn(changes[objName].oldValue, changes[objName].newValue);
+                if (changes['wldt']) {
+                    fn(decodedObj(JSON.parse(changes['wldt'].oldValue)), decodedObj(JSON.parse(changes['wldt'].newValue)));
                 };
             });
         }
 
-        return {execute};
+        return {
+            then: execute
+        };
     }
 }
 
-const manager = new Manager();
+const popoverDB = new PopoverDB();

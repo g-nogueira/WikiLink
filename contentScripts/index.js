@@ -36,9 +36,9 @@
     async function onMouseUp(ev) {
 
         var selection = window.getSelection();
-        var popoverPrefs = await manager.retrieve('popover');
+        var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
 
-        if (popoverPrefs.isEnabled && (ev.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString()))) {
+        if (isPopoverEnabled && (ev.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString()))) {
 
             searchSelection(selection).then(resp => {
 

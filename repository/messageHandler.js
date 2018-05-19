@@ -24,14 +24,14 @@ function messageHandler() {
             if (pageId) {
                 var params = {};
                 params.pageId = pageId;
-                params.language = lang;
+                params.lang = lang;
                 params.imgSize = imageSize;
 
                 return sendMessage('wikirepo', 'searchById', params);
             } else {
                 var params = {}
                 params.term = term;
-                params.language = await manager.retrieve('language');
+                params.lang = await popoverDB.retrieve('fallbackLang');
 
                 return sendMessage('wikirepo', 'searchTerm', params);
             }
@@ -41,7 +41,7 @@ function messageHandler() {
             var params = {}
             params.term = term;
             params.range = range;
-            params.language = await manager.retrieve('language');
+            params.nlpLangs = await popoverDB.retrieve('nlpLangs');
 
             return sendMessage('wikirepo', 'searchTermList', params);
         }

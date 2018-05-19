@@ -15,9 +15,13 @@ body{
 .main{
     display: flex;
     justify-content: center;
+    align-items: center;
     font-family: 'Roboto', sans-serif !important;
     color: var(--primary-text-color);
+    height: 100%;
 }
+
+
 
 .card{
     min-height: 150px;
@@ -30,6 +34,7 @@ body{
 .card--large{
     min-width: 40%;
     width: 40%;
+    height: fit-content;
 }
 
 .form > *{
@@ -43,14 +48,27 @@ body{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
 }
 
-input, select{
+.form-section.logo{
+    justify-content: center;
+    width: 100%;
+    padding: 0;
+}
+
+.logo{
+    width: 80%;
+    height: 80%;
+}
+
+input:not([type="checkbox"]), select{
     color: rgb(117, 117, 117);
     outline: none;
     border: none;
     border-bottom: 1px solid rgba(0,0,0,.12);
     padding: 4px 0;
+    width: 200px;
     
 }
 

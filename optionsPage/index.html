@@ -17,9 +17,14 @@
     <main class="main" style="margin-left:10px;">
         <div class="card card--large mdl-shadow--4dp">
             <form class="form js-form">
+
+                <div class="form-section logo">
+                    <img class="logo" src="../public/images/readme/01Artboard 7150.png" alt="">
+                </div>
+
                 <div class="form-section">
                     <label for="defaultLang">Main Language</label>
-                    <select name="" id="defaultLang" class="js-fallbackLanguage">
+                    <select name="" id="defaultLang" class="js-fallbackLanguage" title="The language to use if can't figure out the text's language">
                         <option value="en">English</option>
                         <option value="pt">Português</option>
                         <option value="es">Spanish</option>
@@ -29,7 +34,7 @@
 
                 <div class="form-section">
                     <label for="popupMode">Popup Mode</label>
-                    <select class="js-popupMode" id="popupMode">
+                    <select class="js-popupMode" id="popupMode" title="Show popup immediately or on shortcut">
                         <option value="default">Immediately</option>
                         <option value="shortcut">On Shortcut</option>
                     </select>
@@ -41,22 +46,22 @@
                 </div>
 
                 <div class="form-section">
-                    <label for="popupMode">AI Languages</label>
+                    <label for="popupMode">Language Detection</label>
                     <fieldset class="js-nlpLanguages">
                         <div>
-                            <input type="checkbox" id="pt" value="pt">
+                            <input type="checkbox" id="pt" value="por" class="js-nlpLang">
                             <label for="pt">Portuguese</label>
                         </div>
                         <div>
-                            <input type="checkbox" id="en" value="en">
+                            <input type="checkbox" id="en" value="eng" class="js-nlpLang">
                             <label for="en">English</label>
                         </div>
                         <div>
-                            <input type="checkbox" id="es" value="es">
+                            <input type="checkbox" id="es" value="esp" class="js-nlpLang">
                             <label for="es">Spanish</label>
                         </div>
                         <div>
-                            <input type="checkbox" id="ru" value="ru">
+                            <input type="checkbox" id="ru" value="rus" class="js-nlpLang">
                             <label for="ru">Russian</label>
                         </div>
                     </fieldset>

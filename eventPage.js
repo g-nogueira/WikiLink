@@ -3,24 +3,30 @@
 
     initializeDB();
 
+    /**
+     * 1: fallBackLanguage: 1: 'en' || 2: 'es' || 3: 'pt' || 4: 'ru'
+     * 2: popupMode: 1:'default' || 2: 'shortcut'
+     * 3: shortcutToShowPopover: 'keyId + keyId'
+     * 4: listOfLanguagesToProcess: [1?, 2?, 3?, 4?]
+     * 5: isPopoverEnabled : true || false
+     */
+
     function initializeDB() {
-        manager.retrieve('popover')
+        let wikilinkData = JSON.stringify({
+            1: 'en',
+            2: 'default',
+            3: '',
+            4: ['eng', 'esp', 'por'],
+            5: true
+        });
+
+        popoverDB.retrieve()
             .then(obj => {
-                if (typeof obj !== 'object')
-                    manager.update('popover').value({ isEnabled: true, shortcuts: [] });
+                if (typeof obj !== 'object') {
+                    chrome.storage.sync.set({wldt: wikilinkData}, () => {});
+                }
             })
-            .catch(error => manager.create({ 'popover':{isEnabled: true, shortcuts: [] }}));
-
-
-        manager.retrieve('language').then(obj => {
-            if (typeof obj !== 'object')
-                manager.update('language').value('rel');
-        });
-
-        manager.retrieve('fallbackLanguage').then(obj => {
-            if (typeof obj !== 'object')
-                manager.update('fallbackLanguage').value('en');
-        });
+            .catch(error => chrome.storage.sync.set({wldt: wikilinkData}, () => {}));
     }
 
     chrome.contextMenus.create({
@@ -28,7 +34,9 @@
         contexts: ["selection"],
         onclick: function (info) {
             const url = `http://www.wikipedia.org/w/index.php?title=Special:Search&search=${info.selectionText}`;
-            chrome.tabs.create({ url: url });
+            chrome.tabs.create({
+                url: url
+            });
         }
 
     });
@@ -40,8 +48,8 @@
         };
 
         async function togglePopover() {
-            const isEnabled = await manager.retrieve('popover', 'isEnabled');
-            manager.update('popover').property('isEnabled', !isEnabled);
+            let isEnabled = await popoverDB.retrieve('isEnabled');
+            popoverDB.update('isEnabled', !isEnabled);
         }
 
         function showPopup() {

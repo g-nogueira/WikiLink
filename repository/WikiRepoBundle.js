@@ -682,6 +682,7 @@ exports.right = function(str){
     'use strict';
 
     const franc = require('franc');
+    const fallbackLnag = await popoverDB.retrieve('fallbackLang');
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.receiver === 'wikirepo') {
@@ -700,11 +701,13 @@ exports.right = function(str){
         searchByTerm({
             range = '',
             term,
-            language = 'rel'
+            nlpLangs
         }) {
             return new Promise((resolve, reject) => {
 
-                var lang = language === 'rel' ? identifyLanguage(range) : language;
+                var lang = identifyLanguage(range, nlpLangs);
+                lang = lang === 'und' ? fallbackLnag : lang;
+
                 var definitions = {
                     langLinks: true,
                     sentences: 3
@@ -737,7 +740,7 @@ exports.right = function(str){
 
         searchById({
             pageId,
-            language = 'en',
+            lang = 'en',
             imageSize = 250
         }) {
             return new Promise((resolve, reject) => {
@@ -747,7 +750,7 @@ exports.right = function(str){
                     sentences: 3
                 };
 
-                http.get(`https://${language==='rel'?'en':language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`)
+                http.get(`https://${lang==='rel'?'en':lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`)
                     .then(response => {
 
                         let pages = findKey(JSON.parse(response), 'pages');
@@ -776,11 +779,11 @@ exports.right = function(str){
         searchTermList({
             range = '',
             term,
-            language = 'rel'
+            nlpLangs = ['eng']
         }) {
             return new Promise((resolve, reject) => {
 
-                var lang = language === 'rel' ? identifyLanguage(range) : language;
+                var lang = identifyLanguage(range, nlpLangs);
                 var disambiguation = {
                     en: 'disambiguation',
                     pt: 'desambiguação',
@@ -793,7 +796,7 @@ exports.right = function(str){
                         let result = findKey(JSON.parse(response), 'pages');
                         let data = [];
                         result.forEach(el => {
-                            if (el.terms?!el.terms.description[0].includes(disambiguation[lang]):true) {
+                            if (el.terms ? !el.terms.description[0].includes(disambiguation[lang]) : true) {
                                 data.push({
                                     index: el.index,
                                     pageId: el.pageid,
@@ -877,7 +880,7 @@ exports.right = function(str){
      * Identifies the language of given argument string. The default is english.
      * @param {string} extract The string to identify the language.
      */
-    function identifyLanguage(extract) {
+    function identifyLanguage(extract, langs = ['eng']) {
         var testUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
         var testDiacritics = /[\u00C0-\u00FF]/g;
         var text = extract.match(testUTF8).toString();
@@ -888,34 +891,14 @@ exports.right = function(str){
             eng: 'en',
             spa: 'es',
             rus: 'ru',
-            und: 'en'
         };
 
 
-        try {
-            let francRes = '';
-
-            if (isDiacritic) {
-                let whitelist = {
-                    whitelist: ['por', 'spa', 'rus']
-                };
-
-                languages.und = 'pt';
-                delete languages.eng;
-
-                francRes = franc(extract, whitelist);
-            } else {
-                let whitelist = {
-                    whitelist: ['por', 'eng', 'spa', 'rus']
-                };
-
-                francRes = franc(extract, whitelist);
-            }
-
+        if (langs.length === 1) {
+            return languages[langs[0]];
+        } else {
+            let francRes = franc(extract, {whitelist: langs});
             return languages[francRes];
-
-        } catch (error) {
-            return 'en';
         }
     }
 

@@ -1,8 +1,6 @@
 (async function () {
     'use strict';
 
-    const defaultLang = await manager.retrieve('language');
-
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.receiver === 'wiktrepo') {
 
@@ -29,7 +27,9 @@
 
                 const wikt = await http.get(`https://en.wiktionary.org/api/rest_v1/page/definition/${term.toLowerCase()}`);
                 const response = JSON.parse(wikt);
-
+                if (response.title) {
+                    resolve(undefined);
+                }
                 resolve(response);
             });
         }

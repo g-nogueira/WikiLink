@@ -5,7 +5,7 @@
      * @param {string} el 
      * @returns {HTMLElement} 
      */
-    const DOM = el => document.querySelector(el);
+    const DOM = el => document.body.querySelector(el);
 
     initializer().DOMEvents()
     initializer().elementsValues()
@@ -22,12 +22,12 @@
          */
         function DOMEvents() {
 
-            DOM('#togglePopover').addEventListener('click', toggleDOMPopover);
-            DOM('#openShortcuts').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
+            DOM('.js-popoverButton ').addEventListener('click', toggleDOMPopover);
+            DOM('.js-shortcutsButton').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
 
             async function toggleDOMPopover () {
-                const popoverState = await manager.retrieve('popover', 'isEnabled');
-                manager.update('popover').property('isEnabled', !popoverState);
+                const popoverState = await popoverDB.retrieve('isEnabled');
+                popoverDB.update('isEnabled', !popoverState);
             }
 
         }
@@ -37,8 +37,8 @@
          */
         async function elementsValues() {
 
-            manager.retrieve('popover', 'isEnabled').then(popoverState => {
-                DOM('#togglePopover').textContent = popoverState ? 'Disable Popup' : 'Enable Popup';
+            popoverDB.retrieve('isEnabled').then(popoverState => {
+                DOM('.js-popoverButton ').textContent = popoverState ? 'Disable Popup' : 'Enable Popup';
             });
 
         }
@@ -48,10 +48,10 @@
          */
         function storageEvents() {
 
-            manager.changesListener('popover').execute(popoverOnChange);
+            popoverDB.watchChanges().then(popoverOnChange);
 
             function popoverOnChange (oldV, newV) {
-                DOM('#togglePopover').textContent = newV.isEnabled ? 'Disable Popup' : 'Enable Popup';
+                DOM('.js-popoverButton ').textContent = newV.isEnabled ? 'Disable Popup' : 'Enable Popup';
             }
         }
 
