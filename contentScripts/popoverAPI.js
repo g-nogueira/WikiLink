@@ -364,6 +364,7 @@ function popoverAPI(popover) {
         var popover = document.createRange().createContextualFragment(`${styleString} ${popoverString}`);
 
 
+        
 
         popover.querySelectorAll('.js-tab').forEach(el => {
             el.addEventListener('click', ev => {
