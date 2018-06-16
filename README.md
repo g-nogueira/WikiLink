@@ -28,7 +28,7 @@ After the user have selected an option, it will be displayed there, too. If he w
 ## Under the hood
 ## Todo List
 - [x] Fix popup out screen boundary.
-- [ ] Get better wikipedia responses.
-- [ ] Implement shortcuts.
-- [ ] Implement options page.
+- [x] Get better wikipedia responses.
+- [x] Implement shortcuts.
+- [x] Implement options page.
 - [ ] Black List sites.
