@@ -23,7 +23,10 @@
         function DOMEvents() {
 
             DOM('.js-popoverButton ').addEventListener('click', toggleDOMPopover);
-            DOM('.js-shortcutsButton').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
+            // DOM('.js-shortcutsButton').addEventListener('click', ev => chrome.runtime.openOptionsPage());
+            DOM('.js-shortcutsButton').addEventListener('click', ev => chrome.windows.create({url: '../optionsPage/index.html', type: 'popup', width: 500,  height: 500}));
+            DOM('.js-optionsButton').addEventListener('click', ev => chrome.windows.create({url: '../optionsPage/index.html', type: 'popup', width: 500,  height: 500}));
+            // DOM('.js-shortcutsButton').addEventListener('click', ev => openTab('chrome://extensions/configureCommands'));
 
             async function toggleDOMPopover () {
                 const popoverState = await popoverDB.retrieve('isEnabled');

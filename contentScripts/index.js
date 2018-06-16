@@ -14,7 +14,7 @@
 @------------------------------------------------@
 */
 
-(function () {
+(async function () {
     "use strict";
 
     var HTML = popoverAPI().generateHTML();
@@ -23,31 +23,73 @@
     var ppvAPI = popoverAPI(popover);
     var cals = insertCals();
     var messageHand = messageHandler();
+    var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
+    var shortcut = await popoverDB.retrieve('shortcut');
+    var popupMode = await popoverDB.retrieve('popupMode');
+    var keyGroup = [];
+
+    initDOMEvents();
 
 
-    document.addEventListener('mouseup', onMouseUp);
-    wikilink.addEventListener('mouseenter', onMouseEnter);
-    wikilink.addEventListener('mouseleave', onMouseLeave);
 
 
 
     ////////////////// IMPLEMENTATION //////////////////
 
-    async function onMouseUp(ev) {
+    function initDOMEvents() {
+        popoverDB.watchChanges().then((oldV, newV) => {
+            shortcut = newV.shortcut;
+            popupMode = newV.popupMode;
+            isPopoverEnabled = newV.isEnabled;
+        });
 
+        if (popupMode === 'shortcut') {
+            document.addEventListener('keydown', onKeyDown)
+            document.addEventListener('keyup', onKeyUp)
+        }
+        if (popupMode === 'default') {
+            document.addEventListener('mouseup', onMouseUp);
+        }
+        wikilink.addEventListener('mouseenter', onMouseEnter);
+        wikilink.addEventListener('mouseleave', onMouseLeave);
+    }
+
+    function onKeyDown(ev) {
+        if (keyGroup.toString() === shortcut.toString()) {
+            startPopup();
+            keyGroup = [];
+        }
+        if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
+            keyGroup.push(ev.code);
+            onKeyDown(ev);            
+        }
+    }
+
+    function onKeyUp(ev) {
+        var index = keyGroup.indexOf(ev.code);
+        if (index !== -1) {
+            keyGroup.splice(index, 1);
+        }
+    }
+
+    function onMouseUp(ev) {
+        if (ev.which === 1 && !ppvAPI.isChild(ev.target.id)) {
+            startPopup();
+        }
+    }
+
+    async function startPopup() {
         var selection = window.getSelection();
-        var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
 
-        if (isPopoverEnabled && (ev.which === 1 && !selection.isCollapsed && !ppvAPI.isChild(ev.target.id) && !isEmptySelection(selection.toString()))) {
-
+        if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection.toString())) {
             searchSelection(selection).then(resp => {
 
                 let data = {
                     article: resp.article,
                     image: resp.image,
                     // dictionary: resp.definition,
-                    isList : true,
-                    list : resp.list
+                    isList: true,
+                    list: resp.list
                 };
 
                 ppvAPI.insertDictionary(resp.definition);
@@ -57,7 +99,9 @@
                 });
             });
 
-            ppvAPI.insertBlankData({isList: true});
+            ppvAPI.insertBlankData({
+                isList: true
+            });
             ppvAPI.displayIt(selection, cals[0], cals[1]);
         }
     }
@@ -69,7 +113,7 @@
     function onMouseLeave(ev) {
         document.body.style.overflow = 'auto';
         setTimeout(() => ppvAPI.hideIt(), 300);
-        
+
     }
 
     function showArticle(ev) {
@@ -78,22 +122,29 @@
         let id = ev.currentTarget.id;
         var termHandler = messageHand.request();
 
-        ppvAPI.insertBlankData({isList: false});
+        ppvAPI.insertBlankData({
+            isList: false
+        });
 
-        termHandler.getArticle({pageId: id, imageSize: 250, lang: lang}).then(async resp => {
-            
+        termHandler.getArticle({
+            pageId: id,
+            imageSize: 250,
+            lang: lang
+        }).then(async resp => {
+
             data.article = resp.body;
             data.image = resp.image;
             data.isList = false;
             ppvAPI.insertData(data);
-            
+
             let dictionary = await termHandler.wiktionary(resp.title);
             ppvAPI.insertDictionary(dictionary);
         });
-        
+
     }
+
     async function searchSelection(selectionObj) {
-        
+
         var selection = selectionObj.toString();
         var selContext = selectionObj.focusNode.data;
         var selectionHandler = messageHand.request(selection);

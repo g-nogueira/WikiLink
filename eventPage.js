@@ -41,23 +41,4 @@
 
     });
 
-    chrome.commands.onCommand.addListener(command => {
-        const commands = {
-            'toggle-popup': togglePopover,
-            'show-popup': showPopup
-        };
-
-        async function togglePopover() {
-            let isEnabled = await popoverDB.retrieve('isEnabled');
-            popoverDB.update('isEnabled', !isEnabled);
-        }
-
-        function showPopup() {
-
-        }
-
-        commands[command]();
-
-    });
-
 }());

@@ -4,7 +4,7 @@
  </p>
 
 
-Welcome to my little project: Wikilinks 🖖
+Welcome to my little project: [Wikilinks](https://chrome.google.com/webstore/detail/wikilink/dnjfeagdbicleejdgpjmjbbnfgdkdgpe) 🖖
 
 The main goal is to be a handy chrome extension to fast and efficiently search terms on Wikipedia.
 

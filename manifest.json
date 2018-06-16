@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "WikiLink",
   "description": "This extension alows the user to fast search wiki terms.",
-  "version": "0.9",
+  "version": "1.0.0",
   "omnibox": {
     "keyword": "wl:"
   },
@@ -44,18 +44,7 @@
       "run_at": "document_end"
     }
   ],
-
-  "commands": {
-    "toggle-popup": {
-      "suggested_key":{
-        "default": "Ctrl+Shift+W",
-        "mac": "Command+Shift+W"
-      },
-      "description": "Toggle Wikipedia popup"
-    }
-  },
   "permissions": [
-    "activeTab",
     "storage",
     "tabs",
     "contextMenus",

@@ -17,8 +17,9 @@ function popoverAPI(popover) {
         popover: popover,
         isChild: isPopoverChild,
         querySelector: querySelector,
-        querySelectorAll: querySelectorAll
-    }
+        querySelectorAll: querySelectorAll,
+        shortcut: getShortcut
+    };
 
     var popover = popover;
 
@@ -703,5 +704,9 @@ function popoverAPI(popover) {
         if (popover.querySelector(tabs[tabId]).hasAttribute('disabled')) {
             popover.querySelector(tabs[tabId]).removeAttribute('disabled');
         }
+    }
+
+    function getShortcut() {
+        
     }
 }

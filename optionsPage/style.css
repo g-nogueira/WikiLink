@@ -32,9 +32,24 @@ body{
 }
 
 .card--large{
-    min-width: 40%;
+    min-width: 400px;
     width: 40%;
     height: fit-content;
+}
+
+@media (max-width: 900px){
+    .card--large{
+        width: 70%;
+        height: fit-content;
+    }
+}
+
+@media (max-width: 700px){
+    .card--large{
+        min-width: 400px;
+        width: 95%;
+        height: fit-content;
+    }
 }
 
 .form > *{
