@@ -10,7 +10,6 @@
      * 4: listOfLanguagesToProcess: [1?, 2?, 3?, 4?]
      * 5: isPopoverEnabled : true || false
      */
-
     function initializeDB() {
         let wikilinkData = JSON.stringify({
             1: 'en',

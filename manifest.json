@@ -14,17 +14,17 @@
   "options_page": "optionsPage/index.html",
   "background": {
     "scripts": [
-      "repository/Http.js",
-      "repository/StorageManager.js",
-      "repository/WikiRepoBundle.js",
-      "repository/WiktRepo.js",
+      "background/Http.js",
+      "background/StorageManager.js",
+      "background/bundles/WikiAPIBundle.js",
+      "background/WiktionaryAPI.js",
       "eventPage.js"
     ],
     "persistence": true
   },
   "browser_action": {
     "default_locale": "en",
-    "default_popup": "browserAction/index.html",
+    "default_popup": "optionsPage/index.html",
     "default_title": "WikiLink Settings"
   },
   "content_scripts": [
@@ -33,8 +33,9 @@
         "<all_urls>"
       ],
       "js": [
-        "repository/StorageManager.js",
-        "repository/messageHandler.js",
+        "background/StorageManager.js",
+        "background/messageHandler.js",
+        "contentScripts/popoverDesigner.js",
         "contentScripts/popoverAPI.js",
         "contentScripts/index.js"
       ],
