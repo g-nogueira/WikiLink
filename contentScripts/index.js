@@ -48,9 +48,9 @@
 		wikilink.addEventListener('mouseenter', onMouseEnter);
 		wikilink.addEventListener('mouseleave', onMouseLeave);
 
-
 		function onMouseEnter(ev) {
-			document.body.style.overflow = 'hidden';
+			// document.body.onwheel = e => e.preventDefault();
+			// window.onwheel = onScroll;
 		}
 
 		function onMouseLeave(ev) {
@@ -104,6 +104,7 @@
 				});
 			});
 
+			document.body.style.overflow = 'hidden';
 			ppvAPI.isWaiting({ area: 'articles' });
 			ppvAPI.displayIt(wSelection, cals[0], cals[1]);
 		}
@@ -160,5 +161,4 @@
 			return false;
 		return true;
 	}
-
 }());

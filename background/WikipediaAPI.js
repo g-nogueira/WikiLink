@@ -117,20 +117,23 @@
 
 						let result = findKey(JSON.parse(response), 'pages');
 						let data = [];
-						result.forEach(el => {
-							if (el.terms ? !el.terms.description[0].includes(disambiguation[lang]) : true) {
-								data.push({
-									index: el.index,
-									pageId: el.pageid,
-									title: el.title,
-									body: el.terms ? el.terms.description[0] : '',
-									img: el.thumbnail ? el.thumbnail.source : '',
-									lang: lang
-								});
-							}
-						});
 
-						data.sort((elA, elB) => elA.index - elB.index);
+						if (Object.entries(result).length > 0) {
+							data = result.map(el => {
+								if (el.terms ? !el.terms.description[0].includes(disambiguation[lang]) : true) {
+									return {
+										index: el.index,
+										pageId: el.pageid,
+										title: el.title,
+										body: el.terms ? el.terms.description[0] : '',
+										img: el.thumbnail ? el.thumbnail.source : '',
+										lang: lang
+									};
+								}
+							});
+							
+							data.sort((elA, elB) => elA.index - elB.index);
+						}
 
 						resolve(data);
 					});

@@ -30,17 +30,34 @@ function popoverAPI(popover) {
 	 * @param {object} dictionary The definitions response returned from Wiktionary.
 	 */
 	function insertArticlesList({ list = [] }) {
+		if (list.length === 0) {
+			popover = setListError();
+		} else {
+			var wikiSect = popover.querySelector('.js-wikiSect');
+			var wikiList = document.createElement('div');
+			wikiList.id = 'wikiSearches';
+			wikiList.classList.add('js-wikiSearches');
 
+			let content = generateWikiList(list);
+
+			removeChildNodes(wikiSect);
+			wikiSect.classList.add('list');
+			wikiList.appendChild(content);
+			wikiSect.appendChild(wikiList);
+
+		}
+		return popover;
+	}
+
+	function setListError() {
 		var wikiSect = popover.querySelector('.js-wikiSect');
 		var wikiList = document.createElement('div');
 		wikiList.id = 'wikiSearches';
 		wikiList.classList.add('js-wikiSearches');
 
-		let content = generateWikiList(list);
-
 		removeChildNodes(wikiSect);
 		wikiSect.classList.add('list');
-		wikiList.appendChild(content);
+		wikiList.appendChild(document.createTextNode('Didn\'t find any info 😕'));
 		wikiSect.appendChild(wikiList);
 
 		return popover;
@@ -70,7 +87,6 @@ function popoverAPI(popover) {
 
 		var wikiSect = popover.querySelector('.js-wikiSect');
 		var wikiList = document.createElement('div');
-		var dictSect = removeChildNodes(popover.querySelector('.js-wiktSect'));
 		wikiList.id = 'wikiSearches';
 		wikiList.classList.add('js-wikiSearches');
 
@@ -96,11 +112,11 @@ function popoverAPI(popover) {
 
 					wikiSect.appendChild(content);
 				}
-            };
-            
-            areaToDisplay[area]();
+			};
+
+			areaToDisplay[area]();
 		} catch (error) {
-            
+
 		}
 		return popover;
 	}
@@ -228,7 +244,7 @@ function popoverAPI(popover) {
 
 
 			} catch (error) {
-				alert('Wikilinks error on line 590 - PopoverAPI.js');
+				// alert('Wikilinks error on line 590 - PopoverAPI.js');
 			}
 
 
