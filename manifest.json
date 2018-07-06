@@ -37,6 +37,7 @@
         "background/messageHandler.js",
         "contentScripts/popoverDesigner.js",
         "contentScripts/popoverAPI.js",
+        "background/Http.js",
         "contentScripts/index.js"
       ],
       "css": [

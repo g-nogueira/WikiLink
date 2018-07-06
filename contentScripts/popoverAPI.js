@@ -71,13 +71,23 @@ function popoverAPI(popover) {
 		wikiList.classList.add('js-wikiSearches');
 
 		let content = generateWikiInfo(article, image);
-
+		let imageElem = content.querySelector('.js-articleImage');
+		
 		let blankArticle = wikiSect.querySelector('.js-wikiArticle');
 		wikiSect.removeChild(blankArticle);
 		wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
 		wikiSect.classList.remove('list');
-		wikiSect.setAttribute('style', image.height >= 200 ? '' : `height: ${image.height}px;`);
+		
+		imageElem.onload = () => {
+			let img = imageElem;
+			let scale = 200 / img.naturalWidth;
 
+			img.style.height = `${img.naturalHeight * scale}px`;
+			img.style.width = `${img.naturalWidth * scale}px`;
+			// img.setAttribute('style', `height: ${scale > 1? img.naturalHeight : img.naturalHeight * scale}px;`)
+			// img.setAttribute('style', `width: ${scale > 1? img.naturalWidth : img.naturalWidth * scale}px;`)
+			wikiSect.setAttribute('style', `height: ${img.height}px;`);
+		};
 		wikiSect.appendChild(content);
 
 		return popover;
@@ -190,7 +200,7 @@ function popoverAPI(popover) {
 
 		let frag = `
                 <div id="wikiArticle" class="js-wikiArticle">
-                    <img id="popoverImage" class="popoverImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png'}">
+                    <img id="popoverImage" class="popoverImage js-articleImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png'}">
                     <p class="js-wikiInfo popoverText">${article}</p>
                 </div>
                 `;
