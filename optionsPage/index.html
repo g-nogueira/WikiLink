@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
     <link rel="stylesheet" href="../node_modules/material-design-lite/material.min.css">
+    <link rel="stylesheet" href="../node_modules/@material/snackbar/dist/mdc.snackbar.min.css">
     <link rel="stylesheet" href="style.css">
 
     <title>WikiLink Options</title>
@@ -33,7 +34,7 @@
                 </div>
 
                 <div class="form-section">
-                    <label for="popupMode">Popup Mode</label>
+                    <label for="popupMode">Popup Trigger</label>
                     <select class="js-popupMode" id="popupMode" title="Show popup immediately or on shortcut">
                         <option value="default">Immediately</option>
                         <option value="shortcut">On Shortcut</option>
@@ -68,9 +69,16 @@
                 </div>
             </form>
         </div>
+        <div class="mdc-snackbar mdc-snackbar--align-start" aria-live="assertive" aria-atomic="true" aria-hidden="true">
+            <div class="mdc-snackbar__text"></div>
+            <div class="mdc-snackbar__action-wrapper">
+                <button type="button" class="mdc-snackbar__action-button"></button>
+            </div>
+        </div>
     </main>
 
     <script src="../background/StorageManager.js"></script>
+    <script src="../node_modules/@material/snackbar/dist/mdc.snackbar.min.js"></script>
     <script src="index.js"></script>
 </body>
 
