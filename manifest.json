@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "WikiLink",
   "description": "The easiest way to be ̶l̶a̶z̶y̶ productive.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "icons": {
     "16": "public/images/icon01/01wikilink16.png",
     "48": "public/images/icon01/01wikilink48.png",
@@ -19,6 +19,9 @@
     ],
     "persistence": true
   },
+
+  "default_locale": "en",
+
   "browser_action": {
     "default_locale": "en",
     "default_popup": "optionsPage/index.html",
