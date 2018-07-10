@@ -1,11 +1,8 @@
 {
   "manifest_version": 2,
   "name": "WikiLink",
-  "description": "This extension alows the user to fast search wiki terms.",
-  "version": "1.0.0",
-  "omnibox": {
-    "keyword": "wl:"
-  },
+  "description": "The easiest way to be ̶l̶a̶z̶y̶ productive.",
+  "version": "1.1.0",
   "icons": {
     "16": "public/images/icon01/01wikilink16.png",
     "48": "public/images/icon01/01wikilink48.png",
@@ -49,7 +46,6 @@
   "permissions": [
     "storage",
     "tabs",
-    "contextMenus",
     "<all_urls>"
   ],
   "content_security_policy": "script-src 'self' https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js; object-src 'self'"

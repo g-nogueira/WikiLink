@@ -13,9 +13,9 @@
     function initializeDB() {
         let wikilinkData = JSON.stringify({
             1: 'en',
-            2: 'default',
-            3: '',
-            4: ['eng', 'esp', 'por'],
+            2: 'shortcut',
+            3: ["ShiftLeft","AltLeft"],
+            4: ["por","eng","esp","rus"],
             5: true
         });
 
@@ -28,16 +28,15 @@
             .catch(error => chrome.storage.sync.set({wldt: wikilinkData}, () => {}));
     }
 
-    chrome.contextMenus.create({
-        title: 'Search \"%s\" on Wikipedia',
-        contexts: ["selection"],
-        onclick: function (info) {
-            const url = `http://www.wikipedia.org/w/index.php?title=Special:Search&search=${info.selectionText}`;
-            chrome.tabs.create({
-                url: url
-            });
-        }
-
-    });
+    // chrome.contextMenus.create({
+    //     title: 'Search \"%s\" on Wikipedia',
+    //     contexts: ["selection"],
+    //     onclick: function (info) {
+    //         const url = `http://www.wikipedia.org/w/index.php?title=Special:Search&search=${info.selectionText}`;
+    //         chrome.tabs.create({
+    //             url: url
+    //         });
+    //     }
+    // });
 
 }());
