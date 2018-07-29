@@ -92,16 +92,15 @@
 
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
 
-			var wiktionaryPromise = wiktionaryAPI.getTermDefinitions({ term: selection.toString() });
-			var articlesListPromise = wikipediaAPI.getArticleList({ term: selection, range: selContext });
-
-			Promise.all([wiktionaryPromise, articlesListPromise]).then(resp => {
-				ppvAPI.insertDictionary(resp[0]);
-				ppvAPI.insertArticleList({ list: resp[1] });
-
+			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(resp => {
+				ppvAPI.insertArticleList({ list: resp });
 				ppvAPI.findElements('.js-item').forEach(article => {
 					article.addEventListener('click', showArticle);
 				});
+			});
+			
+			wiktionaryAPI.getTermDefinitions({ term: selection.toString() }).then(resp => {
+				ppvAPI.insertDictionary(resp);
 			});
 
 			document.body.style.overflow = 'hidden';

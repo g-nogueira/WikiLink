@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "WikiLink",
   "description": "The easiest way to be ̶l̶a̶z̶y̶ productive.",
-  "version": "1.1.1",
+  "version": "1.1.5",
   "icons": {
     "16": "public/images/icon01/01wikilink16.png",
     "48": "public/images/icon01/01wikilink48.png",
@@ -11,11 +11,11 @@
   "options_page": "optionsPage/index.html",
   "background": {
     "scripts": [
+      "eventPage.js",
       "background/Http.js",
       "background/StorageManager.js",
       "background/bundles/WikiAPIBundle.js",
-      "background/WiktionaryAPI.js",
-      "eventPage.js"
+      "background/WiktionaryAPI.js"
     ],
     "persistence": true
   },
@@ -33,11 +33,11 @@
         "<all_urls>"
       ],
       "js": [
+        "background/Http.js",
         "background/StorageManager.js",
         "background/messageHandler.js",
         "contentScripts/popoverDesigner.js",
         "contentScripts/popoverAPI.js",
-        "background/Http.js",
         "contentScripts/index.js"
       ],
       "css": [

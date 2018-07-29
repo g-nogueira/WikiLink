@@ -131,7 +131,7 @@
 									};
 								}
 							});
-							
+
 							data.sort((elA, elB) => elA.index - elB.index);
 						}
 
@@ -203,9 +203,9 @@
 	 * @param {string} extract The string to identify the language.
 	 */
 	function identifyLanguage(extract, langs = ['eng']) {
-		var testUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
-		var testDiacritics = /[\u00C0-\u00FF]/g;
-		var text = extract.match(testUTF8).toString();
+		// var testUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
+		// var testDiacritics = /[\u00C0-\u00FF]/g;
+		// var text = extract && extract.match(testUTF8).toString();
 		// var isDiacritic = testDiacritics.test(text);
 
 		var languages = {
@@ -219,9 +219,7 @@
 		if (langs.length === 1) {
 			return languages[langs[0]];
 		} else {
-			let francRes = franc(extract, {
-				whitelist: langs
-			});
+			let francRes = franc(extract, { whitelist: langs });
 			return languages[francRes] || 'en';
 		}
 	}
