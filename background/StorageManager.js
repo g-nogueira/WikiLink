@@ -64,6 +64,7 @@ class PopoverDB {
     }
 
     retrieve(property = '') {
+        var errorCount = 0;
         return new Promise(async (resolve, reject) => {
             var dataString = '';
             try {
@@ -75,7 +76,20 @@ class PopoverDB {
                 else resolve(data);
 
             } catch (error) {
-                reject(error);
+                errorCount += 1;
+                if (errorCount >= 2) {
+                    reject(error);
+                }
+                else {
+                    let wikilinkData = JSON.stringify({
+                        1: 'en',
+                        2: 'shortcut',
+                        3: ['ShiftLeft', 'AltLeft'],
+                        4: ['por', 'eng', 'esp', 'rus'],
+                        5: true
+                    });
+                    chrome.storage.sync.set({ wldt: wikilinkData }, () => this.retrieve(property));
+                }
             }
 
         });
