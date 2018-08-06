@@ -8,8 +8,8 @@ function popoverAPI(popover) {
 
 
 	return {
-		displayIt: insertPopover,
-		hideIt: hidePopover,
+		render: insertPopover,
+		hide: hidePopover,
 		insertArticleList: insertArticlesList,
 		insertArticle: insertArticle,
 		insertDictionary: insertDictionary,
@@ -38,7 +38,7 @@ function popoverAPI(popover) {
 			wikiList.id = 'wikiSearches';
 			wikiList.classList.add('js-wikiSearches');
 
-			let content = generateWikiList(list);
+			let content = parseWikiRawList(list);
 
 			removeChildNodes(wikiSect);
 			wikiSect.classList.add('list');
@@ -48,6 +48,7 @@ function popoverAPI(popover) {
 		}
 		return popover;
 	}
+
 
 	function setListError() {
 		var wikiSect = popover.querySelector('.js-wikiSect');
@@ -72,12 +73,12 @@ function popoverAPI(popover) {
 
 		let content = generateWikiInfo(article, image);
 		let imageElem = content.querySelector('.js-articleImage');
-		
+
 		let blankArticle = wikiSect.querySelector('.js-wikiArticle');
 		wikiSect.removeChild(blankArticle);
 		wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
 		wikiSect.classList.remove('list');
-		
+
 		imageElem.onload = () => {
 			let img = imageElem;
 			let scale = 200 / img.naturalWidth;
@@ -234,33 +235,31 @@ function popoverAPI(popover) {
 		return section;
 	}
 
-	function generateWikiList(wikiData) {
+	function parseWikiRawList(rawTags) {
 
 		var section = document.createDocumentFragment();
-		wikiData.forEach(el => {
-			try {
-				let frag = `
-                <div id="${el.pageId}" lang="${el.lang}" class="js-item item">
-                    <section class="image">
-                        <img src="${el.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
-                    </section>
-                    <section class="info">
-                        <div class="js-title title">${el.title}</div>
-                        <div class="description">${el.body}</div>
-                    </section>
-                </div>`;
 
-				section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
-
-
-			} catch (error) {
-				// alert('Wikilinks error on line 590 - PopoverAPI.js');
-			}
-
-
-		});
+		rawTags
+		.map(parseArticleTag)
+		.forEach(tag => section.appendChild(tag));
 
 		return section;
+	}
+
+
+	function parseArticleTag(rawTag) {
+		let frag = `
+                <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
+                    <section class="image">
+                        <img src="${rawTag.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
+                    </section>
+                    <section class="info">
+                        <div class="js-title title">${rawTag.title}</div>
+                        <div class="description">${rawTag.body}</div>
+                    </section>
+				</div>`;
+
+		return document.createRange().createContextualFragment(frag).firstElementChild;
 	}
 
 	function generateBlankWikiList() {

@@ -55,7 +55,7 @@
 
 		function onMouseLeave(ev) {
 			document.body.style.overflow = 'auto';
-			setTimeout(() => ppvAPI.hideIt(), 300);
+			setTimeout(() => ppvAPI.hide(), 300);
 		}
 
 		function onKeyDown(ev) {
@@ -106,7 +106,7 @@
 
 			document.body.style.overflow = 'hidden';
 			ppvAPI.isWaiting({ area: 'articles' });
-			ppvAPI.displayIt(wSelection, cals[0], cals[1]);
+			ppvAPI.render(wSelection, cals[0], cals[1]);
 		}
 	}
 
