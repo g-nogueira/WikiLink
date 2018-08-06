@@ -8,7 +8,7 @@ function popoverAPI(popover) {
 
 
 	return {
-		render: insertPopover,
+		render: appendPopover,
 		hide: hidePopover,
 		insertArticleList: insertArticlesList,
 		insertArticle: insertArticle,
@@ -30,7 +30,7 @@ function popoverAPI(popover) {
 	 * @param {object} dictionary The definitions response returned from Wiktionary.
 	 */
 	function insertArticlesList({ list = [] }) {
-		if (list.length === 0) {
+		if (list.length) {
 			popover = setListError();
 		} else {
 			var wikiSect = popover.querySelector('.js-wikiSect');
@@ -38,7 +38,7 @@ function popoverAPI(popover) {
 			wikiList.id = 'wikiSearches';
 			wikiList.classList.add('js-wikiSearches');
 
-			let content = parseWikiRawList(list);
+			let content = thumbnailsToHtml(list);
 
 			removeChildNodes(wikiSect);
 			wikiSect.classList.add('list');
@@ -48,7 +48,6 @@ function popoverAPI(popover) {
 		}
 		return popover;
 	}
-
 
 	function setListError() {
 		var wikiSect = popover.querySelector('.js-wikiSect');
@@ -71,7 +70,7 @@ function popoverAPI(popover) {
 		wikiList.id = 'wikiSearches';
 		wikiList.classList.add('js-wikiSearches');
 
-		let content = generateWikiInfo(article, image);
+		let content = wikipediaArticle(article, image);
 		let imageElem = content.querySelector('.js-articleImage');
 
 		let blankArticle = wikiSect.querySelector('.js-wikiArticle');
@@ -104,7 +103,7 @@ function popoverAPI(popover) {
 		try {
 			var areaToDisplay = {
 				articles: () => {
-					let content = generateBlankWikiList();
+					let content = blankThumbnails();
 					removeChildNodes(wikiSect);
 
 					wikiSect.classList.add('list');
@@ -115,7 +114,7 @@ function popoverAPI(popover) {
 
 				},
 				article: () => {
-					let content = generateBlankWikiInfo();
+					let content = blankArticle();
 
 					// removeChildNodes(wikiSect);
 					wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
@@ -136,7 +135,7 @@ function popoverAPI(popover) {
 		var dictSect = removeChildNodes(popover.querySelector('.js-wiktSect'));
 
 		if (data) {
-			var dictResult = generateDictionary(data);
+			var dictResult = wiktionaryArticle(data);
 			dictSect.appendChild(dictResult);
 			enableTab(2);
 		} else {
@@ -147,39 +146,42 @@ function popoverAPI(popover) {
 
 	/**
 	 * Generates the dictionary section based on given data argument.
-	 * @param {object} dictData The data returned from the wiktionary.
+	 * @param {object} article The data returned from the wiktionary.
 	 * @returns {DocumentFragment} The dictionary section to be inserted on the popover.
 	 */
-	function generateDictionary(dictData) {
+	function wiktionaryArticle(article) {
 
 		var section = document.createDocumentFragment();
 
-		Object.keys(dictData).forEach(el => { //foreach language
+		Object.entries(article).forEach(entrie => { //foreach language
 			try {
-				const key = dictData[el];
+				debugger;
+				var partsOfSpeech = entrie[1]
+				var language = entrie[1][0].language;
+
 				const span = document.createElement('span');
+				const ul = document.createElement('ul');
 
-				let ul = document.createElement('ul');
-				key.forEach(pOS => { //foreach partOfSpeach
-					let liFrag = `
-                    <li id="\`li${uniqueId()}\`">
-                        <span class="dict-partofspeach">${pOS.partOfSpeech}</span>
-                        <ol type="1" id="dictDefs" class="dict-definition">
-                        </ol>
-                    </li>`;
+				partsOfSpeech.forEach(group => {
 
-					liFrag = document.createRange().createContextualFragment(liFrag).firstElementChild;
+					const liPoS = document.createRange().createContextualFragment(`
+                    	<li id="\`li${uniqueId()}\`">
+                    	    <span class="dict-partofspeach">${group.partOfSpeech}</span>
+                    	    <ol type="1" id="dictDefs" class="dict-definition">
+                    	    </ol>
+                    	</li>`);
 
-					pOS.definitions.forEach(def => {
-						const liDef = document.createElement('li');
-						liDef.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
-						liFrag.querySelector('#dictDefs').appendChild(liDef);
+
+					group.definitions.forEach(def => {
+						const wordDefinition = document.createElement('li');
+						wordDefinition.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
+						liPoS.querySelector('#dictDefs').appendChild(wordDefinition);
 					});
 
 					span.id = `s${uniqueId()}`;
-					span.innerText = key[0].language;
+					span.innerText = language;
 					span.classList.add('dict-lang');
-					ul.appendChild(liFrag);
+					ul.appendChild(liPoS);
 					ul.classList.add('dict-lang--sections');
 					section.appendChild(span);
 					section.appendChild(ul);
@@ -196,58 +198,49 @@ function popoverAPI(popover) {
 		return section;
 	}
 
-	function generateWikiInfo(article, image) {
+	function wikipediaArticle(text, image) {
 		var section = document.createDocumentFragment();
-
 		let frag = `
                 <div id="wikiArticle" class="js-wikiArticle">
                     <img id="popoverImage" class="popoverImage js-articleImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png'}">
-                    <p class="js-wikiInfo popoverText">${article}</p>
+                    <p class="js-wikiInfo popoverText">${text}</p>
                 </div>
                 `;
 
-		section.appendChild(document.createRange().createContextualFragment(frag));
-
-		return section;
+		return section.appendChild(document.createRange().createContextualFragment(frag));
 	}
 
-	function generateBlankWikiInfo() {
+	function blankArticle(paragraphs = 8) {
 		var section = document.createDocumentFragment();
+		var paragraphs = "";
+
+
+		for (let p = 0; p < paragraphs; p++) {
+			paragraphs = paragraphs.concat('<div class="description--blank"></div>');
+		}
 
 		let frag = `
                 <div id="wikiArticle" class="js-wikiArticle wikiArticle--blank">
                     <div id="popoverImage" class="popoverImage--blank"></div>
-                    <section class="text--blank">
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                    </section>
+					<section class="text--blank">${paragraphs}</section>
                 </>
                 `;
 
-		section.appendChild(document.createRange().createContextualFragment(frag));
-
-		return section;
+		return section.appendChild(document.createRange().createContextualFragment(frag));
 	}
 
-	function parseWikiRawList(rawTags) {
+	function thumbnailsToHtml(thumbList) {
 
 		var section = document.createDocumentFragment();
 
-		rawTags
-		.map(parseArticleTag)
-		.forEach(tag => section.appendChild(tag));
+		thumbList
+			.map(thumbnailToHtml)
+			.forEach(thumbnail => section.appendChild(thumbnail));
 
 		return section;
 	}
 
-
-	function parseArticleTag(rawTag) {
+	function thumbnailToHtml(rawTag) {
 		let frag = `
                 <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
                     <section class="image">
@@ -262,11 +255,11 @@ function popoverAPI(popover) {
 		return document.createRange().createContextualFragment(frag).firstElementChild;
 	}
 
-	function generateBlankWikiList() {
+	function blankThumbnails(quantity = 6) {
 
 		var section = document.createDocumentFragment();
 
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < quantity; i++) {
 			let frag = `
                 <div class="js-item item item--blank">
                     <section class="image--blank"></section>
@@ -289,7 +282,7 @@ function popoverAPI(popover) {
 	 * @param {*} cal1 
 	 * @param {*} cal2 
 	 */
-	function insertPopover(selection, cal1, cal2) {
+	function appendPopover(selection, cal1, cal2) {
 		/**From:
 		 * https://stackoverflow.com/questions/39283159/how-to-keep-selection-but-also-press-button
 		 */
@@ -371,7 +364,7 @@ function popoverAPI(popover) {
 		}
 	}
 
-	function getShortcut() {
+	function parseWiktResponseToHtml(json) {}
 
-	}
+	function parseJsonArticleToHtml(json) {}
 }

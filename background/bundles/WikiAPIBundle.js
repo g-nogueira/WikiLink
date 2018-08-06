@@ -44,7 +44,7 @@
 					sentences: 3
 				};
 
-				http.get(`https:///${lang}.wikipedia.org/w/api.php?action=query&format=jsonfm&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}&redirects=1`)
+				http.get(`https:///${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}&redirects=1`)
 					.then(response => {
 						let pages = findKey(JSON.parse(response), 'pages');
 						let data = {
@@ -132,7 +132,7 @@
 									};
 								}
 							});
-							
+
 							data.sort((elA, elB) => elA.index - elB.index);
 						}
 
@@ -204,7 +204,7 @@
 	 * @param {string} extract The string to identify the language.
 	 */
 	function identifyLanguage(extract, langs = ['eng']) {
-		var testUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
+		// var testUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
 		// var testDiacritics = /[\u00C0-\u00FF]/g;
 		// var text = extract && extract.match(testUTF8).toString();
 		// var isDiacritic = testDiacritics.test(text);
@@ -220,9 +220,7 @@
 		if (langs.length === 1) {
 			return languages[langs[0]];
 		} else {
-			let francRes = franc(extract, {
-				whitelist: langs
-			});
+			let francRes = franc(extract, { whitelist: langs });
 			return languages[francRes] || 'en';
 		}
 	}
