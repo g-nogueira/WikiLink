@@ -30,7 +30,7 @@ function popoverAPI(popover) {
 	 * @param {object} dictionary The definitions response returned from Wiktionary.
 	 */
 	function insertArticlesList({ list = [] }) {
-		if (list.length) {
+		if (!list.length) {
 			popover = setListError();
 		} else {
 			var wikiSect = popover.querySelector('.js-wikiSect');
@@ -155,7 +155,6 @@ function popoverAPI(popover) {
 
 		Object.entries(article).forEach(entrie => { //foreach language
 			try {
-				debugger;
 				var partsOfSpeech = entrie[1]
 				var language = entrie[1][0].language;
 
@@ -207,15 +206,15 @@ function popoverAPI(popover) {
                 </div>
                 `;
 
-		return section.appendChild(document.createRange().createContextualFragment(frag));
+		return section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
 	}
 
-	function blankArticle(paragraphs = 8) {
+	function blankArticle(paragraphsCount = 8) {
 		var section = document.createDocumentFragment();
 		var paragraphs = "";
 
 
-		for (let p = 0; p < paragraphs; p++) {
+		for (let p = 0; p < paragraphsCount; p++) {
 			paragraphs = paragraphs.concat('<div class="description--blank"></div>');
 		}
 
@@ -226,7 +225,7 @@ function popoverAPI(popover) {
                 </>
                 `;
 
-		return section.appendChild(document.createRange().createContextualFragment(frag));
+		return section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
 	}
 
 	function thumbnailsToHtml(thumbList) {
