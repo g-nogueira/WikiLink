@@ -10,7 +10,7 @@ function popoverAPI(popover) {
 	return {
 		render: appendPopover,
 		hide: hidePopover,
-		insertArticleList: insertArticlesList,
+		insertArticleList: insertThumbnails,
 		insertArticle: insertArticle,
 		insertDictionary: insertDictionary,
 		isWaiting: insertBlankData,
@@ -20,30 +20,21 @@ function popoverAPI(popover) {
 	};
 
 
-	/**
-	 * 
-	 * @param {string} article The article string.
-	 * @param {object} image The image response returned from somewhere.
-	 * @param {string} image.source The url of the image.
-	 * @param {number} image.width The width of the image.
-	 * @param {number} image.height The height of the image.
-	 * @param {object} dictionary The definitions response returned from Wiktionary.
-	 */
-	function insertArticlesList({ list = [] }) {
-		if (!list.length) {
+	function insertThumbnails({ thumbList = [] }) {
+		if (!thumbList.length) {
 			popover = setListError();
 		} else {
 			var wikiSect = popover.querySelector('.js-wikiSect');
-			var wikiList = document.createElement('div');
-			wikiList.id = 'wikiSearches';
-			wikiList.classList.add('js-wikiSearches');
-
-			let content = thumbnailsToHtml(list);
-
-			removeChildNodes(wikiSect);
+			var thumbnails = thumbnailsToHtml(thumbList);
+			var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
+			var thumbWrapper = 
+			newFragment(`<div id="wikiSearches" class="js-wikiSearches"></div>`)
+			.firstElementChild
+			.appendChild(thumbnails);
+			
+			removeChildNodesFrom(wikiSect);
 			wikiSect.classList.add('list');
-			wikiList.appendChild(content);
-			wikiSect.appendChild(wikiList);
+			wikiSect.appendChild(thumbWrapper);
 
 		}
 		return popover;
@@ -55,7 +46,7 @@ function popoverAPI(popover) {
 		wikiList.id = 'wikiSearches';
 		wikiList.classList.add('js-wikiSearches');
 
-		removeChildNodes(wikiSect);
+		removeChildNodesFrom(wikiSect);
 		wikiSect.classList.add('list');
 		wikiList.appendChild(document.createTextNode('Didn\'t find any info 😕'));
 		wikiSect.appendChild(wikiList);
@@ -104,7 +95,7 @@ function popoverAPI(popover) {
 			var areaToDisplay = {
 				articles: () => {
 					let content = blankThumbnails();
-					removeChildNodes(wikiSect);
+					removeChildNodesFrom(wikiSect);
 
 					wikiSect.classList.add('list');
 					wikiSect.appendChild(wikiList);
@@ -132,7 +123,7 @@ function popoverAPI(popover) {
 	}
 
 	function insertDictionary(data) {
-		var dictSect = removeChildNodes(popover.querySelector('.js-wiktSect'));
+		var dictSect = removeChildNodesFrom(popover.querySelector('.js-wiktSect'));
 
 		if (data) {
 			var dictResult = wiktionaryArticle(data);
@@ -240,7 +231,7 @@ function popoverAPI(popover) {
 	}
 
 	function thumbnailToHtml(rawTag) {
-		let frag = `
+		var thumbnail = `
                 <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
                     <section class="image">
                         <img src="${rawTag.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
@@ -251,7 +242,7 @@ function popoverAPI(popover) {
                     </section>
 				</div>`;
 
-		return document.createRange().createContextualFragment(frag).firstElementChild;
+		return newFragment(thumbnail).firstElementChild;
 	}
 
 	function blankThumbnails(quantity = 6) {
@@ -313,7 +304,7 @@ function popoverAPI(popover) {
 		}
 	}
 
-	function removeChildNodes(element) {
+	function removeChildNodesFrom(element) {
 		while (element.hasChildNodes()) {
 			element.removeChild(element.lastChild);
 		}
@@ -363,6 +354,17 @@ function popoverAPI(popover) {
 		}
 	}
 
+	function newFragment(codeString = '<div></div>') {
+		return document.createRange().createContextualFragment(codeString);
+	}
+
+	function newElement(element = 'div', id = '', classList = []) {
+		var el = document.createElement(element);
+		el.id = id;
+		el.classList.add(classList);
+
+		return el;
+	}
 	function parseWiktResponseToHtml(json) {}
 
 	function parseJsonArticleToHtml(json) {}

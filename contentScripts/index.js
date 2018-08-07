@@ -93,7 +93,7 @@
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
 
 			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(resp => {
-				ppvAPI.insertArticleList({ list: resp });
+				ppvAPI.insertArticleList({ thumbList: resp });
 				ppvAPI.findElements('.js-item').forEach(article => {
 					article.addEventListener('click', showArticle);
 				});
