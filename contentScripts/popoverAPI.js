@@ -10,10 +10,10 @@ function popoverAPI(popover) {
 	return {
 		render: appendPopover,
 		hide: hidePopover,
-		insertArticleList: insertThumbnails,
+		insertThumbnails: insertThumbnails,
 		insertArticle: insertArticle,
 		insertDictionary: insertDictionary,
-		isWaiting: insertBlankData,
+		loading: insertBlankData,
 		isPopoverChild: isPopoverChild,
 		findElement: querySelector,
 		findElements: querySelectorAll,
@@ -25,31 +25,26 @@ function popoverAPI(popover) {
 			popover = setListError();
 		} else {
 			var wikiSect = popover.querySelector('.js-wikiSect');
-			var thumbnails = thumbnailsToHtml(thumbList);
 			var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
-			var thumbWrapper = 
-			newFragment(`<div id="wikiSearches" class="js-wikiSearches"></div>`)
-			.firstElementChild
-			.appendChild(thumbnails);
-			
-			removeChildNodesFrom(wikiSect);
-			wikiSect.classList.add('list');
-			wikiSect.appendChild(thumbWrapper);
+			var thumbnails = thumbnailsToHtml(thumbList);
 
+			removeChildrenFrom(wikiSect);
+			wikiSect.classList.add('list');
+			thumbWrapper.appendChild(thumbnails);
+			wikiSect.appendChild(thumbWrapper);
 		}
+
 		return popover;
 	}
 
 	function setListError() {
 		var wikiSect = popover.querySelector('.js-wikiSect');
-		var wikiList = document.createElement('div');
-		wikiList.id = 'wikiSearches';
-		wikiList.classList.add('js-wikiSearches');
+		var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
 
-		removeChildNodesFrom(wikiSect);
+		removeChildrenFrom(wikiSect);
 		wikiSect.classList.add('list');
-		wikiList.appendChild(document.createTextNode('Didn\'t find any info 😕'));
-		wikiSect.appendChild(wikiList);
+		thumbWrapper.appendChild(document.createTextNode(`Didn't find any info 😕`));
+		wikiSect.appendChild(thumbWrapper);
 
 		return popover;
 	}
@@ -57,16 +52,13 @@ function popoverAPI(popover) {
 	function insertArticle({ article, image }) {
 
 		var wikiSect = popover.querySelector('.js-wikiSect');
-		var wikiList = document.createElement('div');
-		wikiList.id = 'wikiSearches';
-		wikiList.classList.add('js-wikiSearches');
+		var blankArticle = wikiSect.querySelector('.js-wikiArticle');
+		var content = wikipediaArticle(article, image);
+		var imageElem = content.querySelector('.js-articleImage');
 
-		let content = wikipediaArticle(article, image);
-		let imageElem = content.querySelector('.js-articleImage');
 
-		let blankArticle = wikiSect.querySelector('.js-wikiArticle');
 		wikiSect.removeChild(blankArticle);
-		wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
+		wikiSect.querySelector('.js-wikiSearches').classList.add('hidden');
 		wikiSect.classList.remove('list');
 
 		imageElem.onload = () => {
@@ -87,34 +79,32 @@ function popoverAPI(popover) {
 	function insertBlankData({ area = '' }) {
 
 		var wikiSect = popover.querySelector('.js-wikiSect');
-		var wikiList = document.createElement('div');
-		wikiList.id = 'wikiSearches';
-		wikiList.classList.add('js-wikiSearches');
+		var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
 
+		var areaToDisplay = {
+			thumbnails: () => {
+
+				wikiSect.classList.add('list');
+				removeChildrenFrom(wikiSect);
+
+				thumbWrapper.appendChild(blankThumbnails());
+				wikiSect.appendChild(thumbheWrapper);
+			},
+			wiktionary: () => {
+
+			},
+			article: () => {
+				let content = blankArticle();
+
+				// removeChildNodes(wikiSect);
+				// wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
+				wikiSect.querySelector('.js-wikiSearches').classList.add('hidden');
+				wikiSect.classList.remove('list');
+
+				wikiSect.appendChild(content);
+			}
+		};
 		try {
-			var areaToDisplay = {
-				articles: () => {
-					let content = blankThumbnails();
-					removeChildNodesFrom(wikiSect);
-
-					wikiSect.classList.add('list');
-					wikiSect.appendChild(wikiList);
-					wikiList.appendChild(content);
-				},
-				wiktionary: () => {
-
-				},
-				article: () => {
-					let content = blankArticle();
-
-					// removeChildNodes(wikiSect);
-					wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
-					wikiSect.classList.remove('list');
-
-					wikiSect.appendChild(content);
-				}
-			};
-
 			areaToDisplay[area]();
 		} catch (error) {
 
@@ -123,7 +113,7 @@ function popoverAPI(popover) {
 	}
 
 	function insertDictionary(data) {
-		var dictSect = removeChildNodesFrom(popover.querySelector('.js-wiktSect'));
+		var dictSect = removeChildrenFrom(popover.querySelector('.js-wiktSect'));
 
 		if (data) {
 			var dictResult = wiktionaryArticle(data);
@@ -231,7 +221,8 @@ function popoverAPI(popover) {
 	}
 
 	function thumbnailToHtml(rawTag) {
-		var thumbnail = `
+		try {
+			var thumbnail = `
                 <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
                     <section class="image">
                         <img src="${rawTag.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
@@ -241,7 +232,9 @@ function popoverAPI(popover) {
                         <div class="description">${rawTag.body}</div>
                     </section>
 				</div>`;
-
+		} catch (error) {
+			var thumbnail = `<div></div>`;
+		}
 		return newFragment(thumbnail).firstElementChild;
 	}
 
@@ -304,7 +297,7 @@ function popoverAPI(popover) {
 		}
 	}
 
-	function removeChildNodesFrom(element) {
+	function removeChildrenFrom(element) {
 		while (element.hasChildNodes()) {
 			element.removeChild(element.lastChild);
 		}
@@ -360,11 +353,14 @@ function popoverAPI(popover) {
 
 	function newElement(element = 'div', id = '', classList = []) {
 		var el = document.createElement(element);
-		el.id = id;
-		el.classList.add(classList);
+		el.id = id || el.id;
+		if (classList.length) {
+			el.classList.add(classList);
+		}
 
 		return el;
 	}
+
 	function parseWiktResponseToHtml(json) {}
 
 	function parseJsonArticleToHtml(json) {}

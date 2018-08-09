@@ -93,42 +93,38 @@
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
 
 			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(resp => {
-				ppvAPI.insertArticleList({ thumbList: resp });
-				ppvAPI.findElements('.js-item').forEach(article => {
-					article.addEventListener('click', showArticle);
+				ppvAPI.insertThumbnails({ thumbList: resp });
+				ppvAPI.findElements('.js-item').forEach(thumbnail => {
+					thumbnail.addEventListener('click', loadArticle);
 				});
 			});
-			
-			wiktionaryAPI.getTermDefinitions({ term: selection.toString() }).then(resp => {
+
+			wiktionaryAPI.getDefinitions({ term: selection.toString() }).then(resp => {
 				ppvAPI.insertDictionary(resp);
 			});
 
 			document.body.style.overflow = 'hidden';
-			ppvAPI.isWaiting({ area: 'articles' });
+			ppvAPI.loading({ area: 'thumbnails' });
 			ppvAPI.render(wSelection, cals[0], cals[1]);
 		}
 	}
 
-	function showArticle(ev) {
-		let lang = ev.currentTarget.attributes.getNamedItem('lang').value;
-		let id = ev.currentTarget.id;
+	function loadArticle(ev) {
+		var lang = ev.currentTarget.attributes.getNamedItem('lang').value;
+		var id = ev.currentTarget.id;
 
-		ppvAPI.isWaiting({ area: 'article' });
+		ppvAPI.loading({ area: 'article' });
 
-		wikipediaAPI.getArticleById({ pageId: id, imageSize: 250, lang: lang }).then(async resp => {
-			ppvAPI.insertArticle({ article: resp.body, image: resp.image });
-
-			var dictionary = await wiktionaryAPI.getTermDefinitions({ term: resp.title });
+		wikipediaAPI.getArticleById({ pageId: id, imageSize: 250, lang }).then(async article => {
+			ppvAPI.insertArticle({ article: article.body, image: article.image });
+			let dictionary = await wiktionaryAPI.getDefinitions({ term: article.title });
 			ppvAPI.insertDictionary(dictionary);
 		});
-
 	}
 
 	function appendOnBody(popover) {
 		const div = document.createElement('div');
-		const shadow = div.attachShadow({
-			mode: 'open'
-		});
+		const shadow = div.attachShadow({mode: 'open'});
 
 		div.classList.add('js-wikilink');
 		shadow.appendChild(popover);

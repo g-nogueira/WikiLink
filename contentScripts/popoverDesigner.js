@@ -20,6 +20,7 @@ const popoverDesigner = {
 			elementString = `
             <div id="popover" class="js-popover">
                 <section id="navbar">
+                    <div class="tab js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSect"><=</div>
                     <div class="tab js-tab js-wikiTab" target=".js-wikiSect">Wikipedia</div>
                     <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
                 </section>
@@ -38,10 +39,16 @@ const popoverDesigner = {
 					const popover = ev.path.find(el => el.classList.contains('js-popover'));
 					const infoSections = popover.querySelectorAll('.js-infoSect');
 
-					if (!el.hasAttribute('disabled')) {
+					if (!el.hasAttribute('disabled') && !el.classList.contains('js-wikiNavigator')) {
 						infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
 						popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
-					}
+                    } 
+                    else if (el.classList.contains('js-wikiNavigator')) {
+                        infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
+                        popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
+                        popover.querySelector(el.attributes.getNamedItem('target').value).classList.add('list'); //Find the target info-section and shows it
+                        popover.querySelector('.js-wikiSearches').classList.remove('hidden');
+                    }
 				});
 			});
 

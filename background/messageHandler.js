@@ -61,7 +61,7 @@ function MessageHandler() {
     function wiktionaryAPI() {
 
 		return {
-			getTermDefinitions: getDefinitions
+			getDefinitions: getDefinitions
 		};
 
 
