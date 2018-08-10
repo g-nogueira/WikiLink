@@ -20,7 +20,7 @@ const popoverDesigner = {
 			elementString = `
             <div id="popover" class="js-popover">
                 <section id="navbar">
-                    <div class="tab js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSect"><=</div>
+                    <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSect"><=</div>
                     <div class="tab js-tab js-wikiTab" target=".js-wikiSect">Wikipedia</div>
                     <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
                 </section>
@@ -43,11 +43,15 @@ const popoverDesigner = {
 						infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
 						popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
                     } 
-                    else if (el.classList.contains('js-wikiNavigator')) {
+                    else if (el.classList.contains('js-wikiNavigator') && popover.querySelector('.js-wikiArticle')) {
+                        let article = popover.querySelector('.js-wikiArticle');
                         infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
                         popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
                         popover.querySelector(el.attributes.getNamedItem('target').value).classList.add('list'); //Find the target info-section and shows it
+                        popover.querySelector(el.attributes.getNamedItem('target').value).removeChild(article); //Find the target info-section and shows it
                         popover.querySelector('.js-wikiSearches').classList.remove('hidden');
+
+
                     }
 				});
 			});
@@ -56,6 +60,14 @@ const popoverDesigner = {
 
 			return popoverElement;
 		}
+
+        function removeChildrenFrom(element) {
+            while (element.hasChildNodes()) {
+                element.removeChild(element.lastChild);
+            }
+    
+            return element;
+        }
 
 		function insertBlankList(popover) {
 
@@ -211,6 +223,12 @@ const popoverDesigner = {
                 transition: background-color .3s;
             }
             
+            #navbar .tab.btn--navigator {
+            //     position: absolute;
+            //     left: 5%;
+                flex-grow: 0.25;
+            }
+
             #navbar .tab::selection {
                 background: rgba(0, 0, 0, 0) !important;
             }

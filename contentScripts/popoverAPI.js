@@ -95,9 +95,6 @@ function popoverAPI(popover) {
 			},
 			article: () => {
 				let content = blankArticle();
-
-				// removeChildNodes(wikiSect);
-				// wikiSect.querySelector('.js-wikiSearches').style.display = 'none';
 				wikiSect.querySelector('.js-wikiSearches').classList.add('hidden');
 				wikiSect.classList.remove('list');
 

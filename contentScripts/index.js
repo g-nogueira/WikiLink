@@ -84,7 +84,6 @@
 
 	}
 
-
 	function startProcess() {
 		var wSelection = window.getSelection();
 		var selection = wSelection.toString();
