@@ -7,6 +7,7 @@ const popoverDesigner = {
 
 		return getBasicShell();
 
+		// var popover = new DocumentFragment();
 		/**
 		 * Generates the popover main structure without any data.
 		 * @returns {DocumentFragment} A popover documentFragment.
@@ -14,7 +15,8 @@ const popoverDesigner = {
 		function getBasicShell() {
 			var elementString = '';
 			var styleString = getPopoverStyles();
-			var popoverElement = new DocumentFragment();
+			var popover = new DocumentFragment();
+
 			//<div class="popover-arrow"></div>
 
 			elementString = `
@@ -32,44 +34,64 @@ const popoverDesigner = {
                 </main>
             </div>`;
 
-			popoverElement = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
+			popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
 
-			popoverElement.querySelectorAll('.js-tab').forEach(el => {
-				el.addEventListener('click', ev => {
-					const popover = ev.path.find(el => el.classList.contains('js-popover'));
-					const infoSections = popover.querySelectorAll('.js-infoSect');
+			popover.querySelectorAll('.js-tab')
+				.forEach(tab => tab.addEventListener('click', displayPage));
 
-					if (!el.hasAttribute('disabled') && !el.classList.contains('js-wikiNavigator')) {
-						infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
-						popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
-                    } 
-                    else if (el.classList.contains('js-wikiNavigator') && popover.querySelector('.js-wikiArticle')) {
-                        let article = popover.querySelector('.js-wikiArticle');
-                        infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
-                        popover.querySelector(el.attributes.getNamedItem('target').value).classList.remove('hidden'); //Find the target info-section and shows it
-                        popover.querySelector(el.attributes.getNamedItem('target').value).classList.add('list'); //Find the target info-section and shows it
-                        popover.querySelector(el.attributes.getNamedItem('target').value).removeChild(article); //Find the target info-section and shows it
-                        popover.querySelector('.js-wikiSearches').classList.remove('hidden');
+			popover = insertBlankThumbs(popover);
 
-
-                    }
-				});
-			});
-
-			popoverElement = insertBlankList(popoverElement);
-
-			return popoverElement;
+			return popover;
 		}
 
-        function removeChildrenFrom(element) {
-            while (element.hasChildNodes()) {
-                element.removeChild(element.lastChild);
-            }
-    
-            return element;
-        }
+		function displayPage(ev) {
+            const popover =  ev.path.find(el => el.classList.contains('js-popover'))
+			const targetVal = ev.currentTarget.attributes.getNamedItem('target').value;
+			const infoSections = popover.querySelectorAll('.js-infoSect');
+			const article = popover.querySelector('.js-wikiArticle');
 
-		function insertBlankList(popover) {
+			if (!ev.currentTarget.hasAttribute('disabled') && !ev.currentTarget.classList.contains('js-wikiNavigator')) {
+
+				infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
+				popover.querySelector(targetVal).classList.remove('hidden'); //Find the target info-section and shows it
+
+			} else if (ev.currentTarget.classList.contains('js-wikiNavigator') && popover.querySelector('.js-wikiArticle')) {
+				infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
+				popover.querySelector(targetVal).classList.remove('hidden'); //Find the target info-section and shows it
+				popover.querySelector(targetVal).classList.add('list'); //Find the target info-section and shows it
+				popover.querySelector(targetVal).removeChild(article); //Find the target info-section and shows it
+				popover.querySelector('.js-wikiSearches').classList.remove('hidden');
+
+			}
+		}
+
+		function display(pageName) {
+
+			return {
+				thumbnails() {
+					hidePages();
+					popover.querySelector('.js-wikiSect').classList.remove('hidden');
+					popover.querySelector('.js-wikiSect').classList.add('list');
+					popover.querySelector('.js-wikiSect').removeChild(article);
+					popover.querySelector('.js-wikiSearches').classList.remove('hidden');
+				},
+
+				article() {
+					hidePages();
+					popover.querySelector('.js-wikiSec').classList.remove('hidden'); //Find the target info-section and shows it
+				},
+
+				wiktionary() {
+
+				}
+			}
+
+			function hidePages() {
+				popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
+			}
+		}
+
+		function insertBlankThumbs(popover) {
 
 			var wikiSect = popover.querySelector('.js-wikiSect');
 			var wikiList = document.createElement('div');
