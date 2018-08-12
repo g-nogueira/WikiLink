@@ -90,9 +90,11 @@
 		var selContext = wSelection.focusNode.data;
 
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
-
-			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(resp => {
-				ppvAPI.insertThumbnails({ thumbList: resp });
+			
+			ppvAPI.showPage('js-wikiSearches');
+			
+			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(thumbnails => {
+				ppvAPI.insertThumbnails({ thumbList: thumbnails });
 				ppvAPI.findElements('.js-item').forEach(thumbnail => {
 					thumbnail.addEventListener('click', loadArticle);
 				});

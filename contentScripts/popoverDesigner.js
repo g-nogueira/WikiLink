@@ -13,106 +13,57 @@ const popoverDesigner = {
 		 * @returns {DocumentFragment} A popover documentFragment.
 		 */
 		function getBasicShell() {
-			var elementString = '';
-			var styleString = getPopoverStyles();
+			var elementString = popoverContent();
+			var styleString = popoverStyles();
 			var popover = new DocumentFragment();
 
-			//<div class="popover-arrow"></div>
-
-			elementString = `
-            <div id="popover" class="js-popover">
-                <section id="navbar">
-                    <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSect"><=</div>
-                    <div class="tab js-tab js-wikiTab" target=".js-wikiSect">Wikipedia</div>
-                    <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
-                </section>
-                <main class="contentGroup">
-                    <section id="wikiSect" class="js-wikiSect js-infoSect info-section">
-                    </section>
-                    <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden">
-                    </section>
-                </main>
-            </div>`;
-
-			popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
-
-			popover.querySelectorAll('.js-tab')
+            popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
+            
+			popover
+				.querySelectorAll('.js-tab')
 				.forEach(tab => tab.addEventListener('click', displayPage));
 
 			popover = insertBlankThumbs(popover);
+
+            popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
+            popover.querySelector('.js-wikiSearches').classList.remove('hidden');
 
 			return popover;
 		}
 
 		function displayPage(ev) {
-            const popover =  ev.path.find(el => el.classList.contains('js-popover'))
+			const popover = ev.path.find(el => el.classList.contains('js-popover'))
 			const targetVal = ev.currentTarget.attributes.getNamedItem('target').value;
 			const infoSections = popover.querySelectorAll('.js-infoSect');
 			const article = popover.querySelector('.js-wikiArticle');
 
-			if (!ev.currentTarget.hasAttribute('disabled') && !ev.currentTarget.classList.contains('js-wikiNavigator')) {
-
+			if (!ev.currentTarget.hasAttribute('disabled')) {
+                debugger;
 				infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
 				popover.querySelector(targetVal).classList.remove('hidden'); //Find the target info-section and shows it
-
-			} else if (ev.currentTarget.classList.contains('js-wikiNavigator') && popover.querySelector('.js-wikiArticle')) {
-				infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
-				popover.querySelector(targetVal).classList.remove('hidden'); //Find the target info-section and shows it
-				popover.querySelector(targetVal).classList.add('list'); //Find the target info-section and shows it
-				popover.querySelector(targetVal).removeChild(article); //Find the target info-section and shows it
-				popover.querySelector('.js-wikiSearches').classList.remove('hidden');
-
-			}
-		}
-
-		function display(pageName) {
-
-			return {
-				thumbnails() {
-					hidePages();
-					popover.querySelector('.js-wikiSect').classList.remove('hidden');
-					popover.querySelector('.js-wikiSect').classList.add('list');
-					popover.querySelector('.js-wikiSect').removeChild(article);
-					popover.querySelector('.js-wikiSearches').classList.remove('hidden');
-				},
-
-				article() {
-					hidePages();
-					popover.querySelector('.js-wikiSec').classList.remove('hidden'); //Find the target info-section and shows it
-				},
-
-				wiktionary() {
-
-				}
-			}
-
-			function hidePages() {
-				popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
-			}
+            }
 		}
 
 		function insertBlankThumbs(popover) {
 
-			var wikiSect = popover.querySelector('.js-wikiSect');
-			var wikiList = document.createElement('div');
-			wikiList.id = 'wikiSearches';
-			wikiList.classList.add('js-wikiSearches');
+			var contentGroup = popover.querySelector('.js-contentGroup');
+			var thumbnails = document.createElement('section');
+			thumbnails.id = 'wikiSearches';
+			thumbnails.classList.add('js-wikiSearches', 'js-infoSect', 'info-section');
 
-			let content = generateBlankWikiList();
+            thumbnails.appendChild(blankThumbnails());
 
-			wikiSect.classList.add('list');
-
-			wikiSect.appendChild(content);
+			contentGroup.appendChild(thumbnails);
 
 			return popover;
 		}
 
-		function generateBlankWikiList() {
+		function blankThumbnails(quantity = 6) {
 
-			var section = document.createDocumentFragment();
+			var frag = document.createDocumentFragment();
 
-			for (let i = 0; i < 6; i++) {
-				let frag = `
+			for (let i = 0; i < quantity; i++) {
+				let fragString = `
                 <div class="js-item item item--blank">
                     <section class="image--blank"></section>
                     <section class="info">
@@ -122,13 +73,30 @@ const popoverDesigner = {
                     </section>
                 </div>`;
 
-				section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+				frag.appendChild(document.createRange().createContextualFragment(fragString).firstElementChild);
 			}
 
-			return section;
+			return frag;
 		}
 
-		function getPopoverStyles() {
+        function popoverContent() {
+            return `
+            <div id="popover" class="js-popover">
+                <section id="navbar">
+                    <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSearches"><=</div>
+                    <div class="tab js-tab js-wikiTab" target=".js-wikiSect">Wikipedia</div>
+                    <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
+                </section>
+                <main class="contentGroup js-contentGroup">
+                    <section id="wikiSect" class="js-wikiSect js-infoSect info-section">
+                    </section>
+                    <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden">
+                    </section>
+                </main>
+            </div>`;
+        }
+
+		function popoverStyles() {
 			return `
         <style>
             :root{
@@ -290,11 +258,11 @@ const popoverDesigner = {
                 align-self: flex-start;
             }
             
-            #wikiSect:not(.list){
+            #wikiSect{
                 margin-right: -1.3px;
             }
 
-            .info-section.list{
+            #wikiSearches{
                 overflow-x: hidden;
                 overflow-y: scroll;
             }
@@ -327,23 +295,23 @@ const popoverDesigner = {
             }
             
             .popoverText:hover::-webkit-scrollbar,
-            .info-section.list:hover::-webkit-scrollbar,
+            #wikiSearches:hover::-webkit-scrollbar,
             #dictionaryContent.info-section:hover::-webkit-scrollbar,
             .popoverText:hover::-webkit-scrollbar-thumb,
-            .info-section.list:hover::-webkit-scrollbar-thumb,
+            #wikiSearches:hover::-webkit-scrollbar-thumb,
             #dictionaryContent.info-section:hover::-webkit-scrollbar-thumb {
                 visibility: visible !important;
             }
             
             .popoverText::-webkit-scrollbar,
-            .info-section.list::-webkit-scrollbar,
+            #wikiSearches::-webkit-scrollbar,
             #dictionaryContent.info-section::-webkit-scrollbar {
                 visibility: hidden;
                 width: .2em !important;
             }
             
             .popoverText::-webkit-scrollbar-thumb,
-            .info-section.list::-webkit-scrollbar-thumb,
+            #wikiSearches::-webkit-scrollbar-thumb,
             #dictionaryContent.info-section::-webkit-scrollbar-thumb {
                 visibility: hidden;
                 background-color: darkgrey !important;
@@ -376,14 +344,16 @@ const popoverDesigner = {
                 right: -10px;
             }
 
-            #wikiSect.list,
-            #wikiSect #wikiSearches{
+            #wikiSect {
+                min-height: 200px;
+            }
+            #wikiSearches{
                 display: flex;
                 flex-direction: column;
                 min-height: 230px;
             }
             
-            #wikiSect.list .item{
+            #wikiSearches .item{
                 display: inline-flex;
                 align-items: center;
                 flex-shrink: 0;
@@ -392,12 +362,12 @@ const popoverDesigner = {
                 cursor: pointer;
             }
             
-            #wikiSect.list .title{
+            #wikiSearches .item .title{
                 font-weight: 500;
                 font-size: 100%;
             }
 
-            #wikiSect.list .title--blank{
+            #wikiSearches .item .title--blank{
                 width: 50%;
                 height: 15px;
                 margin-bottom: 10px;
@@ -405,13 +375,13 @@ const popoverDesigner = {
             }
             
             
-            #wikiSect.list .description{
+            #wikiSearches .item .description{
                 font-size: 90%;
                 line-height: initial;
                 color: rgba(0, 0, 0, 0.54);
             }
             
-            #wikiSect.list .description--blank{
+            #wikiSearches .item .description--blank{
                 width: 80%;
                 height: 10px;
                 margin-top: 2.5px;
@@ -424,17 +394,14 @@ const popoverDesigner = {
                 margin-top: 8px;
                 background-color: #fafafa;
             }
-            #wikiSect .description--blank:nth-child(3n+0){
-                width: 70%;
-            }
-
-            #wikiSect.list .description--blank:last-child,
+            #wikiSect .description--blank:nth-child(3n+0),
+            #wikiSearches .item .description--blank:last-child,
             #wikiSect .description--blank:last-child{
                 width: 70%;
             }
-            
-            #wikiSect.list .image,
-            #wikiSect.list .image--blank{
+
+            #wikiSearches .item .image,
+            #wikiSearches .item .image--blank{
                 width: 70px;
                 height: 70px;
                 display: flex;
@@ -444,7 +411,7 @@ const popoverDesigner = {
                 flex-shrink: 0;
             }
 
-            #wikiSect.list .image--blank{
+            #wikiSearches .item .image--blank{
                 background-color: #fafafa;
             }
 

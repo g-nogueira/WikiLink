@@ -17,34 +17,29 @@ function popoverAPI(popover) {
 		isPopoverChild: isPopoverChild,
 		findElement: querySelector,
 		findElements: querySelectorAll,
+		showPage: hidePages
 	};
 
 
 	function insertThumbnails({ thumbList = [] }) {
 		if (!thumbList.length) {
-			popover = setListError();
+			popover = setThumbsError();
 		} else {
-			var wikiSect = popover.querySelector('.js-wikiSect');
-			var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
+			var thumbsSect = popover.querySelector('.js-wikiSearches');
 			var thumbnails = thumbnailsToHtml(thumbList);
 
-			removeChildrenFrom(wikiSect);
-			wikiSect.classList.add('list');
-			thumbWrapper.appendChild(thumbnails);
-			wikiSect.appendChild(thumbWrapper);
+			removeChildrenFrom(thumbsSect);
+			thumbsSect.appendChild(thumbnails);
 		}
 
 		return popover;
 	}
 
-	function setListError() {
-		var wikiSect = popover.querySelector('.js-wikiSect');
+	function setThumbsError() {
 		var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
 
-		removeChildrenFrom(wikiSect);
-		wikiSect.classList.add('list');
+		removeChildrenFrom(thumbWrapper);
 		thumbWrapper.appendChild(document.createTextNode(`Didn't find any info 😕`));
-		wikiSect.appendChild(thumbWrapper);
 
 		return popover;
 	}
@@ -52,24 +47,28 @@ function popoverAPI(popover) {
 	function insertArticle({ article, image }) {
 
 		var wikiSect = popover.querySelector('.js-wikiSect');
-		var blankArticle = wikiSect.querySelector('.js-wikiArticle');
 		var content = wikipediaArticle(article, image);
 		var imageElem = content.querySelector('.js-articleImage');
 
 
-		wikiSect.removeChild(blankArticle);
-		wikiSect.querySelector('.js-wikiSearches').classList.add('hidden');
-		wikiSect.classList.remove('list');
+		hidePages('js-wikiSect');
+		removeChildrenFrom(wikiSect);
 
 		imageElem.onload = () => {
 			let img = imageElem;
-			let scale = 200 / img.naturalWidth;
+			let minHeight = 200;
+			let scale = minHeight / img.naturalWidth;
 
 			img.style.height = `${img.naturalHeight * scale}px`;
 			img.style.width = `${img.naturalWidth * scale}px`;
-			// img.setAttribute('style', `height: ${scale > 1? img.naturalHeight : img.naturalHeight * scale}px;`)
-			// img.setAttribute('style', `width: ${scale > 1? img.naturalWidth : img.naturalWidth * scale}px;`)
-			wikiSect.setAttribute('style', `height: ${img.height}px;`);
+			if (img.height < minHeight && content.clientHeight <= minHeight) {
+				wikiSect.setAttribute('style', `max-height: ${content.clientHeight}px;`);
+				wikiSect.setAttribute('style', `min-height: ${content.clientHeight}px;`);
+			}
+			else if (img.height >= 200){
+				wikiSect.setAttribute('style', `max-height: ${img.height}px;`);
+				wikiSect.setAttribute('style', `min-height: ${img.height}px;`);
+			}
 		};
 		wikiSect.appendChild(content);
 
@@ -79,26 +78,27 @@ function popoverAPI(popover) {
 	function insertBlankData({ area = '' }) {
 
 		var wikiSect = popover.querySelector('.js-wikiSect');
-		var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
+		// var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
+		var thumbWrapper = popover.querySelector('.js-wikiSearches');
 
 		var areaToDisplay = {
 			thumbnails: () => {
 
-				wikiSect.classList.add('list');
-				removeChildrenFrom(wikiSect);
-
+				removeChildrenFrom(thumbWrapper);
 				thumbWrapper.appendChild(blankThumbnails());
-				wikiSect.appendChild(thumbheWrapper);
+				// wikiSect.appendChild(thumbWrapper);
 			},
 			wiktionary: () => {
 
 			},
 			article: () => {
-				let content = blankArticle();
-				wikiSect.querySelector('.js-wikiSearches').classList.add('hidden');
-				wikiSect.classList.remove('list');
-
-				wikiSect.appendChild(content);
+				hidePages('js-wikiSect');
+				var previousArticle = wikiSect.querySelector('.js-wikiArticle');
+				if (previousArticle) {
+					wikiSect.removeChild(previousArticle)
+				}
+				wikiSect.appendChild(blankArticle());
+				// wikiSect.classList.remove('hidden');
 			}
 		};
 		try {
@@ -110,11 +110,11 @@ function popoverAPI(popover) {
 	}
 
 	function insertDictionary(data) {
-		var dictSect = removeChildrenFrom(popover.querySelector('.js-wiktSect'));
+		var wiktWrapper = popover.querySelector('.js-wiktSect');
+		var wiktWrapper = removeChildrenFrom(wiktWrapper);
 
 		if (data) {
-			var dictResult = wiktionaryArticle(data);
-			dictSect.appendChild(dictResult);
+			wiktWrapper.appendChild(wiktionaryArticle(data));
 			enableTab(2);
 		} else {
 			disableTab(2);
@@ -168,8 +168,6 @@ function popoverAPI(popover) {
 			} catch (error) {
 				disableTab(2);
 			}
-
-
 		});
 
 		return section;
@@ -358,7 +356,15 @@ function popoverAPI(popover) {
 		return el;
 	}
 
-	function parseWiktResponseToHtml(json) {}
+	function hidePages(exception) {
+		// var notHiddenSections = popover.querySelectorAll('.js-infoSect:not(.hidden)');
 
-	function parseJsonArticleToHtml(json) {}
+		popover.querySelectorAll('.js-infoSect').forEach(section => {
+			if (!section.classList.contains(exception)) {
+				section.classList.add('hidden');
+			} else {
+				section.classList.remove('hidden');
+			}
+		});
+	}
 }
