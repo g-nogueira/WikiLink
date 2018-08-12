@@ -29,5 +29,5 @@ After the user have selected an option (an article), it will be displayed there,
 ## Todo List
 - [ ] Wl00 - Fix shortcut detection bug.
 - [ ] Wl01 - Create a link to access the page of the Wikipedia's article.
-- [ ] Wl02 - Create a buttom for navigation between the article and the articles list.
+- [x] Wl02 - Create a buttom for navigation between the article and the articles list.
 - [ ] Wl03 - Black List sites.
