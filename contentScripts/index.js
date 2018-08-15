@@ -31,6 +31,7 @@
 
 	function initDOMEvents() {
 		var wikilink = document.body.querySelector('.js-wikilink');
+		var timeOutId = null;
 
 		popoverDB.watchChanges().then((oldV, newV) => {
 			shortcut = newV.shortcut;
@@ -41,10 +42,10 @@
 		if (popupMode === 'shortcut') {
 			document.addEventListener('keydown', onKeyDown)
 			document.addEventListener('keyup', onKeyUp)
-		}
-		if (popupMode === 'default') {
+		} else if (popupMode === 'default') {
 			document.addEventListener('mouseup', onMouseUp);
 		}
+
 		wikilink.addEventListener('mouseenter', onMouseEnter);
 		wikilink.addEventListener('mouseleave', onMouseLeave);
 
@@ -59,14 +60,19 @@
 		}
 
 		function onKeyDown(ev) {
+
+			clearTimeout(timeOutId);
+
 			if (keyGroup.toString() === shortcut.toString()) {
 				startProcess();
 				keyGroup = [];
-			}
-			if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
+			} else if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
 				keyGroup.push(ev.code);
 				onKeyDown(ev);
 			}
+			console.table(keyGroup);
+
+			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
 		}
 
 		function onKeyUp(ev) {
@@ -74,6 +80,7 @@
 			if (index !== -1) {
 				keyGroup.splice(index, 1);
 			}
+			console.table(keyGroup);
 		}
 
 		function onMouseUp(ev) {
@@ -100,7 +107,11 @@
 				});
 			});
 
+<<<<<<< HEAD
 			wiktionaryAPI.getDefinitions({ term: selection.toString() }).then(resp => {
+=======
+			wiktionaryAPI.getTermDefinitions({ term: selection.toString() }).then(resp => {
+>>>>>>> Wl00
 				ppvAPI.insertDictionary(resp);
 			});
 
