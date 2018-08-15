@@ -107,11 +107,7 @@
 				});
 			});
 
-<<<<<<< HEAD
 			wiktionaryAPI.getDefinitions({ term: selection.toString() }).then(resp => {
-=======
-			wiktionaryAPI.getTermDefinitions({ term: selection.toString() }).then(resp => {
->>>>>>> Wl00
 				ppvAPI.insertDictionary(resp);
 			});
 
