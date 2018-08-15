@@ -10,11 +10,11 @@ function popoverManager(popover) {
 		throw new ReferenceError('It is required to indicate a popover element for this function to work properly.')
 	}
 
-	popover.addEventListener('pagechange', ev => {
-		if (ev.detail.className !== 'js-wikiSect') {
-			hideElements('.js-wikiTab.js-wikiNavigator');
-		} else popover.querySelector('.js-wikiTab.js-wikiNavigator').classList.remove('hidden');
-	});
+	// popover.addEventListener('pagechange', ev => {
+	// 	if (ev.detail.className !== 'js-wikiSect') {
+	// 		hideElements('.js-wikiTab.js-wikiNavigator');
+	// 	} else popover.querySelector('.js-wikiTab.js-wikiNavigator').classList.remove('hidden');
+	// });
 
 	popover.addEventListener('tabselect', ev => {
 		if (!isDisabled(ev.detail.element))

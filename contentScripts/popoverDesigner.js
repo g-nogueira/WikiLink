@@ -62,10 +62,11 @@ const popoverDesigner = {
 		 * Generates the popover inner HTML.
 		 */
 		function popoverContent() {
-			return `
+            // <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+            return `
             <div id="popover" class="js-popover">
                 <section id="navbar">
-                    <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSearches"><=</div>
+                    <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>
                     <div class="tab js-tab js-wikiTab" target=".js-wikiSect">Wikipedia</div>
                     <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
                 </section>

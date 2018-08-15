@@ -66,7 +66,7 @@
 				keyGroup.push(ev.code);
 				pushKeyToList(ev);
 			}
-			console.table(keyGroup);
+			// console.table(keyGroup);
 
 			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
 		}
