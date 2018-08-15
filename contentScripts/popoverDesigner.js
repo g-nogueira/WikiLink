@@ -7,7 +7,6 @@ const popoverDesigner = {
 
 		return getBasicShell();
 
-		// var popover = new DocumentFragment();
 		/**
 		 * Generates the popover main structure without any data.
 		 * @returns {DocumentFragment} A popover documentFragment.
@@ -19,27 +18,12 @@ const popoverDesigner = {
 
 			popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
 
-			popover
-				.querySelectorAll('.js-tab')
-				.forEach(tab => tab.addEventListener('click', displayPage));
-
 			popover = insertThumbnails(popover, blankThumbnails());
 
 			popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
 			popover.querySelector('.js-wikiSearches').classList.remove('hidden');
 
 			return popover;
-		}
-
-		function displayPage(ev) {
-			const popover = ev.path.find(el => el.classList.contains('js-popover'))
-			const targetVal = ev.currentTarget.attributes.getNamedItem('target').value;
-			const infoSections = popover.querySelectorAll('.js-infoSect');
-
-			if (!ev.currentTarget.hasAttribute('disabled')) {
-				infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
-				popover.querySelector(targetVal).classList.remove('hidden'); //Find the target info-section and shows it
-			}
 		}
 
 		function insertThumbnails(popover, thumbnails) {
@@ -49,10 +33,10 @@ const popoverDesigner = {
 			return popover;
 		}
 
-        /**
-         * Generates blank thumbnails to use as placeholders while the content is being loaded.
-         * @param {number} quantity The quantity of thumbnails.
-         */
+		/**
+		 * Generates blank thumbnails to use as placeholders while the content is being loaded.
+		 * @param {number} quantity The quantity of thumbnails.
+		 */
 		function blankThumbnails(quantity = 6) {
 
 			var frag = document.createDocumentFragment();
@@ -74,9 +58,9 @@ const popoverDesigner = {
 			return frag;
 		}
 
-        /**
-         * Generates the popover inner HTML.
-         */
+		/**
+		 * Generates the popover inner HTML.
+		 */
 		function popoverContent() {
 			return `
             <div id="popover" class="js-popover">
@@ -96,9 +80,9 @@ const popoverDesigner = {
             </div>`;
 		}
 
-        /**
-         * Generates the popover CSS.
-         */
+		/**
+		 * Generates the popover CSS.
+		 */
 		function popoverStyles() {
 			return `
         <style>

@@ -48,8 +48,7 @@
 
 		wikilink.addEventListener('mouseleave', hidePopup);
 
-		popover.addEventListener('thumbclick', ev => console.log);
-		popover.addEventListener('pagechange', ev => console.log);
+		popover.addEventListener('thumbclick', ev => loadArticle({ language: ev.detail.article.lang, pageId: ev.detail.article.id }));
 
 		function hidePopup(ev) {
 			document.body.style.overflow = 'auto';
@@ -80,7 +79,7 @@
 		}
 
 		function showPopup(ev) {
-			if (ev.which === 1 && !ppvAPI.isPopoverChild(ev.target.id)) {
+			if (ev.which === 1 && !ppvAPI.isPopoverChild(`#${ev.target.id}`)) {
 				startProcess();
 			}
 		}
@@ -93,17 +92,12 @@
 		var selContext = wSelection.focusNode.data;
 
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
-			
-			ppvAPI.showPage('js-wikiSearches');
-			
-			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(thumbnails => {
-				ppvAPI.insertThumbnails({ thumbList: thumbnails });
-				ppvAPI.findElements('.js-item').forEach(thumbnail => {
-					thumbnail.addEventListener('click', loadArticle);
-				});
-			});
 
-			wiktionaryAPI.getDefinitions({ term: selection.toString() }).then(resp => {
+			ppvAPI.showPage('js-wikiSearches');
+
+			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(ppvAPI.insertThumbnails);
+
+			wiktionaryAPI.getDefinitions(selection.toString()).then(resp => {
 				ppvAPI.insertDictionary(resp);
 			});
 
@@ -113,22 +107,19 @@
 		}
 	}
 
-	function loadArticle(ev) {
-		var lang = ev.currentTarget.attributes.getNamedItem('lang').value;
-		var id = ev.currentTarget.id;
-
+	function loadArticle({ language, pageId }) {
 		ppvAPI.loading({ area: 'article' });
 
-		wikipediaAPI.getArticleById({ pageId: id, imageSize: 250, lang }).then(async article => {
+		wikipediaAPI.getArticleById({ pageId: pageId, imageSize: 250, language }).then(async article => {
 			ppvAPI.insertArticle({ article: article.body, image: article.image });
-			let dictionary = await wiktionaryAPI.getDefinitions({ term: article.title });
+			let dictionary = await wiktionaryAPI.getDefinitions(article.title);
 			ppvAPI.insertDictionary(dictionary);
 		});
 	}
 
 	function appendOnBody(popover) {
 		const div = document.createElement('div');
-		const shadow = div.attachShadow({mode: 'open'});
+		const shadow = div.attachShadow({ mode: 'open' });
 
 		div.classList.add('js-wikilink');
 		shadow.appendChild(popover);

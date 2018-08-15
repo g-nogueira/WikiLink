@@ -65,7 +65,7 @@ function MessageHandler() {
 		};
 
 
-		function getDefinitions({term = ''}) {
+		function getDefinitions(term = '') {
 			var params = {};
 			params.term = term;
 

@@ -4,11 +4,22 @@
  * A popover DOM management API
  * @param {Element} popover 
  */
-function popoverAPI(popover) {
+function popoverManager(popover) {
 
 	if (!popover) {
-		throw new ReferenceError('It is required to indicate a popover element for this function to work properly.' )
+		throw new ReferenceError('It is required to indicate a popover element for this function to work properly.')
 	}
+
+	popover.addEventListener('pagechange', ev => {
+		if (ev.detail.className !== 'js-wikiSect') {
+			hideElements('.js-wikiTab.js-wikiNavigator');
+		} else popover.querySelector('.js-wikiTab.js-wikiNavigator').classList.remove('hidden');
+	});
+
+	popover.addEventListener('tabselect', ev => {
+		if (!isDisabled(ev.detail.element))
+			showPage(ev.detail.target)
+	});
 
 	return {
 		render: appendPopover,
@@ -23,13 +34,12 @@ function popoverAPI(popover) {
 		showPage: showPage
 	};
 
-
-	function insertThumbnails({ thumbList = [] }) {
-		if (!thumbList.length) {
+	function insertThumbnails(thumbs = []) {
+		if (!thumbs.length) {
 			popover = setThumbsError();
 		} else {
 			const thumbsSect = popover.querySelector('.js-wikiSearches');
-			const thumbnails = thumbnailsToHtml(thumbList);
+			const thumbnails = thumbnailsToHtml(thumbs);
 
 			thumbnails.querySelectorAll('.js-item').forEach(thumbnail => {
 				if (thumbnail) {
@@ -84,8 +94,8 @@ function popoverAPI(popover) {
 				wikiSect.setAttribute('style', `max-height: ${content.clientHeight}px;`);
 				wikiSect.setAttribute('style', `min-height: ${content.clientHeight}px;`);
 			} else if (img.height >= 200) {
-				wikiSect.setAttribute('style', `max-height: ${img.height}px;`);
 				wikiSect.setAttribute('style', `min-height: ${img.height}px;`);
+				wikiSect.setAttribute('style', `max-height: ${img.height}px;`);
 			}
 		};
 		wikiSect.appendChild(content);
@@ -154,8 +164,8 @@ function popoverAPI(popover) {
 				var partsOfSpeech = entrie[1]
 				var language = entrie[1][0].language;
 
-				const span = document.createElement('span');
-				const ul = document.createElement('ul');
+				const span = newElement('span', `s${uniqueId()}`, ['dict-lang'])
+				const ul = newElement('ul', '', ['dict-lang--sections']);
 
 				partsOfSpeech.forEach(group => {
 
@@ -168,16 +178,13 @@ function popoverAPI(popover) {
 
 
 					group.definitions.forEach(def => {
-						const wordDefinition = document.createElement('li');
+						const wordDefinition = newElement('li');
 						wordDefinition.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
 						liPoS.querySelector('#dictDefs').appendChild(wordDefinition);
 					});
 
-					span.id = `s${uniqueId()}`;
 					span.innerText = language;
-					span.classList.add('dict-lang');
 					ul.appendChild(liPoS);
-					ul.classList.add('dict-lang--sections');
 					section.appendChild(span);
 					section.appendChild(ul);
 
@@ -308,6 +315,20 @@ function popoverAPI(popover) {
 		function calcLeftPos(selRange, rb1, rb2) {
 			return (selRange.left - rb2.left) * 100 / (rb1.left - rb2.left);
 		}
+
+		popover
+			.querySelectorAll('.js-tab')
+			.forEach(tab => tab.addEventListener('click', ev => {
+				const tabSelect = new CustomEvent('tabselect', {
+					bubbles: true,
+					detail: {
+						target: ev.currentTarget.attributes.getNamedItem('target').value,
+						element: ev.target
+					}
+				});
+
+				popover.dispatchEvent(tabSelect);
+			}));
 	}
 
 	function removeChildrenFrom(element) {
@@ -318,12 +339,8 @@ function popoverAPI(popover) {
 		return element;
 	}
 
-	function isPopoverChild(elemId) {
-		try {
-			return popover.querySelector(`#${elemId}`) === null ? false : true;
-		} catch (error) {
-			return false;
-		}
+	function isPopoverChild(elemIdentifier = '') {
+		return popover.querySelector(elemIdentifier) === null ? false : true;
 	}
 
 	function hidePopover() {
@@ -364,6 +381,18 @@ function popoverAPI(popover) {
 		return document.createRange().createContextualFragment(codeString);
 	}
 
+	function isDisabled(element) {
+		return element.hasAttribute('disabled');
+	}
+
+	function hideElements(identifier = '') {
+		if (typeof identifier === 'object') {
+			identifier.classList.add('hidden');
+		} else {
+			popover.querySelectorAll(identifier).forEach(el => el.classList.add('hidden'));
+		}
+	}
+
 	function newElement(element = 'div', id = '', classList = []) {
 		var el = document.createElement(element);
 		el.id = id || el.id;
@@ -375,22 +404,28 @@ function popoverAPI(popover) {
 	}
 
 	function showPage(pageClass) {
-
+		var className = pageClass.match(/([^.].+)/g)[0];
+		var previousPage;
 		popover.querySelectorAll('.js-infoSect').forEach(section => {
-			if (!section.classList.contains(pageClass)) {
-				section.classList.add('hidden');
+			if (!section.classList.contains('hidden'))
+				previousPage = section;
+			if (!section.classList.contains(className)) {
+				hideElements(section);
 			} else {
 				section.classList.remove('hidden');
 				const changePageEvent = new CustomEvent('pagechange', {
 					bubbles: true,
 					detail: {
-						className: pageClass,
-						element: section
+						className: className,
+						element: section,
+						previous: previousPage
 					}
 				});
 
 				popover.dispatchEvent(changePageEvent);
 			}
 		});
+
+
 	}
 }
