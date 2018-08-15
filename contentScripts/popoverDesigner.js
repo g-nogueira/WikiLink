@@ -38,7 +38,6 @@ const popoverDesigner = {
 			const article = popover.querySelector('.js-wikiArticle');
 
 			if (!ev.currentTarget.hasAttribute('disabled')) {
-                debugger;
 				infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
 				popover.querySelector(targetVal).classList.remove('hidden'); //Find the target info-section and shows it
             }

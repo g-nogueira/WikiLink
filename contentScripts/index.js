@@ -80,7 +80,6 @@
 			if (index !== -1) {
 				keyGroup.splice(index, 1);
 			}
-			console.table(keyGroup);
 		}
 
 		function onMouseUp(ev) {
