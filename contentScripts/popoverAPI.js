@@ -36,7 +36,7 @@ function popoverAPI(popover) {
 	}
 
 	function setThumbsError() {
-		var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
+		var thumbWrapper = popover.querySelector('.js-wikiSearches');
 
 		removeChildrenFrom(thumbWrapper);
 		thumbWrapper.appendChild(document.createTextNode(`Didn't find any info 😕`));
