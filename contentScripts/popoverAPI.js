@@ -6,6 +6,9 @@
  */
 function popoverAPI(popover) {
 
+	if (!popover) {
+		throw new ReferenceError('It is required to indicate a popover element for this function to work properly.' )
+	}
 
 	return {
 		render: appendPopover,
@@ -17,7 +20,7 @@ function popoverAPI(popover) {
 		isPopoverChild: isPopoverChild,
 		findElement: querySelector,
 		findElements: querySelectorAll,
-		showPage: hidePages
+		showPage: showPage
 	};
 
 
@@ -25,9 +28,25 @@ function popoverAPI(popover) {
 		if (!thumbList.length) {
 			popover = setThumbsError();
 		} else {
-			var thumbsSect = popover.querySelector('.js-wikiSearches');
-			var thumbnails = thumbnailsToHtml(thumbList);
+			const thumbsSect = popover.querySelector('.js-wikiSearches');
+			const thumbnails = thumbnailsToHtml(thumbList);
 
+			thumbnails.querySelectorAll('.js-item').forEach(thumbnail => {
+				if (thumbnail) {
+					let thumbnailClick = new CustomEvent('thumbclick', {
+						bubbles: true,
+						detail: {
+							article: {
+								id: thumbnail.id,
+								lang: thumbnail.attributes.getNamedItem('lang').value,
+								title: thumbnail.querySelector('.js-title').textContent
+							}
+						}
+					});
+
+					thumbnail.addEventListener('click', ev => popover.dispatchEvent(thumbnailClick));
+				}
+			})
 			removeChildrenFrom(thumbsSect);
 			thumbsSect.appendChild(thumbnails);
 		}
@@ -51,7 +70,7 @@ function popoverAPI(popover) {
 		var imageElem = content.querySelector('.js-articleImage');
 
 
-		hidePages('js-wikiSect');
+		showPage('js-wikiSect');
 		removeChildrenFrom(wikiSect);
 
 		imageElem.onload = () => {
@@ -64,8 +83,7 @@ function popoverAPI(popover) {
 			if (img.height < minHeight && content.clientHeight <= minHeight) {
 				wikiSect.setAttribute('style', `max-height: ${content.clientHeight}px;`);
 				wikiSect.setAttribute('style', `min-height: ${content.clientHeight}px;`);
-			}
-			else if (img.height >= 200){
+			} else if (img.height >= 200) {
 				wikiSect.setAttribute('style', `max-height: ${img.height}px;`);
 				wikiSect.setAttribute('style', `min-height: ${img.height}px;`);
 			}
@@ -92,7 +110,7 @@ function popoverAPI(popover) {
 
 			},
 			article: () => {
-				hidePages('js-wikiSect');
+				showPage('js-wikiSect');
 				var previousArticle = wikiSect.querySelector('.js-wikiArticle');
 				if (previousArticle) {
 					wikiSect.removeChild(previousArticle)
@@ -356,14 +374,22 @@ function popoverAPI(popover) {
 		return el;
 	}
 
-	function hidePages(exception) {
-		// var notHiddenSections = popover.querySelectorAll('.js-infoSect:not(.hidden)');
+	function showPage(pageClass) {
 
 		popover.querySelectorAll('.js-infoSect').forEach(section => {
-			if (!section.classList.contains(exception)) {
+			if (!section.classList.contains(pageClass)) {
 				section.classList.add('hidden');
 			} else {
 				section.classList.remove('hidden');
+				const changePageEvent = new CustomEvent('pagechange', {
+					bubbles: true,
+					detail: {
+						className: pageClass,
+						element: section
+					}
+				});
+
+				popover.dispatchEvent(changePageEvent);
 			}
 		});
 	}

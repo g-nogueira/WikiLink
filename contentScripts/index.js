@@ -14,7 +14,7 @@
 	"use strict";
 
 	var popover = appendOnBody(popoverDesigner.getBasicShell());
-	var ppvAPI = popoverAPI(popover);
+	var ppvAPI = popoverManager(popover);
 	var cals = insertCals();
 	var wikipediaAPI = wikiAPI;
 	var wiktionaryAPI = wiktAPI;
@@ -40,26 +40,23 @@
 		});
 
 		if (popupMode === 'shortcut') {
-			document.addEventListener('keydown', onKeyDown)
-			document.addEventListener('keyup', onKeyUp)
+			document.addEventListener('keydown', pushKeyToList)
+			document.addEventListener('keyup', removeKeyFromList)
 		} else if (popupMode === 'default') {
-			document.addEventListener('mouseup', onMouseUp);
+			document.addEventListener('mouseup', showPopup);
 		}
 
-		wikilink.addEventListener('mouseenter', onMouseEnter);
-		wikilink.addEventListener('mouseleave', onMouseLeave);
+		wikilink.addEventListener('mouseleave', hidePopup);
 
-		function onMouseEnter(ev) {
-			// document.body.onwheel = e => e.preventDefault();
-			// window.onwheel = onScroll;
-		}
+		popover.addEventListener('thumbclick', ev => console.log);
+		popover.addEventListener('pagechange', ev => console.log);
 
-		function onMouseLeave(ev) {
+		function hidePopup(ev) {
 			document.body.style.overflow = 'auto';
 			setTimeout(() => ppvAPI.hide(), 300);
 		}
 
-		function onKeyDown(ev) {
+		function pushKeyToList(ev) {
 
 			clearTimeout(timeOutId);
 
@@ -68,21 +65,21 @@
 				keyGroup = [];
 			} else if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
 				keyGroup.push(ev.code);
-				onKeyDown(ev);
+				pushKeyToList(ev);
 			}
 			console.table(keyGroup);
 
 			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
 		}
 
-		function onKeyUp(ev) {
+		function removeKeyFromList(ev) {
 			var index = keyGroup.indexOf(ev.code);
 			if (index !== -1) {
 				keyGroup.splice(index, 1);
 			}
 		}
 
-		function onMouseUp(ev) {
+		function showPopup(ev) {
 			if (ev.which === 1 && !ppvAPI.isPopoverChild(ev.target.id)) {
 				startProcess();
 			}

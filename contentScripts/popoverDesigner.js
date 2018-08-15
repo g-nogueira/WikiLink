@@ -17,16 +17,16 @@ const popoverDesigner = {
 			var styleString = popoverStyles();
 			var popover = new DocumentFragment();
 
-            popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
-            
+			popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
+
 			popover
 				.querySelectorAll('.js-tab')
 				.forEach(tab => tab.addEventListener('click', displayPage));
 
-			popover = insertBlankThumbs(popover);
+			popover = insertThumbnails(popover, blankThumbnails());
 
-            popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
-            popover.querySelector('.js-wikiSearches').classList.remove('hidden');
+			popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
+			popover.querySelector('.js-wikiSearches').classList.remove('hidden');
 
 			return popover;
 		}
@@ -35,28 +35,24 @@ const popoverDesigner = {
 			const popover = ev.path.find(el => el.classList.contains('js-popover'))
 			const targetVal = ev.currentTarget.attributes.getNamedItem('target').value;
 			const infoSections = popover.querySelectorAll('.js-infoSect');
-			const article = popover.querySelector('.js-wikiArticle');
 
 			if (!ev.currentTarget.hasAttribute('disabled')) {
 				infoSections.forEach(section => section.classList.add('hidden')); //Hides all pages/info-sections
 				popover.querySelector(targetVal).classList.remove('hidden'); //Find the target info-section and shows it
-            }
+			}
 		}
 
-		function insertBlankThumbs(popover) {
+		function insertThumbnails(popover, thumbnails) {
 
-			var contentGroup = popover.querySelector('.js-contentGroup');
-			var thumbnails = document.createElement('section');
-			thumbnails.id = 'wikiSearches';
-			thumbnails.classList.add('js-wikiSearches', 'js-infoSect', 'info-section');
-
-            thumbnails.appendChild(blankThumbnails());
-
-			contentGroup.appendChild(thumbnails);
+			popover.querySelector('.js-wikiSearches').appendChild(thumbnails);
 
 			return popover;
 		}
 
+        /**
+         * Generates blank thumbnails to use as placeholders while the content is being loaded.
+         * @param {number} quantity The quantity of thumbnails.
+         */
 		function blankThumbnails(quantity = 6) {
 
 			var frag = document.createDocumentFragment();
@@ -78,8 +74,11 @@ const popoverDesigner = {
 			return frag;
 		}
 
-        function popoverContent() {
-            return `
+        /**
+         * Generates the popover inner HTML.
+         */
+		function popoverContent() {
+			return `
             <div id="popover" class="js-popover">
                 <section id="navbar">
                     <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSearches"><=</div>
@@ -91,10 +90,15 @@ const popoverDesigner = {
                     </section>
                     <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden">
                     </section>
+                    <section id="wikiSearches" class="js-wikiSearches js-infoSect info-section">
+                    </section>
                 </main>
             </div>`;
-        }
+		}
 
+        /**
+         * Generates the popover CSS.
+         */
 		function popoverStyles() {
 			return `
         <style>
