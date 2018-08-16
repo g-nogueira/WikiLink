@@ -14,160 +14,142 @@
 	'use strict';
 
 	const franc = require('franc');
-	const fallbackLnag = await popoverDB.retrieve('fallbackLang');
+	const fallbackLang = await popoverDB.retrieve('fallbackLang');
 
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (message.receiver === 'wikirepo') {
 
-			wikiRepo[message.fnName](message.params)
-				.then(resp => sendResponse(resp))
-
+			wikiRepo[message.fnName](message.params).then(sendResponse)
 			return true; //It returns true to indicate that this is an async function.
 		}
 	});
 
-
 	class WikiRepo {
-		constructor() {}
-
-		searchByTerm({ range = '', term, nlpLangs }) {
-			return new Promise((resolve, reject) => {
-
-				range.trim();
-
-				var lang = identifyLanguage(range, nlpLangs);
-				lang = lang === 'und' ? fallbackLnag : lang;
-
-				var definitions = {
-					langLinks: true,
-					sentences: 3
-				};
-
-				http.get(`https:///${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}&redirects=1`)
-					.then(response => {
-						let pages = findKey(JSON.parse(response), 'pages');
-						let data = {
-							title: pages[0].title,
-							body: pages[0].extract,
-							image: pages[0].thumbnail,
-							url: pages[0].fullurl
-						}
-
-						resolve(data);
-
-					}).catch(error => {
-
-						let data = {
-							title: '',
-							body: `Couldn't get an article for the term "${term}".`,
-							image: {},
-							url: ''
-						}
-						resolve(data);
-					})
-			});
+		constructor() {
+			this.searchByTerm = searchByTerm;
+			this.searchById = searchById;
+			this.searchTermList = searchTermList;
+			this.searchImage = searchImage;
 		}
+	}
 
-		searchById({ pageId, lang = 'en', imageSize = 250 }) {
-			return new Promise((resolve, reject) => {
+	/**
+	 * Searches an image on Wikipedia by the given term and size.
+	 * @param {object} obj The object containing the parameters.
+	 * @param {String} obj.term The term to be searched on wikipedia.
+	 * @param {number} obj.size The height in pixel of the image;
+	 * @returns {Promise.<object>} Returns a promise that resolves to an object with url, width, and height properties.
+	 */
+	function searchImage({ term, size }) {
+		return new Promise(async resolve => {
+			http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`)
+				.then(response => {
 
-				var definitions = {
-					langLinks: true,
-					sentences: 3
-				};
+					let image = findKey('thumbnail', JSON.parse(response));
+					resolve(image);
 
-				http.get(`https://${lang==='rel'?'en':lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`)
-					.then(response => {
+				}).catch(error => {
 
-						let pages = findKey(JSON.parse(response), 'pages');
-						let data = {};
+					let imageInfo = {};
+					imageInfo.url = '';
+					imageInfo.width = 250;
+					imageInfo.height = 250;
 
-						data.title = pages[0].title || '';
-						data.body = pages[0].extract || '';
-						data.image = pages[0].thumbnail || {};
-						data.url = pages[0].fullurl || '';
+					resolve(imageInfo);
+				})
+		});
+	}
 
-						resolve(data);
+	function searchByTerm({ range = '', term, nlpLangs }) {
+		return new Promise(resolve => {
 
-					}).catch(error => {
+			var lang = identifyLanguage(range.trim(), nlpLangs);
+			var settings = {
+				langLinks: true,
+				sentences: 3
+			};
+			lang = lang === 'und' ? fallbackLang : lang;
+			var url = `https:///${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${settings.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${settings.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}&redirects=1`;
 
-						let data = {};
-						data.title = '';
-						data.body = `Couldn't get an article for the term "${term}".`;
-						data.image = {};
-						data.url = '';
+			http.get(url).then(response => {
 
-						resolve(data);
+				let pages = findKey('pages', JSON.parse(response));
+				let data = {
+					title: pages[0].title,
+					body: pages[0].extract,
+					image: pages[0].thumbnail,
+					url: pages[0].fullurl
+				}
+
+				resolve(data);
+
+			}).catch(error => resolve(null));
+
+		});
+	}
+
+	function searchById({ pageId, lang = 'en', imageSize = 250 }) {
+		return new Promise(resolve => {
+
+			var definitions = {
+				langLinks: true,
+				sentences: 3
+			};
+			var url = `https://${lang ==='rel'?'en' : lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks ? '%7Clanglinks' : ''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`;
+
+			http.get(url).then(response => {
+
+				let pages = findKey('pages', JSON.parse(response));
+				let data = {
+					title: pages[0].title || '',
+					text: pages[0].extract || '',
+					image: pages[0].thumbnail || {},
+					url: pages[0].fullurl || ''
+				}
+
+				resolve(data);
+
+			}).catch(error => resolve(null));
+		});
+	}
+
+	function searchTermList({ range = '', term, nlpLangs = ['eng'] }) {
+		return new Promise(resolve => {
+
+			var lang = identifyLanguage(range, nlpLangs);
+			var disambiguation = {
+				en: 'disambiguation',
+				pt: 'desambiguação',
+				es: 'desambiguación'
+			};
+			var url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`;
+
+			http.get(url).then(list => {
+				let pages = findKey('pages', JSON.parse(list));
+				let data = [];
+
+				if (Object.entries(pages).length > 0) {
+					data = pages.map(page => {
+						var isDesambiguation = page.terms && page.terms.description[0].includes(disambiguation[lang]);
+						if (!isDesambiguation) {
+							return {
+								index: page.index,
+								pageId: page.pageid,
+								title: page.title,
+								body: page.terms && page.terms.description[0] || '',
+								img: page.thumbnail && page.thumbnail.source || '',
+								lang: lang
+							};
+						}
 					});
+					data.sort((elA, elB) => elA.index - elB.index);
+				}
+
+				resolve(data);
 			});
-		}
-
-		searchTermList({ range = '', term, nlpLangs = ['eng'] }) {
-			return new Promise((resolve, reject) => {
-
-				var lang = identifyLanguage(range, nlpLangs);
-				var disambiguation = {
-					en: 'disambiguation',
-					pt: 'desambiguação',
-					es: 'desambiguación'
-				};
-
-				http.get(`https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`)
-					.then(response => {
-
-						let result = findKey(JSON.parse(response), 'pages');
-						let data = [];
-
-						if (Object.entries(result).length > 0) {
-							data = result.map(el => {
-								if (el.terms ? !el.terms.description[0].includes(disambiguation[lang]) : true) {
-									return {
-										index: el.index,
-										pageId: el.pageid,
-										title: el.title,
-										body: el.terms ? el.terms.description[0] : '',
-										img: el.thumbnail ? el.thumbnail.source : '',
-										lang: lang
-									};
-								}
-							});
-
-							data.sort((elA, elB) => elA.index - elB.index);
-						}
-
-						resolve(data);
-					});
-			});
+		});
 
 
-		}
-
-		/**
-		 * Searches an image on wikipedia by the given term.
-		 * @param {object} obj The object containing the parameters.
-		 * @param {String} obj.term The term to be searched on wikipedia.
-		 * @returns {Promise.<object>} Returns a promise that resolves to an object with url, width, and height properties.
-		 */
-		searchImage({ term, size }) {
-			return new Promise(async (resolve, reject) => {
-				http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`)
-					.then(response => {
-
-						let image = findKey(JSON.parse(response), 'thumbnail');
-
-						resolve(image);
-					}).catch(error => {
-
-						let imageInfo = {};
-						imageInfo.url = '';
-						imageInfo.width = 250;
-						imageInfo.height = 250;
-
-						resolve(imageInfo);
-						console.warn(`Couldn't get image for term "${term}"`);
-					})
-			});
-		}
 	}
 
 	/**
@@ -176,9 +158,7 @@
 	 * @param {string} key The key to deep search in the object.
 	 * 
 	 */
-	function findKey(obj, key) {
-
-		var objArg = obj;
+	function findKey(key, obj) {
 
 		return keyToFind(key);
 
@@ -189,7 +169,7 @@
 				if (el === key) {
 					result = obj[el];
 				} else if (typeof obj[el] == 'object') {
-					result = findKey(obj[el], key);
+					result = findKey(key, obj[el]);
 				}
 			});
 

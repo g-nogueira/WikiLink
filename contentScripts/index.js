@@ -13,8 +13,8 @@
 (async function() {
 	"use strict";
 
-	var popover = appendOnBody(popoverDesigner.getBasicShell());
-	var ppvAPI = popoverManager(popover);
+	var element = appendOnBody(popoverDesigner.getBasicShell());
+	var popover = popoverManager(element);
 	var cals = insertCals();
 	var wikipediaAPI = wikiAPI;
 	var wiktionaryAPI = wiktAPI;
@@ -37,25 +37,33 @@
 			shortcut = newV.shortcut;
 			popupMode = newV.popupMode;
 			isPopoverEnabled = newV.isEnabled;
+
+			changePopupMode(newV.popupMode);
 		});
 
-		if (popupMode === 'shortcut') {
-			document.addEventListener('keydown', pushKeyToList)
-			document.addEventListener('keyup', removeKeyFromList)
-		} else if (popupMode === 'default') {
-			document.addEventListener('mouseup', showPopup);
+		changePopupMode(popupMode);
+
+		wikilink.addEventListener('mouseleave', onMouseLeave);
+		popover.addEventListener('thumbclick', ev => loadArticle(ev.detail.article.lang, ev.detail.article.id))
+
+		function changePopupMode(popupMode) {
+			if (popupMode === 'shortcut') {
+				document.removeEventListener('mouseup', onMouseUp);
+				document.addEventListener('keydown', onKeyDown)
+				document.addEventListener('keyup', onKeyUp)
+			} else if (popupMode === 'default') {
+				document.addEventListener('mouseup', onMouseUp);
+				document.removeEventListener('keydown', onKeyDown)
+				document.removeEventListener('keyup', onKeyUp)
+			}
 		}
 
-		wikilink.addEventListener('mouseleave', hidePopup);
-
-		popover.addEventListener('thumbclick', ev => loadArticle({ language: ev.detail.article.lang, pageId: ev.detail.article.id }));
-
-		function hidePopup(ev) {
+		function onMouseLeave(ev) {
 			document.body.style.overflow = 'auto';
-			setTimeout(() => ppvAPI.hide(), 300);
+			popover.hide();
 		}
 
-		function pushKeyToList(ev) {
+		function onKeyDown(ev) {
 
 			clearTimeout(timeOutId);
 
@@ -64,22 +72,22 @@
 				keyGroup = [];
 			} else if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
 				keyGroup.push(ev.code);
-				pushKeyToList(ev);
+				onKeyDown(ev);
 			}
 			// console.table(keyGroup);
 
 			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
 		}
 
-		function removeKeyFromList(ev) {
+		function onKeyUp(ev) {
 			var index = keyGroup.indexOf(ev.code);
 			if (index !== -1) {
 				keyGroup.splice(index, 1);
 			}
 		}
 
-		function showPopup(ev) {
-			if (ev.which === 1 && !ppvAPI.isPopoverChild(`#${ev.target.id}`)) {
+		function onMouseUp(ev) {
+			if (ev.which === 1 && !popover.isChild(`#${ev.target.id}`)) {
 				startProcess();
 			}
 		}
@@ -93,27 +101,24 @@
 
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
 
-			ppvAPI.showPage('js-wikiSearches');
+			popover.showPage('js-wikiSearches');
 
-			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(ppvAPI.insertThumbnails);
-
-			wiktionaryAPI.getDefinitions(selection.toString()).then(resp => {
-				ppvAPI.insertDictionary(resp);
-			});
+			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(popover.setThumbnails);
+			wiktionaryAPI.getDefinitions(selection.toString()).then(popover.setDictionary);
 
 			document.body.style.overflow = 'hidden';
-			ppvAPI.loading({ area: 'thumbnails' });
-			ppvAPI.render(wSelection, cals[0], cals[1]);
+			popover.isLoading({ area: 'thumbnails' });
+			popover.render(wSelection, cals[0], cals[1]);
 		}
 	}
 
-	function loadArticle({ language, pageId }) {
-		ppvAPI.loading({ area: 'article' });
+	function loadArticle(language, pageId) {
+		popover.isLoading({ area: 'article' });
 
 		wikipediaAPI.getArticleById({ pageId: pageId, imageSize: 250, language }).then(async article => {
-			ppvAPI.insertArticle({ article: article.body, image: article.image });
+			popover.setArticle(article);
 			let dictionary = await wiktionaryAPI.getDefinitions(article.title);
-			ppvAPI.insertDictionary(dictionary);
+			popover.setDictionary(dictionary);
 		});
 	}
 
@@ -137,9 +142,7 @@
 
 
 		function createCal(id) {
-			var calString = `<div id="${id}">&nbsp;</div>`;
-			const cal = document.createRange().createContextualFragment(calString);
-			return cal;
+			return document.createRange().createContextualFragment(`<div id="${id}">&nbsp;</div>`);
 		}
 
 		return [document.querySelector('#cal1'), document.querySelector('#cal2')];
@@ -147,8 +150,6 @@
 
 	function isEmptySelection(selection) {
 		//If given argument is not empty neither is white spaces
-		if (selection && /\S/.test(selection))
-			return false;
-		return true;
+		return !(selection && /\S/.test(selection));
 	}
 }());
