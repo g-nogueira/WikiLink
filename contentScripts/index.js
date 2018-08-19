@@ -13,7 +13,7 @@
 (async function() {
 	"use strict";
 
-	var element = appendOnBody(popoverDesigner.getBasicShell());
+	var element = popoverDesigner.getBasicShell(appendOnBody);
 	var popover = popoverManager(element);
 	var cals = insertCals();
 	var wikipediaAPI = wikiAPI;

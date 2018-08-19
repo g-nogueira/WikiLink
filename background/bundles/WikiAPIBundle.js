@@ -18,7 +18,7 @@
 	const fallbackLang = await popoverDB.retrieve('fallbackLang');
 
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-		if (message.receiver === 'wikirepo') {
+		if (message.receiver.toLowerCase() === 'wikirepo') {
 
 			wikiRepo[message.fnName](message.params).then(sendResponse)
 			return true; //It returns true to indicate that this is an async function.
