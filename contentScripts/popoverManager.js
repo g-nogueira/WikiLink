@@ -6,14 +6,15 @@
  */
 function popoverManager(popover) {
 
-	if (!popover) {
-		throw new ReferenceError('It is required to indicate a popover element for this function to work properly.')
-	}
-
 	class Popover {
 		constructor(popover) {
+
+			if (!popover)
+				throw new ReferenceError('It is required to indicate a popover element for this function to work properly.')
+
 			if (!(popover instanceof HTMLElement))
 				throw new ReferenceError('The given popover is not a instance of HTMLElement');
+
 
 			this.HTMLElement = popover;
 			this.hide = hidePopover;
@@ -113,27 +114,23 @@ function popoverManager(popover) {
 	function insertBlankData({ area = '' }) {
 
 		var wikiSect = popover.querySelector('.js-wikiSect');
-		// var thumbWrapper = newElement('div', 'wikiSearches', ['js-wikiSearches']);
 		var thumbWrapper = popover.querySelector('.js-wikiSearches');
 
 		var areaToDisplay = {
 			thumbnails: () => {
-
 				removeChildrenFrom(thumbWrapper);
 				thumbWrapper.appendChild(blankThumbnails());
-				// wikiSect.appendChild(thumbWrapper);
 			},
 			wiktionary: () => {
 
 			},
 			article: () => {
 				showPage('js-wikiSect');
-				var previousArticle = wikiSect.querySelector('.js-wikiArticle');
-				if (previousArticle) {
+				const previousArticle = wikiSect.querySelector('.js-wikiArticle');
+				if (previousArticle)
 					wikiSect.removeChild(previousArticle)
-				}
+
 				wikiSect.appendChild(blankArticle());
-				// wikiSect.classList.remove('hidden');
 			}
 		};
 		try {
@@ -364,7 +361,7 @@ function popoverManager(popover) {
 		try {
 			return popover.querySelector(elemIdentifier) === null ? false : true;
 		} catch (error) {
-			return false;			
+			return false;
 		}
 	}
 
