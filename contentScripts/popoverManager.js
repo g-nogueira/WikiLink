@@ -6,6 +6,13 @@
  */
 function popoverManager(popover) {
 
+	/**
+	 * The Popover element used in the manager dispatches some events:
+	 * - "tabselect" - When the user clicks on a tab (List, Wikipedia, or Wiktionary),
+	 * - "popoverHidden" - When the popover has finished the hidden process,
+	 * - "thumbclick" - When the user selects an article of the search response list,
+	 * - "pagechange" - When a change of page occurs, independent of the trigger,
+	 */
 	class Popover {
 		constructor(popover) {
 
@@ -26,17 +33,10 @@ function popoverManager(popover) {
 			this.isChild = isPopoverChild;
 			this.showPage = showPage;
 			this.addEventListener = (eventName, eventListener) => popover.addEventListener(eventName, eventListener);
-
-			popover.addEventListener('tabselect', ev => {
-				if (!isDisabled(ev.detail.element))
-					showPage(ev.detail.target)
-			});
-
-			// popover.addEventListener('pagechange', ev => {
-			// 	if (ev.detail.className !== 'js-wikiSect') {
-			// 		hideElements('.js-wikiTab.js-wikiNavigator');
-			// 	} else popover.querySelector('.js-wikiTab.js-wikiNavigator').classList.remove('hidden');
-			// });
+			
+			popover.addEventListener('tabselect', ev => showPage(ev.detail.target, !isDisabled(ev.detail.element)));
+			popover.addEventListener('popoverHidden', ev => disableTab(1));
+			popover.addEventListener('thumbclick', ev => enableTab(1));
 		}
 	}
 
@@ -369,13 +369,27 @@ function popoverManager(popover) {
 	 * @param {number} delay The delay in milliseconds to hide the popover.
 	 */
 	function hidePopover(delay = 300) {
-		setTimeout(() => popover.classList.remove('popover--enabled'), delay);
+		setTimeout(() => {
+			popover.classList.remove('popover--enabled');
+			const hideEvent = new CustomEvent('popoverHidden', {
+				bubbles: true,
+				detail: {
+					element: popover,
+				}
+			});
+
+			popover.dispatchEvent(hideEvent);
+		}, delay);
 	}
 
 	function uniqueId() {
 		return (new Date()).getTime();
 	}
 
+	/**
+	 * Disables a tab by given id.
+	 * @param {number} tabId  The id of the tab to be disabled (1: Wikipedia | 2: Wiktionary).
+	 */
 	function disableTab(tabId) {
 		var tabs = {
 			1: '.js-wikiTab',
@@ -384,6 +398,10 @@ function popoverManager(popover) {
 		popover.querySelector(tabs[tabId]).setAttribute('disabled', 'disabled');;
 	}
 
+	/**
+	 * Enables a tab by given id.
+	 * @param {number} tabId  The id of the tab to be enabled (1: Wikipedia | 2: Wiktionary).
+	 */
 	function enableTab(tabId) {
 		var tabs = {
 			1: '.js-wikiTab',
@@ -420,27 +438,30 @@ function popoverManager(popover) {
 		return el;
 	}
 
-	function showPage(pageClass) {
-		var className = pageClass.match(/([^.].+)/g)[0];
-		var previousPage;
-		popover.querySelectorAll('.js-infoSect').forEach(section => {
-			if (!section.classList.contains('hidden'))
-				previousPage = section;
-			if (!section.classList.contains(className)) {
-				hideElements(section);
-			} else {
-				section.classList.remove('hidden');
-				const changePageEvent = new CustomEvent('pagechange', {
-					bubbles: true,
-					detail: {
-						className: className,
-						element: section,
-						previous: previousPage
-					}
-				});
+	function showPage(pageClass, condition = true) {
+		if (condition) {
+			var className = pageClass.match(/([^.].+)/g)[0];
+			var previousPage;
+			popover.querySelectorAll('.js-infoSect').forEach(section => {
+				if (!section.classList.contains('hidden'))
+					previousPage = section;
+				if (!section.classList.contains(className)) {
+					hideElements(section);
+				} else {
+					section.classList.remove('hidden');
+					const changePageEvent = new CustomEvent('pagechange', {
+						bubbles: true,
+						detail: {
+							className: className,
+							element: section,
+							previous: previousPage
+						}
+					});
 
-				popover.dispatchEvent(changePageEvent);
-			}
-		});
+					popover.dispatchEvent(changePageEvent);
+				}
+			});
+		}
+
 	}
 }

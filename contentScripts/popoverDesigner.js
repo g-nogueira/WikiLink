@@ -70,8 +70,8 @@ const popoverDesigner = {
 			return `
             <div id="popover" class="js-popover">
                 <section id="navbar">
-                    <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>
-                    <div class="tab js-tab js-wikiTab" target=".js-wikiSect">Wikipedia</div>
+                    <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>
+                    <div class="tab js-tab js-wikiTab" target=".js-wikiSect" disabled="disabled">Wikipedia</div>
                     <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
                 </section>
                 <main class="contentGroup js-contentGroup">
