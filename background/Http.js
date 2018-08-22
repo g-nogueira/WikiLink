@@ -1,16 +1,13 @@
 'use strict';
 
-/**************************************************
- *      This file contains the Http Class.  📬    *
- *                                                *
- * The Http Class executes the basic http methods *
- * methods (get, post, put, delete) and  RETURNS  *
- * a promise with the pending response            *
- *************************************************/
+/***************************************************
+ *      This file contains the Http Class.  📬     *
+ *                                                 *
+ * The Http Class executes the basic http methods  *
+ * (get, post, put, delete) and  RETURNS a promise *
+ * a promise with the pending response.            *
+ **************************************************/
 
- /**
-  * Executes the basics http methods (get, post, put, delete) and returns a promise.
-  */
 class Http {
     constructor() { }
 

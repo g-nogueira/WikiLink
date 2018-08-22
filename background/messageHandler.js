@@ -6,16 +6,16 @@ const wiktAPI = MessageHandler().wiktAPI();
 function MessageHandler() {
 
 	return {
-        wikiAPI: wikipediaAPI,
-        wiktAPI: wiktionaryAPI
+		wikiAPI: wikipediaAPI,
+		wiktAPI: wiktionaryAPI
 	}
 
 	function wikipediaAPI() {
 
 		return {
-			getArticleById:getByiD,
-            getArticleByTerm: getByTerm,
-            getArticleList: getList,
+			getArticleById: getByiD,
+			getArticleByTerm: getByTerm,
+			getArticleList: getList,
 			getImage: imgRequest,
 		};
 
@@ -30,7 +30,7 @@ function MessageHandler() {
 			return sendMessage('wikirepo', 'searchById', params);
 		}
 
-		async function getByTerm({term}) {
+		async function getByTerm({ term }) {
 
 			var params = {}
 			params.term = term;
@@ -48,7 +48,7 @@ function MessageHandler() {
 			return sendMessage('wikirepo', 'searchTermList', params);
 		}
 
-		function imgRequest({term, size}) {
+		function imgRequest({ term, size }) {
 			var params = {};
 			params.term = term;
 			params.size = size;
@@ -56,9 +56,9 @@ function MessageHandler() {
 			return sendMessage('wikirepo', 'searchImage', params);
 		}
 
-    }
-    
-    function wiktionaryAPI() {
+	}
+
+	function wiktionaryAPI() {
 
 		return {
 			getDefinitions: getDefinitions
@@ -72,7 +72,7 @@ function MessageHandler() {
 			return sendMessage('wiktrepo', 'searchTerm', params);
 		}
 
-    }
+	}
 
 	function sendMessage(receiver, functionName, params) {
 		var msg = {};

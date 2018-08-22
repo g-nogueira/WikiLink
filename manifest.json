@@ -37,7 +37,7 @@
         "background/StorageManager.js",
         "background/messageHandler.js",
         "contentScripts/popoverDesigner.js",
-        "contentScripts/popoverAPI.js",
+        "contentScripts/popoverManager.js",
         "contentScripts/index.js"
       ],
       "css": [

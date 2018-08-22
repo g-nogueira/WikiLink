@@ -3,15 +3,15 @@
 
 const popoverDesigner = {
 
-	getBasicShell: () => {
+	getBasicShell: callback => {
 
-		return getBasicShell();
+		return getBasicShell(callback);
 
 		/**
 		 * Generates the popover main structure without any data.
 		 * @returns {DocumentFragment} A popover documentFragment.
 		 */
-		function getBasicShell() {
+		function getBasicShell(callback) {
 			var elementString = popoverContent();
 			var styleString = popoverStyles();
 			var popover = new DocumentFragment();
@@ -23,7 +23,11 @@ const popoverDesigner = {
 			popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
 			popover.querySelector('.js-wikiSearches').classList.remove('hidden');
 
-			return popover;
+			if (!callback)
+				return popover;
+
+			return callback(popover);
+			// return popover;
 		}
 
 		function insertThumbnails(popover, thumbnails) {
@@ -62,8 +66,8 @@ const popoverDesigner = {
 		 * Generates the popover inner HTML.
 		 */
 		function popoverContent() {
-            // <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-            return `
+			// <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+			return `
             <div id="popover" class="js-popover">
                 <section id="navbar">
                     <div class="tab btn--navigator js-tab js-wikiTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>
