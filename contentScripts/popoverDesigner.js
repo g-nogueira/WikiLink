@@ -123,7 +123,7 @@ const popoverDesigner = {
                 display:block;
                 opacity: 1;
                 transform: translateY(0);
-                z-index: 10;
+                z-index: 100;
             }
             
             #cal1{
