@@ -143,7 +143,7 @@ const popoverDesigner = {
             }
             
             .contentGroup{
-                // min-height: 200px;
+                min-height: 200px;
                 min-width: 500px;
                 transition: height .3s cubic-bezier(0.4, 0.0, 1, 1);
             }
@@ -334,11 +334,14 @@ const popoverDesigner = {
                 min-height: 200px;
             }
             #wikiSearches{
+                position: absolute;
+                width: 50%;
+                background-color: #faffff;
                 overflow-x: hidden;
                 overflow-y: scroll;
                 display: flex;
                 flex-direction: column;
-                min-height: 230px;
+                // min-height: 230px;
             }
             
             #wikiSearches .item{

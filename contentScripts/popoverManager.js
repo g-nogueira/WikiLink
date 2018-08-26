@@ -35,20 +35,28 @@ function popoverManager(popover) {
 			this.showPage = showPage;
 			this.addEventListener = (eventName, eventListener) => popover.addEventListener(eventName, eventListener);
 
-			popover.addEventListener('tabselect', ev => showPage(ev.detail.target, !isDisabled(ev.detail.element)));
+			popover.addEventListener('tabselect', ev => {
+				if (ev.detail.element === this.sections.resultsTab || isChild(ev.detail.element, this.sections.resultsTab)) {
+					toggleHide(this.sections.listWrapper);
+				} else
+					showPage(ev.detail.target, !isDisabled(ev.detail.element));
+			});
 			popover.addEventListener('popoverHidden', ev => disableTab(1));
 			popover.addEventListener('thumbclick', ev => enableTab(1));
 			popover.addEventListener('pagechange', ev => {
-				if (ev.detail.element === this.sections.wikipediaWrapper || ev.detail.element === this.sections.wiktionaryWrapper) {
-					showElements(this.sections.resultsTab);
-				} else {
-					hideElements(this.sections.resultsTab);
-				}
+				// this.sections.listWrapper.style.maxHeight = `${this.sections.mainWrapper.clientHeight}px`;
+				this.sections.listWrapper.style.minHeight = `${this.sections.mainWrapper.clientHeight}px`;
+				this.sections.listWrapper.style.maxHeight = `${this.sections.mainWrapper.clientHeight}px`;
 			});
 		}
 	}
 
+	initEvents();
+
 	return new Popover(popover);
+
+
+	//////////////////////// IMPLEMENTATION ////////////////////////
 
 	function popoverElements() {
 		return {
@@ -58,6 +66,7 @@ function popoverManager(popover) {
 			listWrapper: popover.querySelector('.js-wikiSearches'),
 			wikipediaWrapper: popover.querySelector('.js-wikiSect'),
 			wiktionaryWrapper: popover.querySelector('.js-wiktSect'),
+			mainWrapper: popover.querySelector('.js-contentGroup'),
 		}
 	}
 
@@ -70,14 +79,11 @@ function popoverManager(popover) {
 
 			thumbnails.querySelectorAll('.js-item').forEach(thumbnail => {
 				if (thumbnail) {
-					let thumbnailClick = new CustomEvent('thumbclick', {
-						bubbles: true,
-						detail: {
-							article: {
-								id: thumbnail.id,
-								lang: thumbnail.attributes.getNamedItem('lang').value,
-								title: thumbnail.querySelector('.js-title').textContent
-							}
+					let thumbnailClick = newEvent('thumbclick', {
+						article: {
+							id: thumbnail.id,
+							lang: thumbnail.attributes.getNamedItem('lang').value,
+							title: thumbnail.querySelector('.js-title').textContent
 						}
 					});
 
@@ -353,19 +359,7 @@ function popoverManager(popover) {
 			return (selRange.left - rb2.left) * 100 / (rb1.left - rb2.left);
 		}
 
-		popover
-			.querySelectorAll('.js-tab')
-			.forEach(tab => tab.addEventListener('click', ev => {
-				const tabSelect = new CustomEvent('tabselect', {
-					bubbles: true,
-					detail: {
-						target: ev.currentTarget.attributes.getNamedItem('target').value,
-						element: ev.target
-					}
-				});
 
-				popover.dispatchEvent(tabSelect);
-			}));
 	}
 
 	function removeChildrenFrom(element) {
@@ -376,12 +370,74 @@ function popoverManager(popover) {
 		return element;
 	}
 
-	function isPopoverChild(elemIdentifier = '') {
+	/**
+	 * 
+	 * @param {HTMLElement | NodeList | string | string[] } element The uposed child element(s) or className(s).
+	 * @param {HTMLElement} parent 
+	 */
+	function isChild(element = '', parent) {
+
+		var isChild = false;
+
+		var elementType = {
+			[element instanceof HTMLElement]: () => {
+				isChild = parent.querySelector(`.${element.className.replace(' ', '.')}`) !== null;
+			},
+			[element instanceof NodeList]: () => {
+				element.forEach(el => {
+					isChild = isChild || parent.querySelector(`.${el.className.replace(' ', '.')}`) !== null;
+				});
+			},
+			[Array.isArray(element)]: () => {
+				element.forEach(className => {
+					isChild = isChild || parent.querySelector(className) !== null;
+				});
+			},
+			[typeof element === "string"]: () => {
+				isChild = parent.querySelector(element) !== null;
+			},
+		};
+
 		try {
-			return popover.querySelector(elemIdentifier) === null ? false : true;
+			elementType[true]();
 		} catch (error) {
-			return false;
+			isChild = false;			
 		}
+
+		return isChild;
+
+	}
+
+	function isPopoverChild(child = '') {
+
+		var isChild = false;
+
+		var elementType = {
+			[child instanceof HTMLElement]: () => {
+				isChild = popover.querySelector(`.${child.className.replace(' ', '.')}`) !== null;
+			},
+			[child instanceof NodeList]: () => {
+				child.forEach(el => {
+					isChild = isChild || popover.querySelector(`.${el.className.replace(' ', '.')}`) !== null;
+				});
+			},
+			[Array.isArray(child)]: () => {
+				child.forEach(className => {
+					isChild = isChild || popover.querySelector(className) !== null;
+				});
+			},
+			[typeof child === "string"]: () => {
+				isChild = popover.querySelector(child) !== null;
+			},
+		};
+
+		try {
+			elementType[true]();
+		} catch (error) {
+			isChild = false;			
+		}
+
+		return isChild;
 	}
 
 	/**
@@ -439,26 +495,52 @@ function popoverManager(popover) {
 		return element.hasAttribute('disabled');
 	}
 
-	function hideElements(identifier = '') {
+	function toggleHide(identifier = '') {
 
 		if (identifier instanceof HTMLElement) {
 
-			identifier.classList.add('hidden');
+			identifier.classList.toggle('hidden');
 
 		} else if (identifier instanceof NodeList) {
 
-			identifier.forEach(el => el.classList.add('hidden'));
+			identifier.forEach(el => el.classList.toggle('hidden'));
 
 		} else if (Array.isArray(identifier)) {
 
 			identifier.forEach(el => {
-				popover.querySelectorAll(el).forEach(el => el.classList.add('hidden'));
+				popover.querySelectorAll(el).forEach(el => el.classList.toggle('hidden'));
 			});
 
 		} else if (typeof identifier === "string") {
-			
-			popover.querySelectorAll(identifier).forEach(el => el.classList.add('hidden'));
+
+			popover.querySelectorAll(identifier).forEach(el => el.classList.toggle('hidden'));
 		}
+	}
+
+	function hideElements(identifier = '', condition = true) {
+
+		if (condition) {
+
+			if (identifier instanceof HTMLElement) {
+
+				identifier.classList.add('hidden');
+
+			} else if (identifier instanceof NodeList) {
+
+				identifier.forEach(el => el.classList.add('hidden'));
+
+			} else if (Array.isArray(identifier)) {
+
+				identifier.forEach(el => {
+					popover.querySelectorAll(el).forEach(el => el.classList.add('hidden'));
+				});
+
+			} else if (typeof identifier === "string") {
+
+				popover.querySelectorAll(identifier).forEach(el => el.classList.add('hidden'));
+			}
+		}
+
 	}
 
 	function showElements(identifier = '') {
@@ -497,26 +579,38 @@ function popoverManager(popover) {
 	function showPage(pageClass, condition = true) {
 		if (condition) {
 			var className = pageClass.match(/([^.].+)/g)[0];
-			var previousPage;
 			popover.querySelectorAll('.js-infoSect').forEach(section => {
-				if (!section.classList.contains('hidden'))
-					previousPage = section;
 				if (!section.classList.contains(className)) {
-					hideElements(section);
+					hideElements(section, !section.classList.contains('js-wikiSearches'));
 				} else {
-					section.classList.remove('hidden');
-					const changePageEvent = new CustomEvent('pagechange', {
-						bubbles: true,
-						detail: {
-							className: className,
-							element: section,
-							previous: previousPage
-						}
+					showElements(section);
+
+					const pageChange = newEvent('pagechange', {
+						className: className,
+						element: section,
 					});
 
-					popover.dispatchEvent(changePageEvent);
+					popover.dispatchEvent(pageChange);
 				}
 			});
 		}
+	}
+
+	function newEvent(name, details) {
+		return new CustomEvent(name, {
+			bubbles: true,
+			detail: details
+		});
+	}
+
+	function initEvents(params) {
+		popover.querySelectorAll('.js-tab').forEach(tab => tab.addEventListener('click', ev => {
+			const tabSelect = newEvent('tabselect', {
+				target: ev.currentTarget.attributes.getNamedItem('target').value,
+				element: ev.target
+			});
+
+			popover.dispatchEvent(tabSelect);
+		}));
 	}
 }
