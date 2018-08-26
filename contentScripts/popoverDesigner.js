@@ -75,12 +75,9 @@ const popoverDesigner = {
                     <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
                 </section>
                 <main class="contentGroup js-contentGroup">
-                    <section id="wikiSect" class="js-wikiSect js-infoSect info-section">
-                    </section>
-                    <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden">
-                    </section>
-                    <section id="wikiSearches" class="js-wikiSearches js-infoSect info-section">
-                    </section>
+                    <section id="wikiSearches" class="js-wikiSearches js-infoSect info-section"></section>
+                    <section id="wikiSect" class="js-wikiSect js-infoSect info-section"></section>
+                    <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden"></section>
                 </main>
             </div>`;
 		}
@@ -254,10 +251,7 @@ const popoverDesigner = {
                 margin-right: -1.3px;
             }
 
-            #wikiSearches{
-                overflow-x: hidden;
-                overflow-y: scroll;
-            }
+            
             
             .hidden{
                 display: none !important;
@@ -340,6 +334,8 @@ const popoverDesigner = {
                 min-height: 200px;
             }
             #wikiSearches{
+                overflow-x: hidden;
+                overflow-y: scroll;
                 display: flex;
                 flex-direction: column;
                 min-height: 230px;

@@ -20,10 +20,11 @@ function popoverManager(popover) {
 				throw new ReferenceError('It is required to indicate a popover element for this function to work properly.')
 
 			if (!(popover instanceof HTMLElement))
-				throw new ReferenceError('The given popover is not a instance of HTMLElement');
+				throw new TypeError('The given popover is not a instance of HTMLElement');
 
 
 			this.HTMLElement = popover;
+			this.sections = popoverElements();
 			this.hide = hidePopover;
 			this.render = appendPopover;
 			this.setThumbnails = insertThumbnails;
@@ -33,14 +34,32 @@ function popoverManager(popover) {
 			this.isChild = isPopoverChild;
 			this.showPage = showPage;
 			this.addEventListener = (eventName, eventListener) => popover.addEventListener(eventName, eventListener);
-			
+
 			popover.addEventListener('tabselect', ev => showPage(ev.detail.target, !isDisabled(ev.detail.element)));
 			popover.addEventListener('popoverHidden', ev => disableTab(1));
 			popover.addEventListener('thumbclick', ev => enableTab(1));
+			popover.addEventListener('pagechange', ev => {
+				if (ev.detail.element === this.sections.wikipediaWrapper || ev.detail.element === this.sections.wiktionaryWrapper) {
+					showElements(this.sections.resultsTab);
+				} else {
+					hideElements(this.sections.resultsTab);
+				}
+			});
 		}
 	}
 
 	return new Popover(popover);
+
+	function popoverElements() {
+		return {
+			resultsTab: popover.querySelector('.js-listTab'),
+			wikiTab: popover.querySelector('.js-wikiTab'),
+			wiktTab: popover.querySelector('.js-wiktTab'),
+			listWrapper: popover.querySelector('.js-wikiSearches'),
+			wikipediaWrapper: popover.querySelector('.js-wikiSect'),
+			wiktionaryWrapper: popover.querySelector('.js-wiktSect'),
+		}
+	}
 
 	function insertThumbnails(thumbs = []) {
 		if (!thumbs.length) {
@@ -421,11 +440,48 @@ function popoverManager(popover) {
 	}
 
 	function hideElements(identifier = '') {
-		if (typeof identifier === 'object') {
+
+		if (identifier instanceof HTMLElement) {
+
 			identifier.classList.add('hidden');
-		} else {
+
+		} else if (identifier instanceof NodeList) {
+
+			identifier.forEach(el => el.classList.add('hidden'));
+
+		} else if (Array.isArray(identifier)) {
+
+			identifier.forEach(el => {
+				popover.querySelectorAll(el).forEach(el => el.classList.add('hidden'));
+			});
+
+		} else if (typeof identifier === "string") {
+			
 			popover.querySelectorAll(identifier).forEach(el => el.classList.add('hidden'));
 		}
+	}
+
+	function showElements(identifier = '') {
+		if (identifier instanceof HTMLElement) {
+
+			identifier.classList.remove('hidden');
+
+		} else if (identifier instanceof NodeList) {
+
+			identifier.forEach(el => el.classList.remove('hidden'));
+
+		} else if (Array.isArray(identifier)) {
+
+			identifier.forEach(el => {
+				popover.querySelectorAll(el).forEach(el => el.classList.remove('hidden'));
+			});
+
+		} else if (typeof identifier === "string") {
+
+			popover.querySelectorAll(identifier).forEach(el => el.classList.remove('hidden'));
+		}
+
+
 	}
 
 	function newElement(element = 'div', id = '', classList = []) {
@@ -462,6 +518,5 @@ function popoverManager(popover) {
 				}
 			});
 		}
-
 	}
 }
