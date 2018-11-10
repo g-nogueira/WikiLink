@@ -22,6 +22,7 @@
 	var shortcut = await popoverDB.retrieve('shortcut');
 	var popupMode = await popoverDB.retrieve('popupMode');
 	var keyGroup = [];
+	var selectedString = '';
 
 	initDOMEvents();
 
@@ -33,7 +34,7 @@
 		var wikilink = document.body.querySelector('.js-wikilink');
 		var timeOutId = null;
 
-		popoverDB.watchChanges().then((oldV, newV) => {
+		popoverDB.onChanges((oldV, newV) => {
 			shortcut = newV.shortcut;
 			popupMode = newV.popupMode;
 			isPopoverEnabled = newV.isEnabled;
@@ -45,6 +46,7 @@
 
 		wikilink.addEventListener('mouseleave', onMouseLeave);
 		popover.addEventListener('thumbclick', ev => loadArticle(ev.detail.article.lang, ev.detail.article.id))
+		popover.addEventListener('tabselect', ev => loadWictionary(selectedString));
 
 		function changePopupMode(popupMode) {
 			if (popupMode === 'shortcut') {
@@ -102,7 +104,7 @@
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
 
 			popover.showPage('js-wikiSearches');
-
+			selectedString = selection;
 			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(popover.setThumbnails);
 			wiktionaryAPI.getDefinitions(selection.toString()).then(popover.setDictionary);
 
@@ -117,9 +119,14 @@
 
 		wikipediaAPI.getArticleById({ pageId: pageId, imageSize: 250, language }).then(async article => {
 			popover.setArticle(article);
-			let dictionary = await wiktionaryAPI.getDefinitions(article.title);
-			popover.setDictionary(dictionary);
+			loadWictionary(article.title);
 		});
+	}
+
+	function loadWictionary(title) {
+		wiktionaryAPI
+			.getDefinitions(title)
+			.then(resp => popover.setDictionary(resp))
 	}
 
 	function appendOnBody(popover) {

@@ -50,7 +50,7 @@
 		 * Initializes storage changes listeners.
 		 */
 		function storageEvents() {
-			popoverDB.watchChanges().then(syncValues);
+			popoverDB.onChanges(syncValues);
 		}
 
 		return {

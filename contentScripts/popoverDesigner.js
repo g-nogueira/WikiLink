@@ -70,7 +70,8 @@ const popoverDesigner = {
 			return `
             <div id="popover" class="js-popover">
                 <section id="navbar">
-                    <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>
+                    <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">👈</i></div>
+                    <!--<div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>-->
                     <div class="tab js-tab js-wikiTab" target=".js-wikiSect" disabled="disabled">Wikipedia</div>
                     <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
                 </section>
@@ -98,7 +99,7 @@ const popoverDesigner = {
             }
             #popover {
                 will-change: opacity;
-                position:absolute;
+                position:fixed;
                 opacity: 0;
                 background:#ffffff;
                 width:auto;
@@ -121,6 +122,7 @@ const popoverDesigner = {
                 opacity: 1;
                 transform: translateY(0);
                 z-index: 100;
+                position: absolute;
             }
             
             #cal1{

@@ -51,11 +51,10 @@
          */
         function storageEvents() {
 
-            popoverDB.watchChanges().then(popoverOnChange);
-
-            function popoverOnChange (oldV, newV) {
+            popoverDB.onChanges((oldV, newV) => {
+                debugger;
                 DOM('.js-popoverButton ').textContent = newV.isEnabled ? 'Disable Popup' : 'Enable Popup';
-            }
+            });
         }
 
         return { DOMEvents, elementsValues, storageEvents };
