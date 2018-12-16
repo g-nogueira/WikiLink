@@ -20,11 +20,11 @@ function MessageHandler() {
 		};
 
 
-		async function getByiD({ pageId, imageSize, lang }) {
+		async function getByiD({ pageId, imageSize, language }) {
 
 			var params = {};
 			params.pageId = pageId;
-			params.lang = lang;
+			params.lang = language;
 			params.imgSize = imageSize;
 
 			return sendMessage('wikirepo', 'searchById', params);
