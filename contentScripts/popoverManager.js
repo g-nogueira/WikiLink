@@ -100,12 +100,12 @@ function popoverManager(popover) {
 		return popover;
 	}
 
-	function insertArticle({ text, image }) {
+	function insertArticle({ title, text, image, url }) {
 
 		var wikiSect = popover.querySelector('.js-wikiSect');
-		var content = wikipediaArticle(text, image);
+		var content = wikipediaArticle({title, text, image, url});
 		var imageElem = content.querySelector('.js-articleImage');
-
+		
 
 		showPage('js-wikiSect');
 		removeChildrenFrom(wikiSect);
@@ -226,12 +226,20 @@ function popoverManager(popover) {
 	 * @param {string} text The article's text.
 	 * @returns {object} text The article's image data (source).
 	 */
-	function wikipediaArticle(text, image) {
+	function wikipediaArticle({title, text, image, url}) {
 		var section = document.createDocumentFragment();
+		var originalWord = (() => {
+			let loweredText = text.toLowerCase();
+			let loweredTitle = title.toLowerCase();
+			let startIndex = loweredText.search(loweredTitle);
+			let endIndex = startIndex + title.length;
+			return text.substring(startIndex, endIndex)
+		})();
+		var formatedText = text.replace(originalWord, `<strong><a href="${url}" target="_blank" rel="noopener noreferrer" title="View on Wikipedia">${originalWord}</a></strong>`)
 		let frag = `
                 <div id="wikiArticle" class="js-wikiArticle">
                     <img id="popoverImage" class="popoverImage js-articleImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png'}">
-                    <p class="js-wikiInfo popoverText">${text}</p>
+                    <p class="js-wikiInfo popoverText">${formatedText}</p>
                 </div>
                 `;
 
