@@ -1,52 +1,52 @@
-'use strict';
+(() => {
+	'use strict';
+
+	module.exports = {getBasicShell};
 
 
-const popoverDesigner = {
+	/**
+	 * Generates the popover main structure without any data.
+	 * @returns {DocumentFragment} A popover documentFragment.
+	 */
+	function getBasicShell(callback) {
+		var elementString = popoverContent();
+		var styleString = popoverStyles();
+		var popover = new DocumentFragment();
 
-	getBasicShell: callback => {
+		popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
 
-		return getBasicShell(callback);
+		popover = insertThumbnails(popover, blankThumbnails());
 
-		/**
-		 * Generates the popover main structure without any data.
-		 * @returns {DocumentFragment} A popover documentFragment.
-		 */
-		function getBasicShell(callback) {
-			var elementString = popoverContent();
-			var styleString = popoverStyles();
-			var popover = new DocumentFragment();
+		popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
+		popover.querySelector('.js-wikiSearches').classList.remove('hidden');
 
-			popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
-
-			popover = insertThumbnails(popover, blankThumbnails());
-
-			popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
-			popover.querySelector('.js-wikiSearches').classList.remove('hidden');
-
-			if (!callback)
-				return popover;
-
-			return callback(popover);
-			// return popover;
-		}
-
-		function insertThumbnails(popover, thumbnails) {
-
-			popover.querySelector('.js-wikiSearches').appendChild(thumbnails);
-
+		if (!callback)
 			return popover;
-		}
 
-		/**
-		 * Generates blank thumbnails to use as placeholders while the content is being loaded.
-		 * @param {number} quantity The quantity of thumbnails.
-		 */
-		function blankThumbnails(quantity = 6) {
+		return callback(popover);
+		// return popover;
+	}
 
-			var frag = document.createDocumentFragment();
 
-			for (let i = 0; i < quantity; i++) {
-				let fragString = `
+	////////////////// IMPLEMENTATION //////////////////
+
+	function insertThumbnails(popover, thumbnails) {
+
+		popover.querySelector('.js-wikiSearches').appendChild(thumbnails);
+
+		return popover;
+	}
+
+	/**
+	 * Generates blank thumbnails to use as placeholders while the content is being loaded.
+	 * @param {number} quantity The quantity of thumbnails.
+	 */
+	function blankThumbnails(quantity = 6) {
+
+		var frag = document.createDocumentFragment();
+
+		for (let i = 0; i < quantity; i++) {
+			let fragString = `
                 <div class="js-item item item--blank">
                     <section class="image--blank"></section>
                     <section class="info">
@@ -56,18 +56,18 @@ const popoverDesigner = {
                     </section>
                 </div>`;
 
-				frag.appendChild(document.createRange().createContextualFragment(fragString).firstElementChild);
-			}
-
-			return frag;
+			frag.appendChild(document.createRange().createContextualFragment(fragString).firstElementChild);
 		}
 
-		/**
-		 * Generates the popover inner HTML.
-		 */
-		function popoverContent() {
-			// <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-			return `
+		return frag;
+	}
+
+	/**
+	 * Generates the popover inner HTML.
+	 */
+	function popoverContent() {
+		// <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		return `
             <div id="popover" class="js-popover">
                 <section id="navbar">
                     <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">👈</i></div>
@@ -81,13 +81,13 @@ const popoverDesigner = {
                     <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden"></section>
                 </main>
             </div>`;
-		}
+	}
 
-		/**
-		 * Generates the popover CSS.
-		 */
-		function popoverStyles() {
-			return `
+	/**
+	 * Generates the popover CSS.
+	 */
+	function popoverStyles() {
+		return `
         <style>
             :root{
                 --primary-text-color: rgba(0, 0, 0, 0.87);
@@ -411,7 +411,6 @@ const popoverDesigner = {
             }
         </style>`;
 
-		}
 	}
 
-}
+})();

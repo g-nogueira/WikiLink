@@ -10,148 +10,145 @@
  * 
  ******************************************/
 
-(async () => {
+(() => {
 
 	'use strict';
 
 	const franc = require('franc');
-	const fallbackLang = await popoverDB.retrieve('fallbackLang');
+	const http = require('../utils/Http');
+	const popoverDB = require('../utils/StorageManager');
 
-	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-		if (message.receiver.toLowerCase() === 'wikirepo') {
-
-			wikiRepo[message.fnName](message.params).then(sendResponse)
-			return true; //It returns true to indicate that this is an async function.
-		}
-	});
 
 	class WikiRepo {
 		constructor() {
-			this.searchByTerm = searchByTerm;
-			this.searchById = searchById;
-			this.searchTermList = searchTermList;
-			this.searchImage = searchImage;
+			this.getArticleList = this.searchTermList;
+		}
+
+		/**
+		 * Searches an image on Wikipedia by the given term and size.
+		 * @param {object} obj The object containing the parameters.
+		 * @param {String} obj.term The term to be searched on wikipedia.
+		 * @param {number} obj.size The height in pixel of the image;
+		 * @returns {Promise.<object>} Returns a promise that resolves to an object with url, width, and height properties.
+		 */
+		searchImage({ term, size }) {
+			return new Promise(async resolve => {
+				http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`)
+					.then(response => {
+
+						let image = findKey('thumbnail', JSON.parse(response));
+						resolve(image);
+
+					}).catch(error => {
+
+						let imageInfo = {};
+						imageInfo.url = '';
+						imageInfo.width = 250;
+						imageInfo.height = 250;
+
+						resolve(imageInfo);
+					})
+			});
+		}
+
+		findByTerm({ range = '', term, nlpLangs }) {
+
+			return new Promise(resolve => {
+				const fallbackLang = (async () => await popoverDB.retrieve('fallbackLang'));
+
+				var lang = identifyLanguage(range.trim(), nlpLangs);
+				var settings = {
+					langLinks: true,
+					sentences: 3
+				};
+				lang = lang === 'und' ? fallbackLang : lang;
+				var url = `https:///${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${settings.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${settings.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}&redirects=1`;
+
+				http.get(url).then(response => {
+
+					let pages = findKey('pages', JSON.parse(response));
+					let data = {
+						title: pages[0].title,
+						body: pages[0].extract,
+						image: pages[0].thumbnail,
+						url: pages[0].fullurl
+					}
+
+					resolve(data);
+
+				}).catch(error => resolve(null));
+
+			});
+		}
+
+		findById({ pageId, lang: language = 'en', imageSize = 250 }) {
+			return new Promise(resolve => {
+
+				var definitions = {
+					langLinks: true,
+					sentences: 3
+				};
+				var url = `https://${language ==='rel'?'en' : language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks ? '%7Clanglinks' : ''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`;
+
+				http.get(url).then(response => {
+
+					let pages = findKey('pages', JSON.parse(response));
+					let data = {
+						title: pages[0].title || '',
+						text: pages[0].extract || '',
+						image: pages[0].thumbnail || {},
+						url: pages[0].fullurl || ''
+					}
+
+					resolve(data);
+
+				}).catch(error => resolve(null));
+			});
+		}
+
+		searchTermList({ range = '', term }) {
+			return new Promise(async resolve => {
+
+				var nlpWhiteList = await popoverDB.retrieve('nlpLangs') || ['eng'];
+				var lang = identifyLanguage(range, nlpWhiteList);
+
+				var disambiguation = {
+					en: 'disambiguation',
+					pt: 'desambiguação',
+					es: 'desambiguación'
+				};
+				var url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`;
+
+				http.get(url).then(list => {
+					let pages = findKey('pages', JSON.parse(list));
+					let data = [];
+
+					if (Object.entries(pages).length > 0) {
+						data = pages.map(page => {
+							var isDesambiguation = page.terms && page.terms.description[0].includes(disambiguation[lang]);
+							if (!isDesambiguation) {
+								return {
+									index: page.index,
+									pageId: page.pageid,
+									title: page.title,
+									body: page.terms && page.terms.description[0] || '',
+									img: page.thumbnail && page.thumbnail.source || '',
+									lang: lang
+								};
+							}
+						});
+						data.sort((elA, elB) => elA.index - elB.index);
+					}
+
+					resolve(data);
+				});
+			});
+
+
 		}
 	}
 
-	/**
-	 * Searches an image on Wikipedia by the given term and size.
-	 * @param {object} obj The object containing the parameters.
-	 * @param {String} obj.term The term to be searched on wikipedia.
-	 * @param {number} obj.size The height in pixel of the image;
-	 * @returns {Promise.<object>} Returns a promise that resolves to an object with url, width, and height properties.
-	 */
-	function searchImage({ term, size }) {
-		return new Promise(async resolve => {
-			http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`)
-				.then(response => {
-
-					let image = findKey('thumbnail', JSON.parse(response));
-					resolve(image);
-
-				}).catch(error => {
-
-					let imageInfo = {};
-					imageInfo.url = '';
-					imageInfo.width = 250;
-					imageInfo.height = 250;
-
-					resolve(imageInfo);
-				})
-		});
-	}
-
-	function searchByTerm({ range = '', term, nlpLangs }) {
-		return new Promise(resolve => {
-
-			var lang = identifyLanguage(range.trim(), nlpLangs);
-			var settings = {
-				langLinks: true,
-				sentences: 3
-			};
-			lang = lang === 'und' ? fallbackLang : lang;
-			var url = `https:///${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${settings.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${settings.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}&redirects=1`;
-
-			http.get(url).then(response => {
-
-				let pages = findKey('pages', JSON.parse(response));
-				let data = {
-					title: pages[0].title,
-					body: pages[0].extract,
-					image: pages[0].thumbnail,
-					url: pages[0].fullurl
-				}
-
-				resolve(data);
-
-			}).catch(error => resolve(null));
-
-		});
-	}
-
-	function searchById({ pageId, lang = 'en', imageSize = 250 }) {
-		return new Promise(resolve => {
-
-			var definitions = {
-				langLinks: true,
-				sentences: 3
-			};
-			var url = `https://${lang ==='rel'?'en' : lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks ? '%7Clanglinks' : ''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`;
-
-			http.get(url).then(response => {
-
-				let pages = findKey('pages', JSON.parse(response));
-				let data = {
-					title: pages[0].title || '',
-					text: pages[0].extract || '',
-					image: pages[0].thumbnail || {},
-					url: pages[0].fullurl || ''
-				}
-
-				resolve(data);
-
-			}).catch(error => resolve(null));
-		});
-	}
-
-	function searchTermList({ range = '', term, nlpLangs = ['eng'] }) {
-		return new Promise(resolve => {
-
-			var lang = identifyLanguage(range, nlpLangs);
-			var disambiguation = {
-				en: 'disambiguation',
-				pt: 'desambiguação',
-				es: 'desambiguación'
-			};
-			var url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`;
-
-			http.get(url).then(list => {
-				let pages = findKey('pages', JSON.parse(list));
-				let data = [];
-
-				if (Object.entries(pages).length > 0) {
-					data = pages.map(page => {
-						var isDesambiguation = page.terms && page.terms.description[0].includes(disambiguation[lang]);
-						if (!isDesambiguation) {
-							return {
-								index: page.index,
-								pageId: page.pageid,
-								title: page.title,
-								body: page.terms && page.terms.description[0] || '',
-								img: page.thumbnail && page.thumbnail.source || '',
-								lang: lang
-							};
-						}
-					});
-					data.sort((elA, elB) => elA.index - elB.index);
-				}
-
-				resolve(data);
-			});
-		});
-
-
-	}
+	module.exports = new WikiRepo();
 
 	/**
 	 * @summary Deep searches given key in the given object.
@@ -205,10 +202,1159 @@
 		}
 	}
 
-	const wikiRepo = new WikiRepo();
+})();
+},{"../utils/Http":13,"../utils/StorageManager":14,"franc":9}],2:[function(require,module,exports){
+(function() {
+	'use strict';
+
+	const http = require('../utils/Http');
+
+	class WiktRepo {
+		constructor() {
+			this.getDefinitions = this.searchTerm;
+		}
+
+		/**
+		 * @summary It searches a given term on wiktionary.
+		 * @param {String} obj.term The term to be searched on wiktionary.
+		 * @returns {Promise.<object>} Returns a Promise that resolves to an object with ....
+		 */
+		searchTerm(term = '') {
+			return new Promise(async (resolve, reject) => {
+				const wikt = await http.get(`https://en.wiktionary.org/api/rest_v1/page/definition/${term.toLowerCase().trim()}`);
+				const response = JSON.parse(wikt);
+				if (response.title) {
+					resolve(undefined);
+				}
+				resolve(response);
+			});
+		}
+	}
+
+	module.exports = new WiktRepo();
+
+}());
+},{"../utils/Http":13}],3:[function(require,module,exports){
+/*
+#### DOM manipulation, data input and output ####
+@------------------------------------------------@
+| It creates a div element at the displayed page |
+| DOM, as well as two "cals", for padding sakes. |
+| Gets the ranges of these elements and listen to|
+| the onmouseup event, that gets the selected    |
+| text, parses it and request data to the API.   |
+| The response will be displayed into a popover. |
+@------------------------------------------------@
+*/
+
+(async function() {
+	"use strict";
+
+	const popoverDB = require("../utils/StorageManager");
+	const wikiAPI = require("../api/WikipediaAPI");
+	const wiktAPI = require("../api/WiktionaryAPI");
+	const popoverManager = require("../models/popoverManager");
+	const popoverDesigner = require("../models/popoverDesigner");
+
+	var element = popoverDesigner.getBasicShell(appendOnBody);
+	var popover = popoverManager(element);
+	var cals = insertCals();
+	var wikipediaAPI = wikiAPI;
+	var wiktionaryAPI = wiktAPI;
+	var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
+	var shortcut = await popoverDB.retrieve('shortcut');
+	var popupMode = await popoverDB.retrieve('popupMode');
+	var keyGroup = [];
+	var selectedString = '';
+
+	initDOMEvents();
+
+
+	////////////////// IMPLEMENTATION //////////////////
+
+	function initDOMEvents() {
+		var wikilink = document.body.querySelector('.js-wikilink');
+		var timeOutId = null;
+
+		popoverDB.onChanges((oldV, newV) => {
+			shortcut = newV.shortcut;
+			popupMode = newV.popupMode;
+			isPopoverEnabled = newV.isEnabled;
+
+			changePopupMode(newV.popupMode);
+		});
+
+		changePopupMode(popupMode);
+
+		wikilink.addEventListener('mouseleave', onMouseLeave);
+		popover.addEventListener('thumbclick', ev => loadArticle(ev.detail.article.lang, ev.detail.article.id))
+		popover.addEventListener('tabselect', ev => loadWictionary(selectedString));
+
+		function changePopupMode(popupMode) {
+			if (popupMode === 'shortcut') {
+				document.removeEventListener('mouseup', onMouseUp);
+				document.addEventListener('keydown', onKeyDown)
+				document.addEventListener('keyup', onKeyUp)
+			} else if (popupMode === 'default') {
+				document.addEventListener('mouseup', onMouseUp);
+				document.removeEventListener('keydown', onKeyDown)
+				document.removeEventListener('keyup', onKeyUp)
+			}
+		}
+
+		function onMouseLeave(ev) {
+			document.body.style.overflow = 'auto';
+			popover.hide();
+		}
+
+		function onKeyDown(ev) {
+
+			clearTimeout(timeOutId);
+
+			if (keyGroup.toString() === shortcut.toString()) {
+				startProcess();
+				keyGroup = [];
+			} else if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
+				keyGroup.push(ev.code);
+				onKeyDown(ev);
+			}
+			// console.table(keyGroup);
+
+			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
+		}
+
+		function onKeyUp(ev) {
+			var index = keyGroup.indexOf(ev.code);
+			if (index !== -1) {
+				keyGroup.splice(index, 1);
+			}
+		}
+
+		function onMouseUp(ev) {
+			if (ev.which === 1 && !popover.isChild(`#${ev.target.id}`)) {
+				startProcess();
+			}
+		}
+
+	}
+
+	function startProcess() {
+		var wSelection = window.getSelection();
+		var selection = wSelection.toString();
+		var selContext = wSelection.focusNode.data;
+
+		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
+
+			popover.showPage('js-wikiSearches');
+			selectedString = selection;
+			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(popover.setThumbnails);
+			wiktionaryAPI.getDefinitions(selection.toString()).then(popover.setDictionary);
+
+			document.body.style.overflow = 'hidden';
+			popover.isLoading({ area: 'thumbnails' });
+			popover.render(wSelection, cals[0], cals[1]);
+		}
+	}
+
+	function loadArticle(language, pageId) {
+		popover.isLoading({ area: 'article' });
+
+		wikipediaAPI.getArticleById({ pageId: pageId, imageSize: 250, language }).then(async article => {
+			popover.setArticle(article);
+			loadWictionary(article.title);
+		});
+	}
+
+	function loadWictionary(title) {
+		wiktionaryAPI
+			.getDefinitions(title)
+			.then(resp => popover.setDictionary(resp))
+	}
+
+	function appendOnBody(popover) {
+		const div = document.createElement('div');
+		const shadow = div.attachShadow({ mode: 'open' });
+
+		div.classList.add('js-wikilink');
+		shadow.appendChild(popover);
+		document.body.appendChild(div);
+
+		return shadow.querySelector('.js-popover');
+	}
+
+	function insertCals() {
+		var cal1, cal2;
+		cal1 = createCal('cal1');
+		cal2 = createCal('cal2');
+		document.body.appendChild(cal1);
+		document.body.appendChild(cal2);
+
+
+		function createCal(id) {
+			return document.createRange().createContextualFragment(`<div id="${id}">&nbsp;</div>`);
+		}
+
+		return [document.querySelector('#cal1'), document.querySelector('#cal2')];
+	}
+
+	function isEmptySelection(selection) {
+		//If given argument is not empty neither is white spaces
+		return !(selection && /\S/.test(selection));
+	}
+}());
+},{"../api/WikipediaAPI":1,"../api/WiktionaryAPI":2,"../models/popoverDesigner":4,"../models/popoverManager":5,"../utils/StorageManager":14}],4:[function(require,module,exports){
+(() => {
+	'use strict';
+
+	module.exports = {getBasicShell};
+
+
+	/**
+	 * Generates the popover main structure without any data.
+	 * @returns {DocumentFragment} A popover documentFragment.
+	 */
+	function getBasicShell(callback) {
+		var elementString = popoverContent();
+		var styleString = popoverStyles();
+		var popover = new DocumentFragment();
+
+		popover = document.createRange().createContextualFragment(`${styleString} ${elementString}`);
+
+		popover = insertThumbnails(popover, blankThumbnails());
+
+		popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
+		popover.querySelector('.js-wikiSearches').classList.remove('hidden');
+
+		if (!callback)
+			return popover;
+
+		return callback(popover);
+		// return popover;
+	}
+
+
+	////////////////// IMPLEMENTATION //////////////////
+
+	function insertThumbnails(popover, thumbnails) {
+
+		popover.querySelector('.js-wikiSearches').appendChild(thumbnails);
+
+		return popover;
+	}
+
+	/**
+	 * Generates blank thumbnails to use as placeholders while the content is being loaded.
+	 * @param {number} quantity The quantity of thumbnails.
+	 */
+	function blankThumbnails(quantity = 6) {
+
+		var frag = document.createDocumentFragment();
+
+		for (let i = 0; i < quantity; i++) {
+			let fragString = `
+                <div class="js-item item item--blank">
+                    <section class="image--blank"></section>
+                    <section class="info">
+                        <div class="js-title title--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                    </section>
+                </div>`;
+
+			frag.appendChild(document.createRange().createContextualFragment(fragString).firstElementChild);
+		}
+
+		return frag;
+	}
+
+	/**
+	 * Generates the popover inner HTML.
+	 */
+	function popoverContent() {
+		// <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		return `
+            <div id="popover" class="js-popover">
+                <section id="navbar">
+                    <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">👈</i></div>
+                    <!--<div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>-->
+                    <div class="tab js-tab js-wikiTab" target=".js-wikiSect" disabled="disabled">Wikipedia</div>
+                    <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
+                </section>
+                <main class="contentGroup js-contentGroup">
+                    <section id="wikiSearches" class="js-wikiSearches js-infoSect info-section"></section>
+                    <section id="wikiSect" class="js-wikiSect js-infoSect info-section"></section>
+                    <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden"></section>
+                </main>
+            </div>`;
+	}
+
+	/**
+	 * Generates the popover CSS.
+	 */
+	function popoverStyles() {
+		return `
+        <style>
+            :root{
+                --primary-text-color: rgba(0, 0, 0, 0.87);
+                --secundary-text-color: rgba(0, 0, 0, 0.54);
+                --disabled-text-color: rgba(0, 0, 0, 0.38);
+            }
+            #popover{
+                all: initial;
+            }
+            #popover {
+                will-change: opacity;
+                position:fixed;
+                opacity: 0;
+                background:#ffffff;
+                width:auto;
+                max-width: 500px;
+                box-shadow:0 30px 90px -20px rgba(0,0,0,0.3), 0 0 1px #a2a9b1;
+                text-align: left;
+                z-index: -10;
+                transform: translateY(10%);
+                transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1), opacity .2s, z-index .5s;
+                border-radius: 5px;
+                font-size: 14px;
+                font-family: 'Roboto', sans-serif !important;
+                color: rgba(0,0,0,.87);
+                font-weight: 400;
+                line-height: 20px;
+            }
+            
+            #popover.popover--enabled{
+                display:block;
+                opacity: 1;
+                transform: translateY(0);
+                z-index: 100;
+                position: absolute;
+            }
+            
+            #cal1{
+                position:absolute;
+                height:0px;
+                width:0px;
+                top:100px;
+                left:100px;
+                overflow:none;
+                z-index:-100;
+            }
+            #cal2{
+                position:absolute;
+                height:0px;
+                width:0px;
+                top:0px;
+                left:0px;
+                overflow:none;
+                z-index:-100;
+            }
+            
+            .contentGroup{
+                // min-height: 200px;
+                min-width: 500px;
+                transition: height .3s cubic-bezier(0.4, 0.0, 1, 1);
+            }
+
+            #wikiSect #wikiArticle{
+                display: flex;
+                flex-flow: row-reverse;
+            }
+
+            #wikiSect .wikiArticle--blank{
+                width: 100%;
+            }
+
+            #wikiSect .wikiArticle--blank .text--blank{
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+            }
+            
+            .popoverImage,
+            .popoverImage--blank{
+                max-width: 200px;
+                max-height: 200px;
+                background-size: contain;
+                border-radius: 0 0 5px 0;
+            }
+
+            .popoverImage--blank{
+                width: 200px;
+                height: 200px;
+                background-color: #fafafa;
+            }
+            
+            .popoverText{
+                font-family: sans-serif;
+                font-size: 14px;
+                line-height: 20px;
+                color:#777;
+                overflow-x: hidden;
+                overflow-y: scroll;
+                margin: 0;
+            }
+            
+            #navbar{
+                display: inline-flex;
+                width: -webkit-fill-available;
+                align-items: center;
+            }
+            
+            #navbar .tab {
+                padding-top: 13px;
+                padding-bottom: 13px;
+                flex-grow: 1;
+                text-align: center;
+                cursor: pointer;
+                transition: background-color .3s;
+            }
+            
+            #navbar .tab.btn--navigator {
+            //     position: absolute;
+            //     left: 5%;
+                flex-grow: 0.25;
+            }
+
+            #navbar .tab::selection {
+                background: rgba(0, 0, 0, 0) !important;
+            }
+            
+            #navbar .tab:hover{
+                background-color: rgba(0, 0, 0, .04);
+            }
+
+            #navbar .tab[disabled]{
+                color: rgba(0,0,0,.50);
+                cursor: unset;
+            }
+
+            #navbar .tab[disabled]:hover{
+                background-color: #fff;
+            }
+            
+            #dictionaryContent{
+                overflow-x: hidden;
+                overflow-y: scroll;
+            }
+            .dict-lang--sections:last-child{
+                margin-bottom: 10px !important;
+            }
+            
+            .info-section{
+                display: flex;
+                flex-flow: row-reverse;
+                padding-left: 10px;
+                overflow: hidden;
+                max-height: 230px;
+            }
+
+            .info{
+                width: 100%;
+                height: auto;
+                align-self: flex-start;
+            }
+            
+            #wikiSect{
+                margin-right: -1.3px;
+            }
+
+            
+            
+            .hidden{
+                display: none !important;
+            }
+            
+            .info-section .dict-lang {
+                font-weight: bold;
+                font-size: 120%;
+                border-bottom: 1px solid rgba(0,0,0,.20);
+                margin-bottom: 10px;
+                // overflow-y: scroll;
+            }
+            
+            .info-section .dict-lang:not(:first-child) {
+                margin-top: 10px;
+            }
+            
+            .info-section .dict-partofspeach {
+                font-size: 105%;
+                font-weight: 500;
+            }
+            
+            .info-section .dict-lang--sections {
+                list-style: none;
+                padding: initial;
+                margin: initial;
+            }
+            
+            .popoverText:hover::-webkit-scrollbar,
+            #wikiSearches:hover::-webkit-scrollbar,
+            #dictionaryContent.info-section:hover::-webkit-scrollbar,
+            .popoverText:hover::-webkit-scrollbar-thumb,
+            #wikiSearches:hover::-webkit-scrollbar-thumb,
+            #dictionaryContent.info-section:hover::-webkit-scrollbar-thumb {
+                visibility: visible !important;
+            }
+            
+            .popoverText::-webkit-scrollbar,
+            #wikiSearches::-webkit-scrollbar,
+            #dictionaryContent.info-section::-webkit-scrollbar {
+                visibility: hidden;
+                width: .2em !important;
+            }
+            
+            .popoverText::-webkit-scrollbar-thumb,
+            #wikiSearches::-webkit-scrollbar-thumb,
+            #dictionaryContent.info-section::-webkit-scrollbar-thumb {
+                visibility: hidden;
+                background-color: darkgrey !important;
+                outline: 1px solid slategrey !important;
+            }
+            
+            .self-column{
+                display: flex;
+                flex-flow: column;
+            }
+            
+            ol{
+                -webkit-padding-start: 40px !important;
+                margin: 0 !important;
+            }
+            
+            ol li{
+                list-style-type: decimal !important;
+            }
+            
+            .popover-arrow{
+                width: 0;
+                height: 0;
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-bottom: 10px solid white;
+                z-index: 100000;
+                top: -10px;
+                position: relative;
+                right: -10px;
+            }
+
+            #wikiSect {
+                min-height: 200px;
+            }
+            #wikiSearches{
+                overflow-x: hidden;
+                overflow-y: scroll;
+                display: flex;
+                flex-direction: column;
+                min-height: 230px;
+            }
+            
+            #wikiSearches .item{
+                display: inline-flex;
+                align-items: center;
+                flex-shrink: 0;
+                padding: 5px 8px 5px 0;
+                border-bottom: 1px solid rgba(0,0,0, .2);
+                cursor: pointer;
+            }
+            
+            #wikiSearches .item .title{
+                font-weight: 500;
+                font-size: 100%;
+            }
+
+            #wikiSearches .item .title--blank{
+                width: 50%;
+                height: 15px;
+                margin-bottom: 10px;
+                background-color: #fafafa;
+            }
+            
+            
+            #wikiSearches .item .description{
+                font-size: 90%;
+                line-height: initial;
+                color: rgba(0, 0, 0, 0.54);
+            }
+            
+            #wikiSearches .item .description--blank{
+                width: 80%;
+                height: 10px;
+                margin-top: 2.5px;
+                background-color: #fafafa;
+            }
+            
+            #wikiSect .description--blank{
+                width: 95%;
+                height: 13px;
+                margin-top: 8px;
+                background-color: #fafafa;
+            }
+            #wikiSect .description--blank:nth-child(3n+0),
+            #wikiSearches .item .description--blank:last-child,
+            #wikiSect .description--blank:last-child{
+                width: 70%;
+            }
+
+            #wikiSearches .item .image,
+            #wikiSearches .item .image--blank{
+                width: 70px;
+                height: 70px;
+                display: flex;
+                align-items: center;
+                margin: 0 10px 0 0;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+
+            #wikiSearches .item .image--blank{
+                background-color: #fafafa;
+            }
+
+            #wikiSect a{
+                text-decoration: none;
+                color: inherit;
+            }
+        </style>`;
+
+	}
 
 })();
-},{"franc":5}],2:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
+(() => {
+	'use strict';
+
+	module.exports = popoverManager;
+
+	/**
+	 * A popover DOM management API
+	 * @param {HTMLElement} popover 
+	 */
+	function popoverManager(popover) {
+
+		/**
+		 * The Popover element used in the manager dispatches some events:
+		 * - "tabselect" - When the user clicks on a tab (List, Wikipedia, or Wiktionary),
+		 * - "popoverHidden" - When the popover has finished the hidden process,
+		 * - "thumbclick" - When the user selects an article of the search response list,
+		 * - "pagechange" - When a change of page occurs, independent of the trigger,
+		 */
+		class Popover {
+			constructor(popover) {
+
+				if (!popover)
+					throw new ReferenceError('It is required to indicate a popover element for this function to work properly.')
+
+				if (!(popover instanceof HTMLElement))
+					throw new TypeError('The given popover is not a instance of HTMLElement');
+
+
+				this.HTMLElement = popover;
+				this.sections = popoverElements();
+				this.hide = hidePopover;
+				this.render = appendPopover;
+				this.setThumbnails = insertThumbnails;
+				this.setArticle = insertArticle;
+				this.setDictionary = insertDictionary;
+				this.isLoading = insertBlankData;
+				this.isChild = isPopoverChild;
+				this.showPage = showPage;
+				this.addEventListener = (eventName, eventListener) => popover.addEventListener(eventName, eventListener);
+
+				popover.addEventListener('tabselect', ev => showPage(ev.detail.target, !isDisabled(ev.detail.element)));
+				popover.addEventListener('popoverHidden', ev => disableTab(1));
+				popover.addEventListener('thumbclick', ev => enableTab(1));
+				popover.addEventListener('pagechange', ev => {
+					if (ev.detail.element === this.sections.wikipediaWrapper || ev.detail.element === this.sections.wiktionaryWrapper) {
+						showElements(this.sections.resultsTab);
+					} else {
+						hideElements(this.sections.resultsTab);
+					}
+				});
+			}
+		}
+
+		return new Popover(popover);
+
+		function popoverElements() {
+			return {
+				resultsTab: popover.querySelector('.js-listTab'),
+				wikiTab: popover.querySelector('.js-wikiTab'),
+				wiktTab: popover.querySelector('.js-wiktTab'),
+				listWrapper: popover.querySelector('.js-wikiSearches'),
+				wikipediaWrapper: popover.querySelector('.js-wikiSect'),
+				wiktionaryWrapper: popover.querySelector('.js-wiktSect'),
+			}
+		}
+
+		function insertThumbnails(thumbs = []) {
+			if (!thumbs.length) {
+				popover = setThumbsError();
+			} else {
+				const thumbsSect = popover.querySelector('.js-wikiSearches');
+				const thumbnails = thumbnailsToHtml(thumbs);
+
+				thumbnails.querySelectorAll('.js-item').forEach(thumbnail => {
+					if (thumbnail) {
+						let thumbnailClick = new CustomEvent('thumbclick', {
+							bubbles: true,
+							detail: {
+								article: {
+									id: thumbnail.id,
+									lang: thumbnail.attributes.getNamedItem('lang').value,
+									title: thumbnail.querySelector('.js-title').textContent
+								}
+							}
+						});
+
+						thumbnail.addEventListener('click', ev => popover.dispatchEvent(thumbnailClick));
+					}
+				})
+				removeChildrenFrom(thumbsSect);
+				thumbsSect.appendChild(thumbnails);
+			}
+
+			return popover;
+		}
+
+		function setThumbsError() {
+			var thumbWrapper = popover.querySelector('.js-wikiSearches');
+
+			removeChildrenFrom(thumbWrapper);
+			thumbWrapper.appendChild(document.createTextNode(`Didn't find any info 😕`));
+
+			return popover;
+		}
+
+		function insertArticle({ title, text, image, url }) {
+
+			var wikiSect = popover.querySelector('.js-wikiSect');
+			var content = wikipediaArticle({ title, text, image, url });
+			var imageElem = content.querySelector('.js-articleImage');
+
+
+			showPage('js-wikiSect');
+			removeChildrenFrom(wikiSect);
+
+			imageElem.onload = () => {
+				let img = imageElem;
+				let minHeight = 200;
+				let scale = minHeight / img.naturalWidth;
+
+				img.style.height = `${img.naturalHeight * scale}px`;
+				img.style.width = `${img.naturalWidth * scale}px`;
+				if (img.height < minHeight && content.clientHeight <= minHeight) {
+					wikiSect.setAttribute('style', `max-height: ${content.clientHeight}px;`);
+					wikiSect.setAttribute('style', `min-height: ${content.clientHeight}px;`);
+				} else if (img.height >= 200) {
+					wikiSect.setAttribute('style', `min-height: ${img.height}px;`);
+					wikiSect.setAttribute('style', `max-height: ${img.height}px;`);
+				}
+			};
+			wikiSect.appendChild(content);
+
+			return popover;
+		}
+
+		function insertBlankData({ area = '' }) {
+
+			var wikiSect = popover.querySelector('.js-wikiSect');
+			var thumbWrapper = popover.querySelector('.js-wikiSearches');
+
+			var areaToDisplay = {
+				thumbnails: () => {
+					removeChildrenFrom(thumbWrapper);
+					thumbWrapper.appendChild(blankThumbnails());
+				},
+				wiktionary: () => {
+
+				},
+				article: () => {
+					showPage('js-wikiSect');
+					const previousArticle = wikiSect.querySelector('.js-wikiArticle');
+					if (previousArticle)
+						wikiSect.removeChild(previousArticle)
+
+					wikiSect.appendChild(blankArticle());
+				}
+			};
+			try {
+				areaToDisplay[area]();
+			} catch (error) {
+
+			}
+			return popover;
+		}
+
+		function insertDictionary(data) {
+			var wiktWrapper = popover.querySelector('.js-wiktSect');
+			var wiktWrapper = removeChildrenFrom(wiktWrapper);
+
+			if (data) {
+				wiktWrapper.appendChild(wiktionaryArticle(data));
+				enableTab(2);
+			} else {
+				disableTab(2);
+			}
+
+		}
+
+		/**
+		 * Generates the Wiktionary content based on given data.
+		 * @param {object} article The data to use as the article.
+		 * @returns {DocumentFragment} The dictionary section to be inserted on the popover.
+		 */
+		function wiktionaryArticle(article) {
+
+			var section = document.createDocumentFragment();
+
+			Object.entries(article).forEach(entrie => { //foreach language
+				try {
+					var partsOfSpeech = entrie[1]
+					var language = entrie[1][0].language;
+
+					const span = newElement('span', `s${uniqueId()}`, ['dict-lang'])
+					const ul = newElement('ul', '', ['dict-lang--sections']);
+
+					partsOfSpeech.forEach(group => {
+
+						const liPoS = document.createRange().createContextualFragment(`
+                    	<li id="\`li${uniqueId()}\`">
+                    	    <span class="dict-partofspeach">${group.partOfSpeech}</span>
+                    	    <ol type="1" id="dictDefs" class="dict-definition">
+                    	    </ol>
+                    	</li>`);
+
+
+						group.definitions.forEach(def => {
+							const wordDefinition = newElement('li');
+							wordDefinition.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
+							liPoS.querySelector('#dictDefs').appendChild(wordDefinition);
+						});
+
+						span.innerText = language;
+						ul.appendChild(liPoS);
+						section.appendChild(span);
+						section.appendChild(ul);
+
+
+					});
+				} catch (error) {
+					disableTab(2);
+				}
+			});
+
+			return section;
+		}
+
+		/**
+		 * Generates the Wikipedia content based on given data.
+		 * @param {string} text The article's text.
+		 * @returns {object} text The article's image data (source).
+		 */
+		function wikipediaArticle({ title, text, image, url }) {
+			var section = document.createDocumentFragment();
+			var originalWord = (() => {
+				let loweredText = text.toLowerCase();
+				let loweredTitle = title.toLowerCase();
+				let startIndex = loweredText.search(loweredTitle);
+				let endIndex = startIndex + title.length;
+				return text.substring(startIndex, endIndex)
+			})();
+			var formatedText = text.replace(originalWord, `<strong><a href="${url}" target="_blank" rel="noopener noreferrer" title="View on Wikipedia">${originalWord}</a></strong>`)
+			let frag = `
+                <div id="wikiArticle" class="js-wikiArticle">
+                    <img id="popoverImage" class="popoverImage js-articleImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png'}">
+                    <p class="js-wikiInfo popoverText">${formatedText}</p>
+                </div>
+                `;
+
+			return section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+		}
+
+		/**
+		 * Generates a blank Wikipedia's article.
+		 * @param {number} paragraphsCount The number of paragraphs.
+		 */
+		function blankArticle(paragraphsCount = 8) {
+			var section = document.createDocumentFragment();
+			var paragraphs = "";
+
+
+			for (let p = 0; p < paragraphsCount; p++) {
+				paragraphs = paragraphs.concat('<div class="description--blank"></div>');
+			}
+
+			let frag = `
+                <div id="wikiArticle" class="js-wikiArticle wikiArticle--blank">
+                    <div id="popoverImage" class="popoverImage--blank"></div>
+					<section class="text--blank">${paragraphs}</section>
+                </>
+                `;
+
+			return section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+		}
+
+		/**
+		 * Converts a raw object list to Wikipedia's thumbails.
+		 * @param {object} thumbList The data returned from the wiktionary.
+		 * @returns {DocumentFragment} The list of thumbnails.
+		 */
+		function thumbnailsToHtml(thumbList) {
+
+			var section = document.createDocumentFragment();
+
+			thumbList
+				.map(thumbnailToHtml)
+				.forEach(thumbnail => section.appendChild(thumbnail));
+
+			return section;
+		}
+
+		function thumbnailToHtml(rawTag) {
+			try {
+				var thumbnail = `
+                <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
+                    <section class="image">
+                        <img src="${rawTag.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
+                    </section>
+                    <section class="info">
+                        <div class="js-title title">${rawTag.title}</div>
+                        <div class="description">${rawTag.body}</div>
+                    </section>
+				</div>`;
+			} catch (error) {
+				var thumbnail = `<div></div>`;
+			}
+			return newFragment(thumbnail).firstElementChild;
+		}
+
+		function blankThumbnails(quantity = 6) {
+
+			var section = document.createDocumentFragment();
+
+			for (let i = 0; i < quantity; i++) {
+				let frag = `
+                <div class="js-item item item--blank">
+                    <section class="image--blank"></section>
+                    <section class="info">
+                        <div class="js-title title--blank"></div>
+                        <div class="description--blank"></div>
+                        <div class="description--blank"></div>
+                    </section>
+                </div>`;
+
+				section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+			}
+
+			return section;
+		}
+
+		/**
+		 * Displays the popover based on given selection, cal1 and cal2 coordinates.
+		 * @param {Selection} selection The current window selection on DOM.
+		 * @param {*} cal1 
+		 * @param {*} cal2 
+		 */
+		function appendPopover(selection, cal1, cal2) {
+			/**From:
+			 * https://stackoverflow.com/questions/39283159/how-to-keep-selection-but-also-press-button
+			 */
+			var selRange = selection.getRangeAt(0).getBoundingClientRect();
+			var rb1 = DOMRect(cal1);
+			var rb2 = DOMRect(cal2);
+
+			popover.style.top = `${(selRange.bottom - rb2.top) * 100 / (rb1.top - rb2.top)}px`;
+			let leftPosition = calcLeftPos(selRange, rb1, rb2);
+
+			if (leftPosition + popover.clientWidth > window.innerWidth) {
+				// popover.attributeStyleMap.set('left', CSS.px(leftPosition) - popover.clientWidth + selRange.width);
+				popover.style.left = `${calcLeftPos(selRange, rb1, rb2) - popover.clientWidth + selRange.width}px`
+			} else {
+				// popover.attributeStyleMap.set('left', CSS.px((selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)));
+				popover.style.left = `${(selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)}px`;
+			}
+
+			popover.classList.add('popover--enabled');
+
+			function DOMRect(element) {
+				const r = document.createRange()
+				r.selectNode(element)
+				return r.getBoundingClientRect();
+			}
+
+			function calcLeftPos(selRange, rb1, rb2) {
+				return (selRange.left - rb2.left) * 100 / (rb1.left - rb2.left);
+			}
+
+			popover
+				.querySelectorAll('.js-tab')
+				.forEach(tab => tab.addEventListener('click', ev => {
+					const tabSelect = new CustomEvent('tabselect', {
+						bubbles: true,
+						detail: {
+							target: ev.currentTarget.attributes.getNamedItem('target').value,
+							element: ev.target
+						}
+					});
+
+					popover.dispatchEvent(tabSelect);
+				}));
+		}
+
+		function removeChildrenFrom(element) {
+			while (element.hasChildNodes()) {
+				element.removeChild(element.lastChild);
+			}
+
+			return element;
+		}
+
+		function isPopoverChild(elemIdentifier = '') {
+			try {
+				return popover.querySelector(elemIdentifier) === null ? false : true;
+			} catch (error) {
+				return false;
+			}
+		}
+
+		/**
+		 * @param {number} delay The delay in milliseconds to hide the popover.
+		 */
+		function hidePopover(delay = 300) {
+			setTimeout(() => {
+				popover.classList.remove('popover--enabled');
+				const hideEvent = new CustomEvent('popoverHidden', {
+					bubbles: true,
+					detail: {
+						element: popover,
+					}
+				});
+
+				popover.dispatchEvent(hideEvent);
+			}, delay);
+		}
+
+		function uniqueId() {
+			return (new Date()).getTime();
+		}
+
+		/**
+		 * Disables a tab by given id.
+		 * @param {number} tabId  The id of the tab to be disabled (1: Wikipedia | 2: Wiktionary).
+		 */
+		function disableTab(tabId) {
+			var tabs = {
+				1: '.js-wikiTab',
+				2: '.js-wiktTab'
+			}
+			popover.querySelector(tabs[tabId]).setAttribute('disabled', 'disabled');;
+		}
+
+		/**
+		 * Enables a tab by given id.
+		 * @param {number} tabId  The id of the tab to be enabled (1: Wikipedia | 2: Wiktionary).
+		 */
+		function enableTab(tabId) {
+			var tabs = {
+				1: '.js-wikiTab',
+				2: '.js-wiktTab'
+			}
+			if (popover.querySelector(tabs[tabId]).hasAttribute('disabled')) {
+				popover.querySelector(tabs[tabId]).removeAttribute('disabled');
+			}
+		}
+
+		function newFragment(codeString = '<div></div>') {
+			return document.createRange().createContextualFragment(codeString);
+		}
+
+		function isDisabled(element) {
+			return element.hasAttribute('disabled');
+		}
+
+		function hideElements(identifier = '') {
+
+			if (identifier instanceof HTMLElement) {
+
+				identifier.classList.add('hidden');
+
+			} else if (identifier instanceof NodeList) {
+
+				identifier.forEach(el => el.classList.add('hidden'));
+
+			} else if (Array.isArray(identifier)) {
+
+				identifier.forEach(el => {
+					popover.querySelectorAll(el).forEach(el => el.classList.add('hidden'));
+				});
+
+			} else if (typeof identifier === "string") {
+
+				popover.querySelectorAll(identifier).forEach(el => el.classList.add('hidden'));
+			}
+		}
+
+		function showElements(identifier = '') {
+			if (identifier instanceof HTMLElement) {
+
+				identifier.classList.remove('hidden');
+
+			} else if (identifier instanceof NodeList) {
+
+				identifier.forEach(el => el.classList.remove('hidden'));
+
+			} else if (Array.isArray(identifier)) {
+
+				identifier.forEach(el => {
+					popover.querySelectorAll(el).forEach(el => el.classList.remove('hidden'));
+				});
+
+			} else if (typeof identifier === "string") {
+
+				popover.querySelectorAll(identifier).forEach(el => el.classList.remove('hidden'));
+			}
+
+
+		}
+
+		function newElement(element = 'div', id = '', classList = []) {
+			var el = document.createElement(element);
+			el.id = id || el.id;
+			if (classList.length) {
+				el.classList.add(classList);
+			}
+
+			return el;
+		}
+
+		function showPage(pageClass, condition = true) {
+			if (condition) {
+				var className = pageClass.match(/([^.].+)/g)[0];
+				var previousPage;
+				popover.querySelectorAll('.js-infoSect').forEach(section => {
+					if (!section.classList.contains('hidden'))
+						previousPage = section;
+					if (!section.classList.contains(className)) {
+						hideElements(section);
+					} else {
+						section.classList.remove('hidden');
+						const changePageEvent = new CustomEvent('pagechange', {
+							bubbles: true,
+							detail: {
+								className: className,
+								element: section,
+								previous: previousPage
+							}
+						});
+
+						popover.dispatchEvent(changePageEvent);
+					}
+				});
+			}
+		}
+	}
+})();
+},{}],6:[function(require,module,exports){
 'use strict'
 
 module.exports = collapse
@@ -218,7 +1364,7 @@ function collapse(value) {
   return String(value).replace(/\s+/g, ' ')
 }
 
-},{}],3:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports={
   "Latin": {
     "spa": " de|os |de | la|la | y | a |es |ón |ión|rec|ere|der| co|e l|el |en |ien|cho|ent|ech|ció|aci|o a|a p| el|a l|al |as |e d| en|na |ona|s d|da |nte| to|ad |ene|con| pr| su|tod| se|ho |los| pe|per|ers| lo|o d| ti|cia|n d|cio| es|ida|res|a t|tie|ion|rso|te |do | in|son| re| li|to |dad|tad|e s|est|pro|que|men| po|a e|oda|nci| qu| un|ue |ne |n e|s y|lib|su | na|s e|nac|ia |e e|tra| pa|or |ado|a d|nes|ra |se |ual|a c|er |por|com|nal|rta|a s|ber| o |one|s p|dos|rá |sta|les|des|ibe|ser|era|ar |ert|ter| di|ale|l d|nto|hos|del|ica|a a|s n|n c|oci|imi|io |o e|re |y l|e c|ant|cci| as|las|par|ame| cu|ici|ara|enc|s t|ndi| so|o s|mie|tos|una|bre|dic|cla|s l|e a|l p|pre|ntr|o t|ial|y a|nid|n p|a y|man|omo|so |n l| al|ali|s a|no | ig|s s|e p|nta|uma|ten|gua|ade|y e|soc|mo | fu|igu|o p|n t|hum|d d|ran|ria|y d|ada|tiv|l e|cas| ca|vid|l t|s c|ido|das|dis|s i| hu|s o|nad|fun| ma|rac|nda|eli|sar|und| ac|uni|mbr|a u|die|e i|qui|a i| ha|lar| tr|odo|ca |tic|o y|cti|lid|ori|ndo|ari| me|ta |ind|esa|cua|un |ier|tal|esp|seg|ele|ons|ito|ont|iva|s h|d y|nos|ist|rse| le|cie|ide|edi|ecc|ios|l m|r e|med|tor|sti|n a|rim|uie|ple|tri|ibr|sus|lo |ect|pen|y c|an |e h|n s|ern|tar|l y|egu|gur|ura|int|ond|mat|l r|r a|isf|ote",
@@ -399,7 +1545,7 @@ module.exports={
   }
 }
 
-},{}],4:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // This file is generated by `build.js`.
 module.exports = {
   cmn: /[\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B\u3400-\u4DB5\u4E00-\u9FCC\uF900-\uFA6D\uFA70-\uFAD9]|[\uD840-\uD868\uD86A-\uD86C][\uDC00-\uDFFF]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D]|\uD87E[\uDC00-\uDE1D]/g,
@@ -434,7 +1580,7 @@ module.exports = {
   aii: /[\u0700-\u070D\u070F-\u074A\u074D-\u074F]/g
 };
 
-},{}],5:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 /* Load `trigram-utils`. */
@@ -730,7 +1876,7 @@ function sort(a, b) {
   return a[1] - b[1];
 }
 
-},{"./data.json":3,"./expressions.js":4,"trigram-utils":7}],6:[function(require,module,exports){
+},{"./data.json":7,"./expressions.js":8,"trigram-utils":11}],10:[function(require,module,exports){
 'use strict';
 
 module.exports = nGram;
@@ -771,7 +1917,7 @@ function nGram(n) {
   }
 }
 
-},{}],7:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var trigram = require('n-gram').trigram;
@@ -859,7 +2005,7 @@ function sort(a, b) {
   return a[1] - b[1];
 }
 
-},{"collapse-white-space":2,"n-gram":6,"trim":8}],8:[function(require,module,exports){
+},{"collapse-white-space":6,"n-gram":10,"trim":12}],12:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -875,4 +2021,168 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}]},{},[1]);
+},{}],13:[function(require,module,exports){
+(() => {
+	'use strict';
+
+	/***************************************************
+	 *      This file contains the Http Class.  📬     *
+	 *                                                 *
+	 * The Http Class executes the basic http methods  *
+	 * (get, post, put, delete) and  RETURNS a promise *
+	 * a promise with the pending response.            *
+	 **************************************************/
+
+	class Http {
+		constructor() {}
+
+		get(url) {
+			return this.httpExecute('GET', url);
+		}
+		post(url, data) {
+			return this.httpExecute('POST', url, data);
+		}
+		put(url, data) {
+			return this.httpExecute('PUT', url, data);
+		}
+		delete(url) {
+			return this.httpExecute('DELETE', url);
+		}
+
+		httpExecute(method, url) {
+			return new Promise((resolve, reject) => {
+				const xhr = new XMLHttpRequest();
+				xhr.open(method, url, true);
+				xhr.onload = () => resolve(xhr.responseText);
+				xhr.onerror = () => reject(xhr);
+				xhr.send();
+			});
+		}
+	}
+
+	module.exports = new Http();
+})();
+},{}],14:[function(require,module,exports){
+(() => {
+	'use strict';
+
+
+	/**
+	 * Manages and facilitate storage (chrome.storage.sync) requests and watchers.
+	 */
+	class PopoverDB {
+
+		constructor() {
+			this._errorCode = {
+				1: key => `Object "${key}" not found`,
+				2: (key, property) => `Object property "${key}.${property}" not found in storage.`,
+				3: property => `Object property ".${property}" not found in storage.`
+			};
+
+			this._encodeProp = propertyName => {
+
+				let props = {
+					isEnabled: 5,
+					fallbackLang: 1,
+					nlpLangs: 4,
+					shortcut: 3,
+					popupMode: 2
+				}
+
+				return props[propertyName];
+			}
+
+			this._decodeProp = propertyName => {
+
+				let props = {
+					5: 'isEnabled',
+					1: 'fallbackLang',
+					4: 'nlpLangs',
+					3: 'shortcut',
+					2: 'popupMode'
+				}
+
+				return props[propertyName];
+			}
+
+			this._decodeObj = obj => {
+				let decodedObj = {};
+				Object.keys(obj).forEach(key => {
+					decodedObj[this._decodeProp(key)] = obj[key];
+				});
+
+				return decodedObj;
+			}
+
+		}
+
+		update(property, value) {
+			return new Promise(async (resolve, reject) => {
+				var dataString = '';
+				var data = await this.retrieve();
+
+				data[this._encodeProp(property)] = value;
+				dataString = JSON.stringify(data);
+
+				chrome.storage.sync.set({
+					wldt: dataString
+				}, () => resolve(true));
+			});
+		}
+
+		retrieve(property = '') {
+			var errorCount = 0;
+			return new Promise(async (resolve, reject) => {
+				var dataString = '';
+				try {
+					dataString = await new Promise(resolve => chrome.storage.sync.get('wldt', obj => resolve(obj['wldt'])));
+					var data = JSON.parse(dataString);
+
+					if (property.length > 0)
+						resolve(data[this._encodeProp(property)])
+					else resolve(data);
+
+				} catch (error) {
+					errorCount += 1;
+					if (errorCount >= 2) {
+						reject(error);
+					} else {
+						let wikilinkData = JSON.stringify({
+							1: 'en',
+							2: 'shortcut',
+							3: ['ShiftLeft', 'AltLeft'],
+							4: ['por', 'eng', 'esp', 'rus'],
+							5: true
+						});
+						chrome.storage.sync.set({ wldt: wikilinkData }, () => this.retrieve(property));
+					}
+				}
+
+			});
+		}
+
+
+		/**
+		 * Listens to storage changes in given object and executes a function in a onChanged event.
+		 * @param {*} objName The name of the object in the storage to listens.
+		 * @returns {object} A function to pass as an argument the function to execute on event.
+		 */
+		onChanges(fn) {
+
+			var decodedObj = this._decodeObj;
+
+			chrome.storage.onChanged.addListener((changes, areaName) => {
+				//Popover enabled state changed
+				if (changes['wldt']) {
+					fn(decodedObj(JSON.parse(changes['wldt'].oldValue)), decodedObj(JSON.parse(changes['wldt'].newValue)));
+				};
+			});
+		}
+	}
+
+	module.exports = new PopoverDB();
+
+})();
+},{}]},{},[3])
+
+//# sourceMappingURL=contentScript.js.map

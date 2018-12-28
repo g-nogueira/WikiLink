@@ -6,6 +6,7 @@
 	 * @returns {HTMLElement} 
 	 */
 	const DOM = elem => document.body.querySelector(elem);
+	const popoverDB = require("../utils/StorageManager");
 	const MDCSnackbar = mdc.snackbar.MDCSnackbar;
 	const MDCSnackbarFoundation = mdc.snackbar.MDCSnackbarFoundation;
 	mdc.snackbar.MDCSnackbar.attachTo(DOM('.mdc-snackbar'));

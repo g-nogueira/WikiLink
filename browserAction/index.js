@@ -1,5 +1,8 @@
 (async function () {
     'use strict';
+
+    const popoverDB = require('../utils/StorageManager');
+
     /**
      * Shorthand function for querySelector
      * @param {string} el 

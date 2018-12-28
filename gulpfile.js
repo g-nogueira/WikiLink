@@ -14,17 +14,28 @@ function defaultTask(done) {
 }
 
 function buildProd(done) {
-	var file = browserify({
-		entries: "background/WikipediaAPI.js",
-		debug: true
-	});
 
-	file.bundle()
-	.pipe(source('wikiapi.js'))
-    .pipe(buffer())
-	.pipe(sourcemaps.init({loadMaps: true}))
-	.pipe(sourcemaps.write('./'))
-	.pipe(gulp.dest("./prod/"));
+	bundleToProd({ fileName: "eventPage.js", entries: ["background/eventPage.js"] });
+	bundleToProd({ fileName: "contentScripts/contentScript.js", entries: ["contentScripts/index.js"] });
+	bundleToProd({ fileName: "optionsPage/index.js", entries: ["optionsPage/index.js"] });
+	copyToProd({ source: "optionsPage/*.html", destiny: "optionsPage" });
+	copyToProd({ source: "optionsPage/*.css", destiny: "optionsPage" });
+	copyToProd({ source: "contentScripts/*.css", destiny: "contentScripts" });
 
 	done();
+}
+
+function bundleToProd({ fileName= "", entries= [] }) {
+	var browserifyObject = browserify({ entries: entries, debug: true });
+
+	browserifyObject.bundle()
+		.pipe(source(fileName))
+		.pipe(buffer())
+		.pipe(sourcemaps.init({ loadMaps: true }))
+		.pipe(sourcemaps.write('./'))
+		.pipe(gulp.dest("./prod/"));
+}
+
+function copyToProd({ source, destiny }) {
+	gulp.src(source).pipe(gulp.dest("./prod/"+destiny));
 }

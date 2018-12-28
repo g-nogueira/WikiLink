@@ -13,6 +13,12 @@
 (async function() {
 	"use strict";
 
+	const popoverDB = require("../utils/StorageManager");
+	const wikiAPI = require("../api/WikipediaAPI");
+	const wiktAPI = require("../api/WiktionaryAPI");
+	const popoverManager = require("../models/popoverManager");
+	const popoverDesigner = require("../models/popoverDesigner");
+
 	var element = popoverDesigner.getBasicShell(appendOnBody);
 	var popover = popoverManager(element);
 	var cals = insertCals();
@@ -25,7 +31,6 @@
 	var selectedString = '';
 
 	initDOMEvents();
-
 
 
 	////////////////// IMPLEMENTATION //////////////////
@@ -117,7 +122,7 @@
 	function loadArticle(language, pageId) {
 		popover.isLoading({ area: 'article' });
 
-		wikipediaAPI.getArticleById({ pageId: pageId, imageSize: 250, language }).then(async article => {
+		wikipediaAPI.findById({ pageId: pageId, imageSize: 250, language }).then(async article => {
 			popover.setArticle(article);
 			loadWictionary(article.title);
 		});
