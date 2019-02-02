@@ -3,7 +3,7 @@
 
 	const http = require('../utils/Http');
 
-	class WiktRepo {
+	class WiktionaryAPI {
 		constructor() {
 			this.getDefinitions = this.searchTerm;
 		}
@@ -25,6 +25,6 @@
 		}
 	}
 
-	module.exports = new WiktRepo();
+	module.exports = new WiktionaryAPI();
 
 }());

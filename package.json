@@ -17,10 +17,18 @@
   "devDependencies": {
     "browserify": "^16.2.2",
     "gulp": "github:gulpjs/gulp#v4.0.0-alpha.3",
+    "gulp-if": "^2.0.2",
+    "gulp-inject": "^5.0.2",
+    "gulp-jsdoc3": "^2.0.0",
+    "gulp-minify": "^3.1.0",
+    "gulp-print": "^5.0.0",
     "gulp-sourcemaps": "^2.6.4",
+    "gulp-string-replace": "^1.1.2",
+    "gulp-typescript": "^5.0.0",
     "gulp-uglify": "^3.0.1",
     "vinyl-buffer": "^1.0.1",
-    "vinyl-source-stream": "^2.0.0"
+    "vinyl-source-stream": "^2.0.0",
+    "yargs": "^12.0.5"
   },
   "repository": {
     "type": "git",

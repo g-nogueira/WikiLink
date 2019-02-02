@@ -6,10 +6,12 @@
 	 * @returns {HTMLElement} 
 	 */
 	const DOM = elem => document.body.querySelector(elem);
+
+	var mdc = require("@material/snackbar/dist/mdc.snackbar");
 	const popoverDB = require("../utils/StorageManager");
-	const MDCSnackbar = mdc.snackbar.MDCSnackbar;
-	const MDCSnackbarFoundation = mdc.snackbar.MDCSnackbarFoundation;
-	mdc.snackbar.MDCSnackbar.attachTo(DOM('.mdc-snackbar'));
+	const MDCSnackbar = mdc.MDCSnackbar;
+	const MDCSnackbarFoundation = mdc.MDCSnackbarFoundation;
+	mdc.MDCSnackbar.attachTo(DOM('.mdc-snackbar'));
 	const snackbar = new MDCSnackbar(DOM('.mdc-snackbar'))
 	var shortcutSnapshot = '';
 	var keyGroup = {

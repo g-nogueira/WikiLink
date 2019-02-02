@@ -8,10 +8,10 @@
     "48": "public/images/icon01/01wikilink48.png",
     "128": "public/images/icon01/01wikilink128.png"
   },
-  "options_page": "prod/optionsPage/index.html",
+  "options_page": "optionsPage/index.html",
   "background": {
     "scripts": [
-      "prod/eventPage.js"
+      "eventPage.js"
     ],
     "persistence": true
   },
@@ -20,7 +20,7 @@
 
   "browser_action": {
     "default_locale": "en",
-    "default_popup": "prod/optionsPage/index.html",
+    "default_popup": "optionsPage/index.html",
     "default_title": "WikiLink Settings"
   },
   "content_scripts": [
@@ -29,10 +29,10 @@
         "<all_urls>"
       ],
       "js": [
-        "prod/contentScripts/contentScript.js"
+        "contentScripts/contentScript.js"
       ],
       "css": [
-        "prod/contentScripts/popover.css"
+        "contentScripts/popover.css"
       ],
       "run_at": "document_end"
     }

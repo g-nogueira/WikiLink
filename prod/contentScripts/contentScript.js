@@ -1,15 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-/******************************************
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- ******************************************/
-
 (() => {
 
 	'use strict';
@@ -19,17 +8,18 @@
 	const popoverDB = require('../utils/StorageManager');
 
 
-	class WikiRepo {
-		constructor() {
-			this.getArticleList = this.searchTermList;
-		}
+	/**
+	 * @summary The api for searching terms, images, and articles on Wikipedia.
+	 */
+	class WikipediaAPI {
+		constructor() {}
 
 		/**
-		 * Searches an image on Wikipedia by the given term and size.
-		 * @param {object} obj The object containing the parameters.
-		 * @param {String} obj.term The term to be searched on wikipedia.
-		 * @param {number} obj.size The height in pixel of the image;
-		 * @returns {Promise.<object>} Returns a promise that resolves to an object with url, width, and height properties.
+		 * @summary Searches an image on Wikipedia by given term and size.
+		 * @param {object} options
+		 * @param {string} options.term The term to be searched for.
+		 * @param {number} options.size The height in pixels of the image;
+		 * @returns {Promise<WikipediaImage>} Returns a promise that resolves to an object with url, width, and height properties.
 		 */
 		searchImage({ term, size }) {
 			return new Promise(async resolve => {
@@ -51,12 +41,20 @@
 			});
 		}
 
-		findByTerm({ range = '', term, nlpLangs }) {
+		/**
+		 * @summary Searchs a single page on Wikipedia containing given term.
+		 * @param {Object} options
+		 * @param {string} options.term The full or partial article title to be searched for.
+		 * @param {string} [options.range] A set of words in the same language as the term.
+		 * @returns {Promise<{WikipediaPage}>} Returns a promise tha resolves to an object `WikipediaPage`.
+		 */
+		searchTerm({ range = '', term = '' }) {
 
-			return new Promise(resolve => {
-				const fallbackLang = (async () => await popoverDB.retrieve('fallbackLang'));
+			return new Promise(async resolve => {
+				const fallbackLang = await popoverDB.retrieve('fallbackLang');
+				var nlpWhiteList = await popoverDB.retrieve('nlpLangs') || ['eng'];
 
-				var lang = identifyLanguage(range.trim(), nlpLangs);
+				var lang = identifyLanguage(range.trim(), nlpWhiteList);
 				var settings = {
 					langLinks: true,
 					sentences: 3
@@ -81,7 +79,15 @@
 			});
 		}
 
-		findById({ pageId, lang: language = 'en', imageSize = 250 }) {
+		/**
+		 * @summary Searchs a single page on Wikipedia containing given id.
+		 * @param {object} options
+		 * @param {number|string} options.pageId The id of the article page.
+		 * @param {string} [options.language=en] A set of words in the same language as the term.
+		 * @param {number|string} [options.imageSize=250] The height of the article's image, in pixel.
+		 * @returns {Promise<{WikipediaPage}>} Returns a promise tha resolves to an object `WikipediaPage`.
+		 */
+		getPageById({ pageId, language = 'en', imageSize = 250 }) {
 			return new Promise(resolve => {
 
 				var definitions = {
@@ -91,7 +97,6 @@
 				var url = `https://${language ==='rel'?'en' : language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks ? '%7Clanglinks' : ''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`;
 
 				http.get(url).then(response => {
-
 					let pages = findKey('pages', JSON.parse(response));
 					let data = {
 						title: pages[0].title || '',
@@ -106,7 +111,14 @@
 			});
 		}
 
-		searchTermList({ range = '', term }) {
+		/**
+		 * @summary Searchs a list of pages containing given term.
+		 * @param {object} options
+		 * @param {string} [options.range] A set of words in the same language as the term.
+		 * @param {string} options.term The full or partial article title to be searched for.
+		 * @returns {Promise<{WikipediaThumbnail}>} Returns a promise tha resolves to an object `WikipediaThumbnail`.
+		 */
+		getPageList({ range = '', term }) {
 			return new Promise(async resolve => {
 
 				var nlpWhiteList = await popoverDB.retrieve('nlpLangs') || ['eng'];
@@ -132,7 +144,7 @@
 									pageId: page.pageid,
 									title: page.title,
 									body: page.terms && page.terms.description[0] || '',
-									img: page.thumbnail && page.thumbnail.source || '',
+									image: page.thumbnail && page.thumbnail.source || '',
 									lang: lang
 								};
 							}
@@ -143,12 +155,10 @@
 					resolve(data);
 				});
 			});
-
-
 		}
 	}
 
-	module.exports = new WikiRepo();
+	module.exports = new WikipediaAPI();
 
 	/**
 	 * @summary Deep searches given key in the given object.
@@ -209,7 +219,7 @@
 
 	const http = require('../utils/Http');
 
-	class WiktRepo {
+	class WiktionaryAPI {
 		constructor() {
 			this.getDefinitions = this.searchTerm;
 		}
@@ -231,7 +241,7 @@
 		}
 	}
 
-	module.exports = new WiktRepo();
+	module.exports = new WiktionaryAPI();
 
 }());
 },{"../utils/Http":13}],3:[function(require,module,exports){
@@ -347,7 +357,7 @@
 
 			popover.showPage('js-wikiSearches');
 			selectedString = selection;
-			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(popover.setThumbnails);
+			wikipediaAPI.getPageList({ term: selection, range: selContext }).then(popover.setThumbnails);
 			wiktionaryAPI.getDefinitions(selection.toString()).then(popover.setDictionary);
 
 			document.body.style.overflow = 'hidden';
@@ -359,7 +369,7 @@
 	function loadArticle(language, pageId) {
 		popover.isLoading({ area: 'article' });
 
-		wikipediaAPI.getArticleById({ pageId: pageId, imageSize: 250, language }).then(async article => {
+		wikipediaAPI.getPageById({ pageId: pageId, imageSize: 250, language }).then(async article => {
 			popover.setArticle(article);
 			loadWictionary(article.title);
 		});
@@ -1115,7 +1125,7 @@
 				var thumbnail = `
                 <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
                     <section class="image">
-                        <img src="${rawTag.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
+                        <img src="${rawTag.image || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
                     </section>
                     <section class="info">
                         <div class="js-title title">${rawTag.title}</div>

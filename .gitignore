@@ -3,3 +3,9 @@ public/lib/*
 
 # NPM Packages
 node_modules/*
+
+# Production ready files
+prod/*
+
+# Docs generated automatically by gulp-jsdoc3 and gulp.
+docs/*

@@ -28,7 +28,7 @@ After the user have selected an option (an article), it will be displayed there,
 <!-- ## Under the hood -->
 ## Todo List
 - [x] Wl00 - Fix shortcut detection bug.
-- [ ] Wl01 - Create a link to access the page of the Wikipedia's article.
+- [x] Wl01 - Create a link to access the page of the Wikipedia's article.
 - [x] Wl02 - Create a buttom for navigation between the article and the articles list.
 - [ ] Wl03 - Black List sites.
 - [x] Wl04 - Create event emitters (feat.).

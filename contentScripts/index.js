@@ -110,7 +110,7 @@
 
 			popover.showPage('js-wikiSearches');
 			selectedString = selection;
-			wikipediaAPI.getArticleList({ term: selection, range: selContext }).then(popover.setThumbnails);
+			wikipediaAPI.getPageList({ term: selection, range: selContext }).then(popover.setThumbnails);
 			wiktionaryAPI.getDefinitions(selection.toString()).then(popover.setDictionary);
 
 			document.body.style.overflow = 'hidden';
@@ -122,7 +122,7 @@
 	function loadArticle(language, pageId) {
 		popover.isLoading({ area: 'article' });
 
-		wikipediaAPI.findById({ pageId: pageId, imageSize: 250, language }).then(async article => {
+		wikipediaAPI.getPageById({ pageId: pageId, imageSize: 250, language }).then(async article => {
 			popover.setArticle(article);
 			loadWictionary(article.title);
 		});

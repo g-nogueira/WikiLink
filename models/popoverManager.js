@@ -293,7 +293,7 @@
 				var thumbnail = `
                 <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
                     <section class="image">
-                        <img src="${rawTag.img || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
+                        <img src="${rawTag.image || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
                     </section>
                     <section class="info">
                         <div class="js-title title">${rawTag.title}</div>
