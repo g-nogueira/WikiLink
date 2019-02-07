@@ -22,3 +22,9 @@
  * @property {string} lang The language of the article.
  * @property {Url} image The url for the image of the thumbnail.
  */
+
+  /**
+ * @typedef {Object} FileSourceDestination
+ * @property {string | Array<string>} src The paths of source of the files.
+ * @property {string} dest The path for the file to be placed.
+ */
