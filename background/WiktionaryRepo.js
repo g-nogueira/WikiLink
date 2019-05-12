@@ -3,7 +3,7 @@
 
 	const http = require('../utils/Http');
 
-	class WiktionaryAPI {
+	class WiktionaryRepo {
 		constructor() {
 			this.getDefinitions = this.searchTerm;
 		}
@@ -14,12 +14,17 @@
 		 * @returns {Promise.<object>} Returns a Promise that resolves to an object with ....
 		 */
 		searchTerm(term = '') {
-			return new Promise(async resolve => {
-				chrome.runtime.sendMessage({provider: 'wt', request: 'searchTerm', args: term}, resolve);
+			return new Promise(async (resolve, reject) => {
+				const wikt = await http.get(`https://en.wiktionary.org/api/rest_v1/page/definition/${term.toLowerCase().trim()}`);
+				const response = JSON.parse(wikt);
+				if (response.title) {
+					resolve(undefined);
+				}
+				resolve(response);
 			});
 		}
 	}
 
-	module.exports = new WiktionaryAPI();
+	module.exports = new WiktionaryRepo();
 
 }());

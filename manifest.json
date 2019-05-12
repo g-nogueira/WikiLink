@@ -10,7 +10,10 @@
 	},
 	"options_page": "optionsPage/index.html",
 	"background": {
-		"scripts": ["background/eventPage.js"],
+		"scripts": [
+			"background/eventPage.js",
+			"background/messageManager.js"
+		],
 		"persistence": true
 	},
 

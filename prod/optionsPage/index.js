@@ -1,1 +1,1343 @@
-!function(){return function t(e,n,i){function r(a,s){if(!n[a]){if(!e[a]){var u="function"==typeof require&&require;if(!s&&u)return u(a,!0);if(o)return o(a,!0);var c=new Error("Cannot find module '"+a+"'");throw c.code="MODULE_NOT_FOUND",c}var d=n[a]={exports:{}};e[a][0].call(d.exports,function(t){return r(e[a][1][t]||t)},d,d.exports,t,e,n,i)}return n[a].exports}for(var o="function"==typeof require&&require,a=0;a<i.length;a++)r(i[a]);return r}}()({1:[function(t,e,n){var i,r;i=this,r=function(){return function(t){var e={};function n(i){if(e[i])return e[i].exports;var r=e[i]={i:i,l:!1,exports:{}};return t[i].call(r.exports,r,r.exports,n),r.l=!0,r.exports}return n.m=t,n.c=e,n.d=function(t,e,i){n.o(t,e)||Object.defineProperty(t,e,{configurable:!1,enumerable:!0,get:i})},n.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return n.d(e,"a",e),e},n.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},n.p="",n(n.s=99)}({0:function(t,e,n){"use strict";var i=function(){function t(t,e){for(var n=0;n<e.length;n++){var i=e[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(t,i.key,i)}}return function(e,n,i){return n&&t(e.prototype,n),i&&t(e,i),e}}();var r=function(){function t(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,t),this.adapter_=e}return i(t,null,[{key:"cssClasses",get:function(){return{}}},{key:"strings",get:function(){return{}}},{key:"numbers",get:function(){return{}}},{key:"defaultAdapter",get:function(){return{}}}]),i(t,[{key:"init",value:function(){}},{key:"destroy",value:function(){}}]),t}();e.a=r},1:function(t,e,n){"use strict";var i=n(0),r=function(){function t(t,e){for(var n=0;n<e.length;n++){var i=e[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(t,i.key,i)}}return function(e,n,i){return n&&t(e.prototype,n),i&&t(e,i),e}}();var o=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:void 0;!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,t),this.root_=e;for(var i=arguments.length,r=Array(i>2?i-2:0),o=2;o<i;o++)r[o-2]=arguments[o];this.initialize.apply(this,r),this.foundation_=void 0===n?this.getDefaultFoundation():n,this.foundation_.init(),this.initialSyncWithDOM()}return r(t,null,[{key:"attachTo",value:function(e){return new t(e,new i.a)}}]),r(t,[{key:"initialize",value:function(){}},{key:"getDefaultFoundation",value:function(){throw new Error("Subclasses must override getDefaultFoundation to return a properly configured foundation class")}},{key:"initialSyncWithDOM",value:function(){}},{key:"destroy",value:function(){this.foundation_.destroy()}},{key:"listen",value:function(t,e){this.root_.addEventListener(t,e)}},{key:"unlisten",value:function(t,e){this.root_.removeEventListener(t,e)}},{key:"emit",value:function(t,e){var n=arguments.length>2&&void 0!==arguments[2]&&arguments[2],i=void 0;"function"==typeof CustomEvent?i=new CustomEvent(t,{detail:e,bubbles:n}):(i=document.createEvent("CustomEvent")).initCustomEvent(t,n,!1,e),this.root_.dispatchEvent(i)}}]),t}();e.a=o},100:function(t,e,n){"use strict";var i=n(7),r=n(101),o=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n=arguments[e];for(var i in n)Object.prototype.hasOwnProperty.call(n,i)&&(t[i]=n[i])}return t},a=function(){function t(t,e){for(var n=0;n<e.length;n++){var i=e[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(t,i.key,i)}}return function(e,n,i){return n&&t(e.prototype,n),i&&t(e,i),e}}();var s=function(t){function e(t){!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,e);var n=function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e}(this,(e.__proto__||Object.getPrototypeOf(e)).call(this,o(e.defaultAdapter,t)));return n.active_=!1,n.actionWasClicked_=!1,n.dismissOnAction_=!0,n.firstFocus_=!0,n.pointerDownRecognized_=!1,n.snackbarHasFocus_=!1,n.snackbarData_=null,n.queue_=[],n.actionClickHandler_=function(){n.actionWasClicked_=!0,n.invokeAction_()},n.visibilitychangeHandler_=function(){clearTimeout(n.timeoutId_),n.snackbarHasFocus_=!0,n.adapter_.visibilityIsHidden()||setTimeout(n.cleanup_.bind(n),n.snackbarData_.timeout||r.b.MESSAGE_TIMEOUT)},n.interactionHandler_=function(t){"touchstart"!=t.type&&"mousedown"!=t.type||(n.pointerDownRecognized_=!0),n.handlePossibleTabKeyboardFocus_(t),"focus"==t.type&&(n.pointerDownRecognized_=!1)},n.blurHandler_=function(){clearTimeout(n.timeoutId_),n.snackbarHasFocus_=!1,n.timeoutId_=setTimeout(n.cleanup_.bind(n),n.snackbarData_.timeout||r.b.MESSAGE_TIMEOUT)},n}return function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)}(e,i["MDCFoundation"]),a(e,[{key:"active",get:function(){return this.active_}}],[{key:"cssClasses",get:function(){return r.a}},{key:"strings",get:function(){return r.c}},{key:"defaultAdapter",get:function(){return{addClass:function(){},removeClass:function(){},setAriaHidden:function(){},unsetAriaHidden:function(){},setActionAriaHidden:function(){},unsetActionAriaHidden:function(){},setActionText:function(){},setMessageText:function(){},setFocus:function(){},visibilityIsHidden:function(){return!1},registerCapturedBlurHandler:function(){},deregisterCapturedBlurHandler:function(){},registerVisibilityChangeHandler:function(){},deregisterVisibilityChangeHandler:function(){},registerCapturedInteractionHandler:function(){},deregisterCapturedInteractionHandler:function(){},registerActionClickHandler:function(){},deregisterActionClickHandler:function(){},registerTransitionEndHandler:function(){},deregisterTransitionEndHandler:function(){},notifyShow:function(){},notifyHide:function(){}}}}]),a(e,[{key:"init",value:function(){this.adapter_.registerActionClickHandler(this.actionClickHandler_),this.adapter_.setAriaHidden(),this.adapter_.setActionAriaHidden()}},{key:"destroy",value:function(){var t=this;this.adapter_.deregisterActionClickHandler(this.actionClickHandler_),this.adapter_.deregisterCapturedBlurHandler(this.blurHandler_),this.adapter_.deregisterVisibilityChangeHandler(this.visibilitychangeHandler_),["touchstart","mousedown","focus"].forEach(function(e){t.adapter_.deregisterCapturedInteractionHandler(e,t.interactionHandler_)})}},{key:"dismissesOnAction",value:function(){return this.dismissOnAction_}},{key:"setDismissOnAction",value:function(t){this.dismissOnAction_=!!t}},{key:"show",value:function(t){var e=this;if(!t)throw new Error("Please provide a data object with at least a message to display.");if(!t.message)throw new Error("Please provide a message to be displayed.");if(t.actionHandler&&!t.actionText)throw new Error("Please provide action text with the handler.");if(this.active)this.queue_.push(t);else{clearTimeout(this.timeoutId_),this.snackbarData_=t,this.firstFocus_=!0,this.adapter_.registerVisibilityChangeHandler(this.visibilitychangeHandler_),this.adapter_.registerCapturedBlurHandler(this.blurHandler_),["touchstart","mousedown","focus"].forEach(function(t){e.adapter_.registerCapturedInteractionHandler(t,e.interactionHandler_)});var n=r.a.ACTIVE,i=r.a.MULTILINE,o=r.a.ACTION_ON_BOTTOM;this.adapter_.setMessageText(this.snackbarData_.message),this.snackbarData_.multiline&&(this.adapter_.addClass(i),this.snackbarData_.actionOnBottom&&this.adapter_.addClass(o)),this.snackbarData_.actionHandler?(this.adapter_.setActionText(this.snackbarData_.actionText),this.actionHandler_=this.snackbarData_.actionHandler,this.setActionHidden_(!1)):(this.setActionHidden_(!0),this.actionHandler_=null,this.adapter_.setActionText(null)),this.active_=!0,this.adapter_.addClass(n),this.adapter_.unsetAriaHidden(),this.adapter_.notifyShow(),this.timeoutId_=setTimeout(this.cleanup_.bind(this),this.snackbarData_.timeout||r.b.MESSAGE_TIMEOUT)}}},{key:"handlePossibleTabKeyboardFocus_",value:function(){this.firstFocus_&&!this.pointerDownRecognized_&&this.setFocusOnAction_(),this.firstFocus_=!1}},{key:"setFocusOnAction_",value:function(){this.adapter_.setFocus(),this.snackbarHasFocus_=!0,this.firstFocus_=!1}},{key:"invokeAction_",value:function(){try{if(!this.actionHandler_)return;this.actionHandler_()}finally{this.dismissOnAction_&&this.cleanup_()}}},{key:"cleanup_",value:function(){var t=this;if(!this.snackbarHasFocus_||this.actionWasClicked_){var e=r.a.ACTIVE,n=r.a.MULTILINE,i=r.a.ACTION_ON_BOTTOM;this.adapter_.removeClass(e);this.adapter_.registerTransitionEndHandler(function e(){clearTimeout(t.timeoutId_),t.adapter_.deregisterTransitionEndHandler(e),t.adapter_.removeClass(n),t.adapter_.removeClass(i),t.setActionHidden_(!0),t.adapter_.setAriaHidden(),t.active_=!1,t.snackbarHasFocus_=!1,t.adapter_.notifyHide(),t.showNext_()})}}},{key:"showNext_",value:function(){this.queue_.length&&this.show(this.queue_.shift())}},{key:"setActionHidden_",value:function(t){t?this.adapter_.setActionAriaHidden():this.adapter_.unsetActionAriaHidden()}}]),e}();e.a=s},101:function(t,e,n){"use strict";n.d(e,"a",function(){return i}),n.d(e,"c",function(){return r}),n.d(e,"b",function(){return o});var i={ROOT:"mdc-snackbar",TEXT:"mdc-snackbar__text",ACTION_WRAPPER:"mdc-snackbar__action-wrapper",ACTION_BUTTON:"mdc-snackbar__action-button",ACTIVE:"mdc-snackbar--active",MULTILINE:"mdc-snackbar--multiline",ACTION_ON_BOTTOM:"mdc-snackbar--action-on-bottom"},r={TEXT_SELECTOR:".mdc-snackbar__text",ACTION_WRAPPER_SELECTOR:".mdc-snackbar__action-wrapper",ACTION_BUTTON_SELECTOR:".mdc-snackbar__action-button",SHOW_EVENT:"MDCSnackbar:show",HIDE_EVENT:"MDCSnackbar:hide"},o={MESSAGE_TIMEOUT:2750}},7:function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var i=n(0),r=n(1);n.d(e,"MDCFoundation",function(){return i.a}),n.d(e,"MDCComponent",function(){return r.a})},8:function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0}),n.d(e,"transformStyleProperties",function(){return a}),n.d(e,"getCorrectEventName",function(){return s}),n.d(e,"getCorrectPropertyName",function(){return u});var i={animationstart:{noPrefix:"animationstart",webkitPrefix:"webkitAnimationStart",styleProperty:"animation"},animationend:{noPrefix:"animationend",webkitPrefix:"webkitAnimationEnd",styleProperty:"animation"},animationiteration:{noPrefix:"animationiteration",webkitPrefix:"webkitAnimationIteration",styleProperty:"animation"},transitionend:{noPrefix:"transitionend",webkitPrefix:"webkitTransitionEnd",styleProperty:"transition"}},r={animation:{noPrefix:"animation",webkitPrefix:"-webkit-animation"},transform:{noPrefix:"transform",webkitPrefix:"-webkit-transform"},transition:{noPrefix:"transition",webkitPrefix:"-webkit-transition"}};function o(t,e){if(!function(t){return void 0!==t.document&&"function"==typeof t.document.createElement}(t)||!function(t){return t in i||t in r}(e))return e;var n=e in i?i:r,o=t.document.createElement("div");return n===i?function(t,e,n){return e[t].styleProperty in n.style?e[t].noPrefix:e[t].webkitPrefix}(e,n,o):n[e].noPrefix in o.style?n[e].noPrefix:n[e].webkitPrefix}var a=["transform","WebkitTransform","MozTransform","OTransform","MSTransform"];function s(t,e){return o(t,e)}function u(t,e){return o(t,e)}},99:function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0}),n.d(e,"MDCSnackbar",function(){return s});var i=n(7),r=n(100),o=n(8);n.d(e,"MDCSnackbarFoundation",function(){return r.a});var a=function(){function t(t,e){for(var n=0;n<e.length;n++){var i=e[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(t,i.key,i)}}return function(e,n,i){return n&&t(e.prototype,n),i&&t(e,i),e}}();var s=function(t){function e(){return function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,e),function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e}(this,(e.__proto__||Object.getPrototypeOf(e)).apply(this,arguments))}return function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)}(e,i["MDCComponent"]),a(e,[{key:"show",value:function(t){this.foundation_.show(t)}},{key:"getDefaultFoundation",value:function(){var t=this,e=r.a.strings,n=e.TEXT_SELECTOR,i=e.ACTION_BUTTON_SELECTOR,a=function(){return t.root_.querySelector(i)};return new r.a({addClass:function(e){return t.root_.classList.add(e)},removeClass:function(e){return t.root_.classList.remove(e)},setAriaHidden:function(){return t.root_.setAttribute("aria-hidden","true")},unsetAriaHidden:function(){return t.root_.removeAttribute("aria-hidden")},setActionAriaHidden:function(){return a().setAttribute("aria-hidden","true")},unsetActionAriaHidden:function(){return a().removeAttribute("aria-hidden")},setActionText:function(t){a().textContent=t},setMessageText:function(e){t.root_.querySelector(n).textContent=e},setFocus:function(){return a().focus()},visibilityIsHidden:function(){return document.hidden},registerCapturedBlurHandler:function(t){return a().addEventListener("blur",t,!0)},deregisterCapturedBlurHandler:function(t){return a().removeEventListener("blur",t,!0)},registerVisibilityChangeHandler:function(t){return document.addEventListener("visibilitychange",t)},deregisterVisibilityChangeHandler:function(t){return document.removeEventListener("visibilitychange",t)},registerCapturedInteractionHandler:function(t,e){return document.body.addEventListener(t,e,!0)},deregisterCapturedInteractionHandler:function(t,e){return document.body.removeEventListener(t,e,!0)},registerActionClickHandler:function(t){return a().addEventListener("click",t)},deregisterActionClickHandler:function(t){return a().removeEventListener("click",t)},registerTransitionEndHandler:function(e){return t.root_.addEventListener(Object(o.getCorrectEventName)(window,"transitionend"),e)},deregisterTransitionEndHandler:function(e){return t.root_.removeEventListener(Object(o.getCorrectEventName)(window,"transitionend"),e)},notifyShow:function(){return t.emit(r.a.strings.SHOW_EVENT)},notifyHide:function(){return t.emit(r.a.strings.HIDE_EVENT)}})}},{key:"dismissesOnAction",get:function(){return this.foundation_.dismissesOnAction()},set:function(t){this.foundation_.setDismissOnAction(t)}}],[{key:"attachTo",value:function(t){return new e(t)}}]),e}()}})},"object"==typeof n&&"object"==typeof e?e.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof n?n.snackbar=r():(i.mdc=i.mdc||{},i.mdc.snackbar=r())},{}],2:[function(t,e,n){!function(){"use strict";const e=t=>document.body.querySelector(t);var n=t("@material/snackbar/dist/mdc.snackbar");const i=t("../utils/StorageManager"),r=n.MDCSnackbar;n.MDCSnackbarFoundation;n.MDCSnackbar.attachTo(e(".mdc-snackbar"));const o=new r(e(".mdc-snackbar"));var a="",s={codes:[],pressing:[]};function u(){return{DOMEvents:function(){e(".js-popupShortcut").addEventListener("keydown",l),e(".js-popupShortcut").addEventListener("keyup",f),e(".js-popupShortcut").addEventListener("focus",c),e(".js-popupShortcut").addEventListener("focusout",d),e(".js-popupMode").addEventListener("change",_),e(".js-fallbackLanguage").addEventListener("change",h),e(".js-nlpLanguages").addEventListener("change",v)},elementsValues:function(){p()},storageEvents:function(){i.onChanges(p)}}}function c(t){var n=e(".js-popupShortcut").value;n&&(a=n),e(".js-popupShortcut").value=""}function d(t){var n;e(".js-popupShortcut").value?(n=s.codes,i.update("shortcut",n).then(t=>{o.show({message:"✔ Shortcut definitions saved"})}),o.show({message:"Shortcut saved!"})):e(".js-popupShortcut").value=a}function l(t){console.log(s.pressing),0===s.pressing.length&&(s.codes=[]),s.codes.length<3&&!s.codes.includes(t.code)&&(s.pressing.push(t.keyCode),s.codes.push(t.code),e(".js-popupShortcut").value=s.codes.toString())}function f(t){console.log(s.pressing);var e=s.codes.indexOf(t.code);-1!==e&&s.pressing.splice(e,1)}async function p(t,n){var r=n&&n.fallbackLang||await i.retrieve("fallbackLang"),o=n&&n.popupMode||await i.retrieve("popupMode"),a=n&&n.nlpLangs||await i.retrieve("nlpLangs"),s=n&&n.shortcut||await i.retrieve("shortcut");e(".js-fallbackLanguage").value=r,e(".js-popupMode").value=o,e(".js-popupShortcut").value=s.toString(),document.body.querySelectorAll(".js-nlpLang").forEach(t=>{a.includes(t.value)&&(t.checked=!0)})}function h(){var t=e(".js-fallbackLanguage").value;i.update("fallbackLang",t).then(t=>{o.show({message:" ✔ Language definitions saved"})})}function _(){var t=e(".js-popupMode").value;i.update("popupMode",t).then(t=>{o.show({message:"✔ Popup trigger definitions saved"})})}function v(){var t=[];document.body.querySelectorAll(".js-nlpLang").forEach(e=>{e.checked&&t.push(e.value)}),i.update("nlpLangs",t).then(t=>{o.show({message:"✔ Search Languages definitions saved"})})}u().DOMEvents(),u().elementsValues(),u().storageEvents()}()},{"../utils/StorageManager":3,"@material/snackbar/dist/mdc.snackbar":1}],3:[function(t,e,n){(()=>{"use strict";e.exports=new class{constructor(){this._errorCode={1:t=>`Object "${t}" not found`,2:(t,e)=>`Object property "${t}.${e}" not found in storage.`,3:t=>`Object property ".${t}" not found in storage.`},this._encodeProp=(t=>({isEnabled:5,fallbackLang:1,nlpLangs:4,shortcut:3,popupMode:2})[t]),this._decodeProp=(t=>({5:"isEnabled",1:"fallbackLang",4:"nlpLangs",3:"shortcut",2:"popupMode"})[t]),this._decodeObj=(t=>{let e={};return Object.keys(t).forEach(n=>{e[this._decodeProp(n)]=t[n]}),e})}update(t,e){return new Promise(async(n,i)=>{var r,o=await this.retrieve();o[this._encodeProp(t)]=e,r=JSON.stringify(o),chrome.storage.sync.set({wldt:r},()=>n(!0))})}retrieve(t=""){var e=0;return new Promise(async(n,i)=>{var r="";try{r=await new Promise(t=>chrome.storage.sync.get("wldt",e=>t(e.wldt)));var o=JSON.parse(r);t.length>0?n(o[this._encodeProp(t)]):n(o)}catch(n){if((e+=1)>=2)i(n);else{let e=JSON.stringify({1:"en",2:"shortcut",3:["ShiftLeft","AltLeft"],4:["por","eng","esp","rus"],5:!0});chrome.storage.sync.set({wldt:e},()=>this.retrieve(t))}}})}onChanges(t){var e=this._decodeObj;chrome.storage.onChanged.addListener((n,i)=>{n.wldt&&t(e(JSON.parse(n.wldt.oldValue)),e(JSON.parse(n.wldt.newValue)))})}}})()},{}]},{},[2]);
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+/*!
+ Material Components for the Web
+ Copyright (c) 2018 Google Inc.
+ License: Apache-2.0
+*/
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["snackbar"] = factory();
+	else
+		root["mdc"] = root["mdc"] || {}, root["mdc"]["snackbar"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 99);
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 0:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @template A
+ */
+var MDCFoundation = function () {
+  _createClass(MDCFoundation, null, [{
+    key: "cssClasses",
+
+    /** @return enum{cssClasses} */
+    get: function get() {
+      // Classes extending MDCFoundation should implement this method to return an object which exports every
+      // CSS class the foundation class needs as a property. e.g. {ACTIVE: 'mdc-component--active'}
+      return {};
+    }
+
+    /** @return enum{strings} */
+
+  }, {
+    key: "strings",
+    get: function get() {
+      // Classes extending MDCFoundation should implement this method to return an object which exports all
+      // semantic strings as constants. e.g. {ARIA_ROLE: 'tablist'}
+      return {};
+    }
+
+    /** @return enum{numbers} */
+
+  }, {
+    key: "numbers",
+    get: function get() {
+      // Classes extending MDCFoundation should implement this method to return an object which exports all
+      // of its semantic numbers as constants. e.g. {ANIMATION_DELAY_MS: 350}
+      return {};
+    }
+
+    /** @return {!Object} */
+
+  }, {
+    key: "defaultAdapter",
+    get: function get() {
+      // Classes extending MDCFoundation may choose to implement this getter in order to provide a convenient
+      // way of viewing the necessary methods of an adapter. In the future, this could also be used for adapter
+      // validation.
+      return {};
+    }
+
+    /**
+     * @param {A=} adapter
+     */
+
+  }]);
+
+  function MDCFoundation() {
+    var adapter = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, MDCFoundation);
+
+    /** @protected {!A} */
+    this.adapter_ = adapter;
+  }
+
+  _createClass(MDCFoundation, [{
+    key: "init",
+    value: function init() {
+      // Subclasses should override this method to perform initialization routines (registering events, etc.)
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      // Subclasses should override this method to perform de-initialization routines (de-registering events, etc.)
+    }
+  }]);
+
+  return MDCFoundation;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (MDCFoundation);
+
+/***/ }),
+
+/***/ 1:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__foundation__ = __webpack_require__(0);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/**
+ * @template F
+ */
+
+var MDCComponent = function () {
+  _createClass(MDCComponent, null, [{
+    key: 'attachTo',
+
+    /**
+     * @param {!Element} root
+     * @return {!MDCComponent}
+     */
+    value: function attachTo(root) {
+      // Subclasses which extend MDCBase should provide an attachTo() method that takes a root element and
+      // returns an instantiated component with its root set to that element. Also note that in the cases of
+      // subclasses, an explicit foundation class will not have to be passed in; it will simply be initialized
+      // from getDefaultFoundation().
+      return new MDCComponent(root, new __WEBPACK_IMPORTED_MODULE_0__foundation__["a" /* default */]());
+    }
+
+    /**
+     * @param {!Element} root
+     * @param {F=} foundation
+     * @param {...?} args
+     */
+
+  }]);
+
+  function MDCComponent(root) {
+    var foundation = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+
+    _classCallCheck(this, MDCComponent);
+
+    /** @protected {!Element} */
+    this.root_ = root;
+
+    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+      args[_key - 2] = arguments[_key];
+    }
+
+    this.initialize.apply(this, args);
+    // Note that we initialize foundation here and not within the constructor's default param so that
+    // this.root_ is defined and can be used within the foundation class.
+    /** @protected {!F} */
+    this.foundation_ = foundation === undefined ? this.getDefaultFoundation() : foundation;
+    this.foundation_.init();
+    this.initialSyncWithDOM();
+  }
+
+  _createClass(MDCComponent, [{
+    key: 'initialize',
+    value: function initialize() /* ...args */{}
+    // Subclasses can override this to do any additional setup work that would be considered part of a
+    // "constructor". Essentially, it is a hook into the parent constructor before the foundation is
+    // initialized. Any additional arguments besides root and foundation will be passed in here.
+
+
+    /**
+     * @return {!F} foundation
+     */
+
+  }, {
+    key: 'getDefaultFoundation',
+    value: function getDefaultFoundation() {
+      // Subclasses must override this method to return a properly configured foundation class for the
+      // component.
+      throw new Error('Subclasses must override getDefaultFoundation to return a properly configured ' + 'foundation class');
+    }
+  }, {
+    key: 'initialSyncWithDOM',
+    value: function initialSyncWithDOM() {
+      // Subclasses should override this method if they need to perform work to synchronize with a host DOM
+      // object. An example of this would be a form control wrapper that needs to synchronize its internal state
+      // to some property or attribute of the host DOM. Please note: this is *not* the place to perform DOM
+      // reads/writes that would cause layout / paint, as this is called synchronously from within the constructor.
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      // Subclasses may implement this method to release any resources / deregister any listeners they have
+      // attached. An example of this might be deregistering a resize event from the window object.
+      this.foundation_.destroy();
+    }
+
+    /**
+     * Wrapper method to add an event listener to the component's root element. This is most useful when
+     * listening for custom events.
+     * @param {string} evtType
+     * @param {!Function} handler
+     */
+
+  }, {
+    key: 'listen',
+    value: function listen(evtType, handler) {
+      this.root_.addEventListener(evtType, handler);
+    }
+
+    /**
+     * Wrapper method to remove an event listener to the component's root element. This is most useful when
+     * unlistening for custom events.
+     * @param {string} evtType
+     * @param {!Function} handler
+     */
+
+  }, {
+    key: 'unlisten',
+    value: function unlisten(evtType, handler) {
+      this.root_.removeEventListener(evtType, handler);
+    }
+
+    /**
+     * Fires a cross-browser-compatible custom event from the component root of the given type,
+     * with the given data.
+     * @param {string} evtType
+     * @param {!Object} evtData
+     * @param {boolean=} shouldBubble
+     */
+
+  }, {
+    key: 'emit',
+    value: function emit(evtType, evtData) {
+      var shouldBubble = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      var evt = void 0;
+      if (typeof CustomEvent === 'function') {
+        evt = new CustomEvent(evtType, {
+          detail: evtData,
+          bubbles: shouldBubble
+        });
+      } else {
+        evt = document.createEvent('CustomEvent');
+        evt.initCustomEvent(evtType, shouldBubble, false, evtData);
+      }
+
+      this.root_.dispatchEvent(evt);
+    }
+  }]);
+
+  return MDCComponent;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (MDCComponent);
+
+/***/ }),
+
+/***/ 100:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_index__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(101);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+var MDCSnackbarFoundation = function (_MDCFoundation) {
+  _inherits(MDCSnackbarFoundation, _MDCFoundation);
+
+  _createClass(MDCSnackbarFoundation, [{
+    key: 'active',
+    get: function get() {
+      return this.active_;
+    }
+  }], [{
+    key: 'cssClasses',
+    get: function get() {
+      return __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* cssClasses */];
+    }
+  }, {
+    key: 'strings',
+    get: function get() {
+      return __WEBPACK_IMPORTED_MODULE_1__constants__["c" /* strings */];
+    }
+  }, {
+    key: 'defaultAdapter',
+    get: function get() {
+      return {
+        addClass: function addClass() /* className: string */{},
+        removeClass: function removeClass() /* className: string */{},
+        setAriaHidden: function setAriaHidden() {},
+        unsetAriaHidden: function unsetAriaHidden() {},
+        setActionAriaHidden: function setActionAriaHidden() {},
+        unsetActionAriaHidden: function unsetActionAriaHidden() {},
+        setActionText: function setActionText() /* actionText: string */{},
+        setMessageText: function setMessageText() /* message: string */{},
+        setFocus: function setFocus() {},
+        visibilityIsHidden: function visibilityIsHidden() {
+          return (/* boolean */false
+          );
+        },
+        registerCapturedBlurHandler: function registerCapturedBlurHandler() /* handler: EventListener */{},
+        deregisterCapturedBlurHandler: function deregisterCapturedBlurHandler() /* handler: EventListener */{},
+        registerVisibilityChangeHandler: function registerVisibilityChangeHandler() /* handler: EventListener */{},
+        deregisterVisibilityChangeHandler: function deregisterVisibilityChangeHandler() /* handler: EventListener */{},
+        registerCapturedInteractionHandler: function registerCapturedInteractionHandler() /* evtType: string, handler: EventListener */{},
+        deregisterCapturedInteractionHandler: function deregisterCapturedInteractionHandler() /* evtType: string, handler: EventListener */{},
+        registerActionClickHandler: function registerActionClickHandler() /* handler: EventListener */{},
+        deregisterActionClickHandler: function deregisterActionClickHandler() /* handler: EventListener */{},
+        registerTransitionEndHandler: function registerTransitionEndHandler() /* handler: EventListener */{},
+        deregisterTransitionEndHandler: function deregisterTransitionEndHandler() /* handler: EventListener */{},
+        notifyShow: function notifyShow() {},
+        notifyHide: function notifyHide() {}
+      };
+    }
+  }]);
+
+  function MDCSnackbarFoundation(adapter) {
+    _classCallCheck(this, MDCSnackbarFoundation);
+
+    var _this = _possibleConstructorReturn(this, (MDCSnackbarFoundation.__proto__ || Object.getPrototypeOf(MDCSnackbarFoundation)).call(this, _extends(MDCSnackbarFoundation.defaultAdapter, adapter)));
+
+    _this.active_ = false;
+    _this.actionWasClicked_ = false;
+    _this.dismissOnAction_ = true;
+    _this.firstFocus_ = true;
+    _this.pointerDownRecognized_ = false;
+    _this.snackbarHasFocus_ = false;
+    _this.snackbarData_ = null;
+    _this.queue_ = [];
+    _this.actionClickHandler_ = function () {
+      _this.actionWasClicked_ = true;
+      _this.invokeAction_();
+    };
+    _this.visibilitychangeHandler_ = function () {
+      clearTimeout(_this.timeoutId_);
+      _this.snackbarHasFocus_ = true;
+
+      if (!_this.adapter_.visibilityIsHidden()) {
+        setTimeout(_this.cleanup_.bind(_this), _this.snackbarData_.timeout || __WEBPACK_IMPORTED_MODULE_1__constants__["b" /* numbers */].MESSAGE_TIMEOUT);
+      }
+    };
+    _this.interactionHandler_ = function (evt) {
+      if (evt.type == 'touchstart' || evt.type == 'mousedown') {
+        _this.pointerDownRecognized_ = true;
+      }
+      _this.handlePossibleTabKeyboardFocus_(evt);
+
+      if (evt.type == 'focus') {
+        _this.pointerDownRecognized_ = false;
+      }
+    };
+    _this.blurHandler_ = function () {
+      clearTimeout(_this.timeoutId_);
+      _this.snackbarHasFocus_ = false;
+      _this.timeoutId_ = setTimeout(_this.cleanup_.bind(_this), _this.snackbarData_.timeout || __WEBPACK_IMPORTED_MODULE_1__constants__["b" /* numbers */].MESSAGE_TIMEOUT);
+    };
+    return _this;
+  }
+
+  _createClass(MDCSnackbarFoundation, [{
+    key: 'init',
+    value: function init() {
+      this.adapter_.registerActionClickHandler(this.actionClickHandler_);
+      this.adapter_.setAriaHidden();
+      this.adapter_.setActionAriaHidden();
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      var _this2 = this;
+
+      this.adapter_.deregisterActionClickHandler(this.actionClickHandler_);
+      this.adapter_.deregisterCapturedBlurHandler(this.blurHandler_);
+      this.adapter_.deregisterVisibilityChangeHandler(this.visibilitychangeHandler_);
+      ['touchstart', 'mousedown', 'focus'].forEach(function (evtType) {
+        _this2.adapter_.deregisterCapturedInteractionHandler(evtType, _this2.interactionHandler_);
+      });
+    }
+  }, {
+    key: 'dismissesOnAction',
+    value: function dismissesOnAction() {
+      return this.dismissOnAction_;
+    }
+  }, {
+    key: 'setDismissOnAction',
+    value: function setDismissOnAction(dismissOnAction) {
+      this.dismissOnAction_ = !!dismissOnAction;
+    }
+  }, {
+    key: 'show',
+    value: function show(data) {
+      var _this3 = this;
+
+      if (!data) {
+        throw new Error('Please provide a data object with at least a message to display.');
+      }
+      if (!data.message) {
+        throw new Error('Please provide a message to be displayed.');
+      }
+      if (data.actionHandler && !data.actionText) {
+        throw new Error('Please provide action text with the handler.');
+      }
+      if (this.active) {
+        this.queue_.push(data);
+        return;
+      }
+      clearTimeout(this.timeoutId_);
+      this.snackbarData_ = data;
+      this.firstFocus_ = true;
+      this.adapter_.registerVisibilityChangeHandler(this.visibilitychangeHandler_);
+      this.adapter_.registerCapturedBlurHandler(this.blurHandler_);
+      ['touchstart', 'mousedown', 'focus'].forEach(function (evtType) {
+        _this3.adapter_.registerCapturedInteractionHandler(evtType, _this3.interactionHandler_);
+      });
+
+      var ACTIVE = __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* cssClasses */].ACTIVE,
+          MULTILINE = __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* cssClasses */].MULTILINE,
+          ACTION_ON_BOTTOM = __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* cssClasses */].ACTION_ON_BOTTOM;
+
+
+      this.adapter_.setMessageText(this.snackbarData_.message);
+
+      if (this.snackbarData_.multiline) {
+        this.adapter_.addClass(MULTILINE);
+        if (this.snackbarData_.actionOnBottom) {
+          this.adapter_.addClass(ACTION_ON_BOTTOM);
+        }
+      }
+
+      if (this.snackbarData_.actionHandler) {
+        this.adapter_.setActionText(this.snackbarData_.actionText);
+        this.actionHandler_ = this.snackbarData_.actionHandler;
+        this.setActionHidden_(false);
+      } else {
+        this.setActionHidden_(true);
+        this.actionHandler_ = null;
+        this.adapter_.setActionText(null);
+      }
+
+      this.active_ = true;
+      this.adapter_.addClass(ACTIVE);
+      this.adapter_.unsetAriaHidden();
+      this.adapter_.notifyShow();
+
+      this.timeoutId_ = setTimeout(this.cleanup_.bind(this), this.snackbarData_.timeout || __WEBPACK_IMPORTED_MODULE_1__constants__["b" /* numbers */].MESSAGE_TIMEOUT);
+    }
+  }, {
+    key: 'handlePossibleTabKeyboardFocus_',
+    value: function handlePossibleTabKeyboardFocus_() {
+      var hijackFocus = this.firstFocus_ && !this.pointerDownRecognized_;
+
+      if (hijackFocus) {
+        this.setFocusOnAction_();
+      }
+
+      this.firstFocus_ = false;
+    }
+  }, {
+    key: 'setFocusOnAction_',
+    value: function setFocusOnAction_() {
+      this.adapter_.setFocus();
+      this.snackbarHasFocus_ = true;
+      this.firstFocus_ = false;
+    }
+  }, {
+    key: 'invokeAction_',
+    value: function invokeAction_() {
+      try {
+        if (!this.actionHandler_) {
+          return;
+        }
+
+        this.actionHandler_();
+      } finally {
+        if (this.dismissOnAction_) {
+          this.cleanup_();
+        }
+      }
+    }
+  }, {
+    key: 'cleanup_',
+    value: function cleanup_() {
+      var _this4 = this;
+
+      var allowDismissal = !this.snackbarHasFocus_ || this.actionWasClicked_;
+
+      if (allowDismissal) {
+        var ACTIVE = __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* cssClasses */].ACTIVE,
+            MULTILINE = __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* cssClasses */].MULTILINE,
+            ACTION_ON_BOTTOM = __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* cssClasses */].ACTION_ON_BOTTOM;
+
+
+        this.adapter_.removeClass(ACTIVE);
+
+        var handler = function handler() {
+          clearTimeout(_this4.timeoutId_);
+          _this4.adapter_.deregisterTransitionEndHandler(handler);
+          _this4.adapter_.removeClass(MULTILINE);
+          _this4.adapter_.removeClass(ACTION_ON_BOTTOM);
+          _this4.setActionHidden_(true);
+          _this4.adapter_.setAriaHidden();
+          _this4.active_ = false;
+          _this4.snackbarHasFocus_ = false;
+          _this4.adapter_.notifyHide();
+          _this4.showNext_();
+        };
+
+        this.adapter_.registerTransitionEndHandler(handler);
+      }
+    }
+  }, {
+    key: 'showNext_',
+    value: function showNext_() {
+      if (!this.queue_.length) {
+        return;
+      }
+      this.show(this.queue_.shift());
+    }
+  }, {
+    key: 'setActionHidden_',
+    value: function setActionHidden_(isHidden) {
+      if (isHidden) {
+        this.adapter_.setActionAriaHidden();
+      } else {
+        this.adapter_.unsetActionAriaHidden();
+      }
+    }
+  }]);
+
+  return MDCSnackbarFoundation;
+}(__WEBPACK_IMPORTED_MODULE_0__material_base_index__["MDCFoundation"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (MDCSnackbarFoundation);
+
+/***/ }),
+
+/***/ 101:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return cssClasses; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return strings; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return numbers; });
+/**
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var cssClasses = {
+  ROOT: 'mdc-snackbar',
+  TEXT: 'mdc-snackbar__text',
+  ACTION_WRAPPER: 'mdc-snackbar__action-wrapper',
+  ACTION_BUTTON: 'mdc-snackbar__action-button',
+  ACTIVE: 'mdc-snackbar--active',
+  MULTILINE: 'mdc-snackbar--multiline',
+  ACTION_ON_BOTTOM: 'mdc-snackbar--action-on-bottom'
+};
+
+var strings = {
+  TEXT_SELECTOR: '.mdc-snackbar__text',
+  ACTION_WRAPPER_SELECTOR: '.mdc-snackbar__action-wrapper',
+  ACTION_BUTTON_SELECTOR: '.mdc-snackbar__action-button',
+  SHOW_EVENT: 'MDCSnackbar:show',
+  HIDE_EVENT: 'MDCSnackbar:hide'
+};
+
+var numbers = {
+  MESSAGE_TIMEOUT: 2750
+};
+
+/***/ }),
+
+/***/ 7:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__foundation__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(1);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "MDCFoundation", function() { return __WEBPACK_IMPORTED_MODULE_0__foundation__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "MDCComponent", function() { return __WEBPACK_IMPORTED_MODULE_1__component__["a"]; });
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+/***/ }),
+
+/***/ 8:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transformStyleProperties", function() { return transformStyleProperties; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCorrectEventName", function() { return getCorrectEventName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCorrectPropertyName", function() { return getCorrectPropertyName; });
+/**
+ * @license
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @typedef {{
+ *   noPrefix: string,
+ *   webkitPrefix: string,
+ *   styleProperty: string
+ * }}
+ */
+var VendorPropertyMapType = void 0;
+
+/** @const {Object<string, !VendorPropertyMapType>} */
+var eventTypeMap = {
+  'animationstart': {
+    noPrefix: 'animationstart',
+    webkitPrefix: 'webkitAnimationStart',
+    styleProperty: 'animation'
+  },
+  'animationend': {
+    noPrefix: 'animationend',
+    webkitPrefix: 'webkitAnimationEnd',
+    styleProperty: 'animation'
+  },
+  'animationiteration': {
+    noPrefix: 'animationiteration',
+    webkitPrefix: 'webkitAnimationIteration',
+    styleProperty: 'animation'
+  },
+  'transitionend': {
+    noPrefix: 'transitionend',
+    webkitPrefix: 'webkitTransitionEnd',
+    styleProperty: 'transition'
+  }
+};
+
+/** @const {Object<string, !VendorPropertyMapType>} */
+var cssPropertyMap = {
+  'animation': {
+    noPrefix: 'animation',
+    webkitPrefix: '-webkit-animation'
+  },
+  'transform': {
+    noPrefix: 'transform',
+    webkitPrefix: '-webkit-transform'
+  },
+  'transition': {
+    noPrefix: 'transition',
+    webkitPrefix: '-webkit-transition'
+  }
+};
+
+/**
+ * @param {!Object} windowObj
+ * @return {boolean}
+ */
+function hasProperShape(windowObj) {
+  return windowObj['document'] !== undefined && typeof windowObj['document']['createElement'] === 'function';
+}
+
+/**
+ * @param {string} eventType
+ * @return {boolean}
+ */
+function eventFoundInMaps(eventType) {
+  return eventType in eventTypeMap || eventType in cssPropertyMap;
+}
+
+/**
+ * @param {string} eventType
+ * @param {!Object<string, !VendorPropertyMapType>} map
+ * @param {!Element} el
+ * @return {string}
+ */
+function getJavaScriptEventName(eventType, map, el) {
+  return map[eventType].styleProperty in el.style ? map[eventType].noPrefix : map[eventType].webkitPrefix;
+}
+
+/**
+ * Helper function to determine browser prefix for CSS3 animation events
+ * and property names.
+ * @param {!Object} windowObj
+ * @param {string} eventType
+ * @return {string}
+ */
+function getAnimationName(windowObj, eventType) {
+  if (!hasProperShape(windowObj) || !eventFoundInMaps(eventType)) {
+    return eventType;
+  }
+
+  var map = /** @type {!Object<string, !VendorPropertyMapType>} */eventType in eventTypeMap ? eventTypeMap : cssPropertyMap;
+  var el = windowObj['document']['createElement']('div');
+  var eventName = '';
+
+  if (map === eventTypeMap) {
+    eventName = getJavaScriptEventName(eventType, map, el);
+  } else {
+    eventName = map[eventType].noPrefix in el.style ? map[eventType].noPrefix : map[eventType].webkitPrefix;
+  }
+
+  return eventName;
+}
+
+// Public functions to access getAnimationName() for JavaScript events or CSS
+// property names.
+
+var transformStyleProperties = ['transform', 'WebkitTransform', 'MozTransform', 'OTransform', 'MSTransform'];
+
+/**
+ * @param {!Object} windowObj
+ * @param {string} eventType
+ * @return {string}
+ */
+function getCorrectEventName(windowObj, eventType) {
+  return getAnimationName(windowObj, eventType);
+}
+
+/**
+ * @param {!Object} windowObj
+ * @param {string} eventType
+ * @return {string}
+ */
+function getCorrectPropertyName(windowObj, eventType) {
+  return getAnimationName(windowObj, eventType);
+}
+
+
+
+/***/ }),
+
+/***/ 99:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MDCSnackbar", function() { return MDCSnackbar; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_index__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__foundation__ = __webpack_require__(100);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_animation_index__ = __webpack_require__(8);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "MDCSnackbarFoundation", function() { return __WEBPACK_IMPORTED_MODULE_1__foundation__["a"]; });
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+var MDCSnackbar = function (_MDCComponent) {
+  _inherits(MDCSnackbar, _MDCComponent);
+
+  function MDCSnackbar() {
+    _classCallCheck(this, MDCSnackbar);
+
+    return _possibleConstructorReturn(this, (MDCSnackbar.__proto__ || Object.getPrototypeOf(MDCSnackbar)).apply(this, arguments));
+  }
+
+  _createClass(MDCSnackbar, [{
+    key: 'show',
+    value: function show(data) {
+      this.foundation_.show(data);
+    }
+  }, {
+    key: 'getDefaultFoundation',
+    value: function getDefaultFoundation() {
+      var _this2 = this;
+
+      var _MDCSnackbarFoundatio = __WEBPACK_IMPORTED_MODULE_1__foundation__["a" /* default */].strings,
+          TEXT_SELECTOR = _MDCSnackbarFoundatio.TEXT_SELECTOR,
+          ACTION_BUTTON_SELECTOR = _MDCSnackbarFoundatio.ACTION_BUTTON_SELECTOR;
+
+      var getText = function getText() {
+        return _this2.root_.querySelector(TEXT_SELECTOR);
+      };
+      var getActionButton = function getActionButton() {
+        return _this2.root_.querySelector(ACTION_BUTTON_SELECTOR);
+      };
+
+      /* eslint brace-style: "off" */
+      return new __WEBPACK_IMPORTED_MODULE_1__foundation__["a" /* default */]({
+        addClass: function addClass(className) {
+          return _this2.root_.classList.add(className);
+        },
+        removeClass: function removeClass(className) {
+          return _this2.root_.classList.remove(className);
+        },
+        setAriaHidden: function setAriaHidden() {
+          return _this2.root_.setAttribute('aria-hidden', 'true');
+        },
+        unsetAriaHidden: function unsetAriaHidden() {
+          return _this2.root_.removeAttribute('aria-hidden');
+        },
+        setActionAriaHidden: function setActionAriaHidden() {
+          return getActionButton().setAttribute('aria-hidden', 'true');
+        },
+        unsetActionAriaHidden: function unsetActionAriaHidden() {
+          return getActionButton().removeAttribute('aria-hidden');
+        },
+        setActionText: function setActionText(text) {
+          getActionButton().textContent = text;
+        },
+        setMessageText: function setMessageText(text) {
+          getText().textContent = text;
+        },
+        setFocus: function setFocus() {
+          return getActionButton().focus();
+        },
+        visibilityIsHidden: function visibilityIsHidden() {
+          return document.hidden;
+        },
+        registerCapturedBlurHandler: function registerCapturedBlurHandler(handler) {
+          return getActionButton().addEventListener('blur', handler, true);
+        },
+        deregisterCapturedBlurHandler: function deregisterCapturedBlurHandler(handler) {
+          return getActionButton().removeEventListener('blur', handler, true);
+        },
+        registerVisibilityChangeHandler: function registerVisibilityChangeHandler(handler) {
+          return document.addEventListener('visibilitychange', handler);
+        },
+        deregisterVisibilityChangeHandler: function deregisterVisibilityChangeHandler(handler) {
+          return document.removeEventListener('visibilitychange', handler);
+        },
+        registerCapturedInteractionHandler: function registerCapturedInteractionHandler(evt, handler) {
+          return document.body.addEventListener(evt, handler, true);
+        },
+        deregisterCapturedInteractionHandler: function deregisterCapturedInteractionHandler(evt, handler) {
+          return document.body.removeEventListener(evt, handler, true);
+        },
+        registerActionClickHandler: function registerActionClickHandler(handler) {
+          return getActionButton().addEventListener('click', handler);
+        },
+        deregisterActionClickHandler: function deregisterActionClickHandler(handler) {
+          return getActionButton().removeEventListener('click', handler);
+        },
+        registerTransitionEndHandler: function registerTransitionEndHandler(handler) {
+          return _this2.root_.addEventListener(Object(__WEBPACK_IMPORTED_MODULE_2__material_animation_index__["getCorrectEventName"])(window, 'transitionend'), handler);
+        },
+        deregisterTransitionEndHandler: function deregisterTransitionEndHandler(handler) {
+          return _this2.root_.removeEventListener(Object(__WEBPACK_IMPORTED_MODULE_2__material_animation_index__["getCorrectEventName"])(window, 'transitionend'), handler);
+        },
+        notifyShow: function notifyShow() {
+          return _this2.emit(__WEBPACK_IMPORTED_MODULE_1__foundation__["a" /* default */].strings.SHOW_EVENT);
+        },
+        notifyHide: function notifyHide() {
+          return _this2.emit(__WEBPACK_IMPORTED_MODULE_1__foundation__["a" /* default */].strings.HIDE_EVENT);
+        }
+      });
+    }
+  }, {
+    key: 'dismissesOnAction',
+    get: function get() {
+      return this.foundation_.dismissesOnAction();
+    },
+    set: function set(dismissesOnAction) {
+      this.foundation_.setDismissOnAction(dismissesOnAction);
+    }
+  }], [{
+    key: 'attachTo',
+    value: function attachTo(root) {
+      return new MDCSnackbar(root);
+    }
+  }]);
+
+  return MDCSnackbar;
+}(__WEBPACK_IMPORTED_MODULE_0__material_base_index__["MDCComponent"]);
+
+/***/ })
+
+/******/ });
+});
+
+},{}],2:[function(require,module,exports){
+(function() {
+	'use strict';
+	/**
+	 * Shorthand function for querySelector
+	 * @param {string} el 
+	 * @returns {HTMLElement} 
+	 */
+	const DOM = elem => document.body.querySelector(elem);
+
+	var mdc = require("@material/snackbar/dist/mdc.snackbar");
+	const popoverDB = require("../utils/StorageManager");
+	const MDCSnackbar = mdc.MDCSnackbar;
+	const MDCSnackbarFoundation = mdc.MDCSnackbarFoundation;
+	mdc.MDCSnackbar.attachTo(DOM('.mdc-snackbar'));
+	const snackbar = new MDCSnackbar(DOM('.mdc-snackbar'))
+	var shortcutSnapshot = '';
+	var keyGroup = {
+		codes: [],
+		pressing: []
+	};
+
+	initializer().DOMEvents()
+	initializer().elementsValues()
+	initializer().storageEvents()
+
+
+
+	////////////////// IMPLEMENTATION //////////////////
+
+	function initializer() {
+
+		/**
+		 * Initializes DOM events listeners
+		 */
+		function DOMEvents() {
+			DOM('.js-popupShortcut').addEventListener('keydown', onKeyDown);
+			DOM('.js-popupShortcut').addEventListener('keyup', onKeyUp);
+			DOM('.js-popupShortcut').addEventListener('focus', onFocus);
+			DOM('.js-popupShortcut').addEventListener('focusout', onFocusOut);
+			DOM('.js-popupMode').addEventListener('change', savePopupMode);
+			DOM('.js-fallbackLanguage').addEventListener('change', saveLanguage);
+			DOM('.js-nlpLanguages').addEventListener('change', saveNlpLanguages);
+		}
+
+		/**
+		 * Initializes DOM Elements values
+		 */
+		function elementsValues() {
+			syncValues();
+		}
+
+		/**
+		 * Initializes storage changes listeners.
+		 */
+		function storageEvents() {
+			popoverDB.onChanges(syncValues);
+		}
+
+		return {
+			DOMEvents,
+			elementsValues,
+			storageEvents
+		};
+
+	}
+
+	function onFocus(ev) {
+		var val = DOM('.js-popupShortcut').value;
+		if (val) {
+			shortcutSnapshot = val;
+		}
+		DOM('.js-popupShortcut').value = '';
+	}
+
+	function onFocusOut(ev) {
+		if (DOM('.js-popupShortcut').value) {
+			saveShortcut();
+			snackbar.show({ message: 'Shortcut saved!' });
+		} else {
+			DOM('.js-popupShortcut').value = shortcutSnapshot;
+		}
+
+	}
+
+	function onKeyDown(ev) {
+		console.log(keyGroup.pressing);
+		if (keyGroup.pressing.length === 0) {
+			keyGroup.codes = [];
+		}
+		if (keyGroup.codes.length < 3 && !keyGroup.codes.includes(ev.code)) {
+			keyGroup.pressing.push(ev.keyCode);
+			keyGroup.codes.push(ev.code);
+			DOM('.js-popupShortcut').value = keyGroup.codes.toString();
+		}
+
+	}
+
+	function onKeyUp(ev) {
+		console.log(keyGroup.pressing);
+		var index = keyGroup.codes.indexOf(ev.code);
+		if (index !== -1) {
+			keyGroup.pressing.splice(index, 1);
+		}
+
+	}
+
+	async function syncValues(oldV, newV) {
+		var fallbackLang = newV && newV['fallbackLang'] || await popoverDB.retrieve('fallbackLang');
+		var popupMode = newV && newV['popupMode'] || await popoverDB.retrieve('popupMode');
+		var nlpLangs = newV && newV['nlpLangs'] || await popoverDB.retrieve('nlpLangs');
+		var shortcut = newV && newV['shortcut'] || await popoverDB.retrieve('shortcut');
+
+		DOM('.js-fallbackLanguage').value = fallbackLang;
+		DOM('.js-popupMode').value = popupMode;
+		DOM('.js-popupShortcut').value = shortcut.toString();
+
+		var checkboxList = document.body.querySelectorAll('.js-nlpLang');
+		checkboxList.forEach(chkbx => {
+			if (nlpLangs.includes(chkbx.value)) {
+				chkbx.checked = true;
+			}
+		});
+	}
+
+	function saveLanguage() {
+		var fallbackLanguage = DOM('.js-fallbackLanguage').value;
+		popoverDB.update('fallbackLang', fallbackLanguage).then(resp => {
+			snackbar.show({ message: ' ✔ Language definitions saved' });
+		})
+	}
+
+	function savePopupMode() {
+		var popupMode = DOM('.js-popupMode').value;
+		popoverDB.update('popupMode', popupMode).then(resp => {
+			snackbar.show({ message: '✔ Popup trigger definitions saved' });
+		});
+	}
+
+	function saveShortcut() {
+		var shortcut = keyGroup.codes;
+		popoverDB.update('shortcut', shortcut)
+			.then(resp => {
+				snackbar.show({ message: '✔ Shortcut definitions saved' });
+			});
+	}
+
+	function saveNlpLanguages() {
+		var languages = [];
+		var checkboxList = document.body.querySelectorAll('.js-nlpLang');
+
+		checkboxList.forEach(chkbx => {
+			if (chkbx.checked) {
+				languages.push(chkbx.value);
+			}
+		});
+		popoverDB.update('nlpLangs', languages).then(resp => {
+			snackbar.show({ message: '✔ Search Languages definitions saved' });
+		});
+	}
+}());
+},{"../utils/StorageManager":3,"@material/snackbar/dist/mdc.snackbar":1}],3:[function(require,module,exports){
+(() => {
+	'use strict';
+
+
+	/**
+	 * Manages and facilitate storage (chrome.storage.sync) requests and watchers.
+	 */
+	class PopoverDB {
+
+		constructor() {
+			this._errorCode = {
+				1: key => `Object "${key}" not found`,
+				2: (key, property) => `Object property "${key}.${property}" not found in storage.`,
+				3: property => `Object property ".${property}" not found in storage.`
+			};
+
+			this._encodeProp = propertyName => {
+
+				let props = {
+					isEnabled: 5,
+					fallbackLang: 1,
+					nlpLangs: 4,
+					shortcut: 3,
+					popupMode: 2
+				}
+
+				return props[propertyName];
+			}
+
+			this._decodeProp = propertyName => {
+
+				let props = {
+					5: 'isEnabled',
+					1: 'fallbackLang',
+					4: 'nlpLangs',
+					3: 'shortcut',
+					2: 'popupMode'
+				}
+
+				return props[propertyName];
+			}
+
+			this._decodeObj = obj => {
+				let decodedObj = {};
+				Object.keys(obj).forEach(key => {
+					decodedObj[this._decodeProp(key)] = obj[key];
+				});
+
+				return decodedObj;
+			}
+
+		}
+
+		update(property, value) {
+			return new Promise(async (resolve, reject) => {
+				var dataString = '';
+				var data = await this.retrieve();
+
+				data[this._encodeProp(property)] = value;
+				dataString = JSON.stringify(data);
+
+				chrome.storage.sync.set({
+					wldt: dataString
+				}, () => resolve(true));
+			});
+		}
+
+		retrieve(property = '') {
+			var errorCount = 0;
+			return new Promise(async (resolve, reject) => {
+				var dataString = '';
+				try {
+					dataString = await new Promise(resolve => chrome.storage.sync.get('wldt', obj => resolve(obj['wldt'])));
+					var data = JSON.parse(dataString);
+
+					if (property.length > 0)
+						resolve(data[this._encodeProp(property)])
+					else resolve(data);
+
+				} catch (error) {
+					errorCount += 1;
+					if (errorCount >= 2) {
+						reject(error);
+					} else {
+						let wikilinkData = JSON.stringify({
+							1: 'en',
+							2: 'shortcut',
+							3: ['ShiftLeft', 'AltLeft'],
+							4: ['por', 'eng', 'esp', 'rus'],
+							5: true
+						});
+						chrome.storage.sync.set({ wldt: wikilinkData }, () => this.retrieve(property));
+					}
+				}
+
+			});
+		}
+
+
+		/**
+		 * Listens to storage changes in given object and executes a function in a onChanged event.
+		 * @param {*} objName The name of the object in the storage to listens.
+		 * @returns {object} A function to pass as an argument the function to execute on event.
+		 */
+		onChanges(fn) {
+
+			var decodedObj = this._decodeObj;
+
+			chrome.storage.onChanged.addListener((changes, areaName) => {
+				//Popover enabled state changed
+				if (changes['wldt']) {
+					fn(decodedObj(JSON.parse(changes['wldt'].oldValue)), decodedObj(JSON.parse(changes['wldt'].newValue)));
+				};
+			});
+		}
+	}
+
+	module.exports = new PopoverDB();
+
+})();
+},{}]},{},[2]);

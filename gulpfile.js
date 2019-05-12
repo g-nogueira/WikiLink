@@ -42,6 +42,7 @@ function buildProd(done) {
 
 	const filesToBundle = [
 		{ src: "background/eventPage.js", dest: "prod/background/" },
+		{ src: "background/messageManager.js", dest: "prod/background/" },
 		{ src: "contentScripts/index.js", dest: "prod/contentScripts/"},
 		{ src: "optionsPage/index.js", dest: "prod/optionsPage/" }
 	];
@@ -77,9 +78,9 @@ function bundle(optionsArray = []) {
 			.pipe(buffer())
 			.pipe(gulpif(args.debug, sourcemaps.init({ loadMaps: true })))
 			.pipe(gulpif(args.debug, sourcemaps.write('./')))
-			.pipe(gulpif(args.debug,
-				minify({ ext: { src: '.js', min: '-min.js' } }),
-				minify({ ext: { src: '-debug.js', min: '.js' }, noSource: true })))
+			// .pipe(gulpif(args.debug,
+			// 	minify({ ext: { src: '.js', min: '-min.js' } }),
+			// 	minify({ ext: { src: '-debug.js', min: '.js' }, noSource: true })))
 			.pipe(gulp.dest(destName))
 			.on('end', resolve));
 	});
