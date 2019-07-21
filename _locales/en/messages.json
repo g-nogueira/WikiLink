@@ -1,8 +1,0 @@
-{
-    "wikipedia": {"message": "Wikipedia"},
-    "wiktionary": {"message": "Wiktionary"},
-    "mainLanguage": {"message": "Main Language"},
-    "popupTrigger": {"message": "Popup Trigger"},
-    "shortcut": {"message": "Shortcut"},
-    "languageDetection": {"message": "Language Detection"}
-}
