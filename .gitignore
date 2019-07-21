@@ -8,5 +8,4 @@ node_modules/*
 prod/*
 
 # Docs generated automatically by gulp-jsdoc3 and gulp.
-docs/*
 prod.zip
