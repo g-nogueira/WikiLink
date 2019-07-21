@@ -409,6 +409,8 @@
 				});
 
 				popover.dispatchEvent(hideEvent);
+
+				setTimeout(() => { popover.style.display = "none"; }, 500);
 			}, delay);
 		}
 

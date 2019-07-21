@@ -12,6 +12,7 @@ const inject = require('gulp-inject');
 const zip = require('gulp-zip');
 const path = require('path');
 const log = require('fancy-log');
+const watch = require('gulp-watch');
 
 
 const paths = { modules: { prod: "prod/public", dev: "public/modules" } };
@@ -20,6 +21,11 @@ const jsPaths = {
 	apis: ["api/*.js"]
 }
 
+
+gulp.task('stream', function () {
+    // Endless stream mode
+    return watch("./**!(prod/*.*)!(prod.zip)", { ignoreInitial: false }, buildProd);
+});
 
 gulp.task('jsdoc', jsDoc);
 gulp.task('prod', buildProd);
@@ -37,6 +43,7 @@ function buildProd(done) {
 		{ src: "_locales/pt_BR/*.*", dest: "prod/_locales/pt_BR" },
 		{ src: "_locales/pt_PT/*.*", dest: "prod/_locales/pt_PT" },
 		{ src: ["optionsPage/*.html", "optionsPage/*.css"], dest: "prod/optionsPage/" },
+		{ src: ["browserAction/*.html", "browserAction/*.css"], dest: "prod/browserAction/" },
 		{ src: "contentScripts/*.css", dest: "prod/contentScripts/" }
 	];
 
@@ -44,7 +51,8 @@ function buildProd(done) {
 		{ src: "background/eventPage.js", dest: "prod/background/" },
 		{ src: "background/messageManager.js", dest: "prod/background/" },
 		{ src: "contentScripts/index.js", dest: "prod/contentScripts/"},
-		{ src: "optionsPage/index.js", dest: "prod/optionsPage/" }
+		{ src: "optionsPage/index.js", dest: "prod/optionsPage/" },
+		{ src: "browserAction/index.js", dest: "prod/browserAction/" }
 	];
 
 	const htmlToProcess = "prod/**/*.html";

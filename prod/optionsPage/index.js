@@ -1117,6 +1117,8 @@ var MDCSnackbar = function (_MDCComponent) {
 			popoverDB.onChanges(syncValues);
 		}
 
+		
+
 		return {
 			DOMEvents,
 			elementsValues,
@@ -1135,8 +1137,12 @@ var MDCSnackbar = function (_MDCComponent) {
 
 	function onFocusOut(ev) {
 		if (DOM('.js-popupShortcut').value) {
-			saveShortcut();
-			snackbar.show({ message: 'Shortcut saved!' });
+			saveShortcut().then(() => {
+				snackbar.show({ message: 'Shortcut saved!' });
+
+				var instructionText = DOM('#instructions #shortcut').innerText;
+				DOM('#instructions #shortcut').innerText = DOM('.js-popupShortcut').value.replace(",", " + ");
+			});
 		} else {
 			DOM('.js-popupShortcut').value = shortcutSnapshot;
 		}
@@ -1153,7 +1159,6 @@ var MDCSnackbar = function (_MDCComponent) {
 			keyGroup.codes.push(ev.code);
 			DOM('.js-popupShortcut').value = keyGroup.codes.toString();
 		}
-
 	}
 
 	function onKeyUp(ev) {
@@ -1166,6 +1171,7 @@ var MDCSnackbar = function (_MDCComponent) {
 	}
 
 	async function syncValues(oldV, newV) {
+		var instructionText = DOM('#instructions #shortcut').text;
 		var fallbackLang = newV && newV['fallbackLang'] || await popoverDB.retrieve('fallbackLang');
 		var popupMode = newV && newV['popupMode'] || await popoverDB.retrieve('popupMode');
 		var nlpLangs = newV && newV['nlpLangs'] || await popoverDB.retrieve('nlpLangs');
@@ -1174,6 +1180,7 @@ var MDCSnackbar = function (_MDCComponent) {
 		DOM('.js-fallbackLanguage').value = fallbackLang;
 		DOM('.js-popupMode').value = popupMode;
 		DOM('.js-popupShortcut').value = shortcut.toString();
+		DOM('#instructions #shortcut').innerText = shortcut.toString().replace(",", " + ");
 
 		var checkboxList = document.body.querySelectorAll('.js-nlpLang');
 		checkboxList.forEach(chkbx => {
@@ -1185,24 +1192,21 @@ var MDCSnackbar = function (_MDCComponent) {
 
 	function saveLanguage() {
 		var fallbackLanguage = DOM('.js-fallbackLanguage').value;
-		popoverDB.update('fallbackLang', fallbackLanguage).then(resp => {
-			snackbar.show({ message: ' ✔ Language definitions saved' });
+		popoverDB.update('fallbackLang', fallbackLanguage).then(() => {
+			snackbar.show({ message: ' Language saved' });
 		})
 	}
 
 	function savePopupMode() {
 		var popupMode = DOM('.js-popupMode').value;
-		popoverDB.update('popupMode', popupMode).then(resp => {
-			snackbar.show({ message: '✔ Popup trigger definitions saved' });
+		popoverDB.update('popupMode', popupMode).then(() => {
+			snackbar.show({ message: 'Popup trigger saved' });
 		});
 	}
 
 	function saveShortcut() {
 		var shortcut = keyGroup.codes;
-		popoverDB.update('shortcut', shortcut)
-			.then(resp => {
-				snackbar.show({ message: '✔ Shortcut definitions saved' });
-			});
+		return popoverDB.update('shortcut', shortcut);
 	}
 
 	function saveNlpLanguages() {
@@ -1214,8 +1218,8 @@ var MDCSnackbar = function (_MDCComponent) {
 				languages.push(chkbx.value);
 			}
 		});
-		popoverDB.update('nlpLangs', languages).then(resp => {
-			snackbar.show({ message: '✔ Search Languages definitions saved' });
+		popoverDB.update('nlpLangs', languages).then(() => {
+			snackbar.show({ message: 'Detection Algorithms saved' });
 		});
 	}
 }());

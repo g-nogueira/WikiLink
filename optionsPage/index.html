@@ -22,25 +22,20 @@
                     <a href="https://github.com/g-nogueira/WikiLink"><img class="logo" src="https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/readme/01Artboard%207150.png" alt=""></a>
                 </div>
 
-                <!-- <div class="form-section">
-                    <a href="#">How to use it</a>
-                </div> -->
-
                 <div class="form-section">
-                    <label for="defaultLang">Main Language</label>
-                    <select name="" id="defaultLang" class="js-fallbackLanguage" title="The language to use if can't figure out the text's language">
-                        <option value="en">English</option>
-                        <option value="pt">Português</option>
-                        <option value="es">Spanish</option>
-                        <option value="ru">Russian</option>
-                    </select>
+                    <label for="instructions">Instructions:</label>
+                    <div id="instructions">
+                        <ol>
+                            <li>Select a word</li>
+                            <li>Press the <strong id="shortcut">{{shortcut}}</strong> keys</li>
+                        </ol>
+                    </div>
                 </div>
-
 
                 <div class="form-section">
                     <label for="popupMode">Popup Trigger</label>
                     <select class="js-popupMode" id="popupMode" title="Show popup immediately or on shortcut">
-                        <option value="default">On Selection</option>
+                        <!-- <option value="default">On Selection</option> -->
                         <option value="shortcut">On Shortcut</option>
                     </select>
                 </div>
@@ -49,9 +44,19 @@
                     <label for="shortcut">Shortcut</label>
                     <input type="text" id="shortcut" class="js-popupShortcut" placeholder="Enter your shortcut here!">
                 </div>
+                
+                <div class="form-section" title="The fallback option if the algorithm can't determine the surrounding idiom">
+                    <label for="defaultLang">Fallback language</label>
+                    <select name="" id="defaultLang" class="js-fallbackLanguage" >
+                        <option value="en">English</option>
+                        <option value="pt">Português</option>
+                        <option value="es">Spanish</option>
+                        <option value="ru">Russian</option>
+                    </select>
+                </div>
 
-                <div class="form-section">
-                    <label for="popupMode">Language Detection</label>
+                <div class="form-section" title="The detection algorithm to determine surrounding idiom">
+                    <label for="popupMode">Detection Algorithm</label>
                     <fieldset class="js-nlpLanguages">
                         <div>
                             <input type="checkbox" id="pt" value="por" class="js-nlpLang">
@@ -71,6 +76,7 @@
                         </div>
                     </fieldset>
                 </div>
+
             </form>
         </div>
         <div class="mdc-snackbar mdc-snackbar--align-start" aria-live="assertive" aria-atomic="true" aria-hidden="true">
