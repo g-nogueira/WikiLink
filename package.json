@@ -1,0 +1,14 @@
+{
+  "name": "Wikilink",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/g-nogueira/WikiLink.git",
+  "author": "Gustavo Nogueira <gutoreis.nogueir@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.9.0",
+    "bootstrap": "^4.3.1",
+    "hover.css": "^2.3.2",
+    "typed.js": "^2.0.10"
+  }
+}
