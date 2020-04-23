@@ -1,5 +1,4 @@
 const gulp = require('gulp');
-const minify = require('gulp-minify');
 const browserify = require('browserify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
@@ -15,20 +14,36 @@ const log = require('fancy-log');
 const watch = require('gulp-watch');
 
 
-const paths = { modules: { prod: "prod/public", dev: "public/modules" } };
-const jsPaths = {
-	jsDocTypes: "JSDocsTypes.js",
-	apis: ["api/*.js"]
-}
-
-
-gulp.task('stream', function () {
-    // Endless stream mode
-    return watch("./**!(prod/*.*)!(prod.zip)", { ignoreInitial: false }, buildProd);
-});
-
-gulp.task('jsdoc', jsDoc);
+gulp.task('document', generateDocumentation);
 gulp.task('prod', buildProd);
+
+
+const paths = {
+	dev: {
+		publicLibrary: "public/library/",
+		publicImages: "public/images/",
+		manifest: "manifest.json",
+		locales: "_locales/",
+		background: "background/",
+		contentScripts: "contentScripts/",
+		optionsPage: "optionsPage/",
+		browserAction: "browserAction/",
+		api: "api/",
+		docTypesDefinitions: "JSDocsTypes.js"
+	},
+	prod: {
+		publicLibrary: "prod/public/",
+		publicImages: "prod/public/images/",
+		locales: "prod/_locales/",
+		background: "prod/background/",
+		contentScripts: "prod/contentScripts/",
+		optionsPage: "prod/optionsPage/",
+		browserAction: "prod/browserAction/",
+		path: "prod/"
+	},
+};
+
+
 
 /**
  * Does all the processing to transfer files to production.
@@ -36,33 +51,35 @@ gulp.task('prod', buildProd);
  */
 function buildProd(done) {
 	const filesToCopy = [
-		{ src: paths.modules.dev + "/**/*.*", dest: paths.modules.prod },
-		{ src: "public/images/icon01/*.png", dest: "prod/public/images/icon01/" },
-		{ src: "manifest.json", dest: "prod/" },
-		{ src: "_locales/en/*.*", dest: "prod/_locales/en" },
-		{ src: "_locales/pt_BR/*.*", dest: "prod/_locales/pt_BR" },
-		{ src: "_locales/pt_PT/*.*", dest: "prod/_locales/pt_PT" },
-		{ src: ["optionsPage/*.html", "optionsPage/*.css"], dest: "prod/optionsPage/" },
-		{ src: ["browserAction/*.html", "browserAction/*.css"], dest: "prod/browserAction/" },
-		{ src: "contentScripts/*.css", dest: "prod/contentScripts/" }
+		{ src: paths.dev.publicLibrary + "**/*.*", dest: paths.prod.publicLibrary },
+		{ src: paths.dev.publicImages + "icon01/*.png", dest: paths.prod.publicImages + "icon01/" },
+		{ src: paths.dev.manifest, dest: paths.prod.path },
+		{ src: paths.dev.locales + "en/*.*", dest: paths.prod.locales + "en" },
+		{ src: paths.dev.locales + "pt_BR/*.*", dest: paths.prod.locales + "pt_BR" },
+		{ src: paths.dev.locales + "pt_PT/*.*", dest: paths.prod.locales + "pt_PT" },
+		{ src: [paths.dev.optionsPage + "*.html", paths.dev.optionsPage + "*.css"], dest: paths.prod.optionsPage },
+		{ src: [paths.dev.browserAction + "*.html", paths.dev.browserAction + "*.css"], dest: paths.prod.browserAction },
+		{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts }
 	];
 
 	const filesToBundle = [
-		{ src: "background/eventPage.js", dest: "prod/background/" },
-		{ src: "background/messageManager.js", dest: "prod/background/" },
-		{ src: "contentScripts/index.js", dest: "prod/contentScripts/"},
-		{ src: "optionsPage/index.js", dest: "prod/optionsPage/" },
-		{ src: "browserAction/index.js", dest: "prod/browserAction/" }
+		{ src: paths.dev.background + "eventPage.js", dest: paths.prod.background },
+		{ src: paths.dev.background + "messageManager.js", dest: paths.prod.background },
+		{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts },
+		{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage },
+		{ src: paths.dev.browserAction + "index.js", dest: paths.prod.browserAction }
 	];
 
 	const htmlToProcess = "prod/**/*.html";
 
-	bundle(filesToBundle)
-		.then(() => copyFiles(filesToCopy)
-			.then(() => injectFiles(htmlToProcess).on('end', () => {
+	bundle(filesToBundle).then(() => copyFiles(filesToCopy)
+		.then(() => injectFiles(htmlToProcess)
+			.on('end', () => {
 				zipFiles({ src: "prod/**", dest: './' });
 				done();
-			})));
+			})
+		)
+	);
 }
 
 /**
@@ -71,8 +88,7 @@ function buildProd(done) {
  * @returns {Promise<NodeJS.ReadWriteStream>}
  */
 function bundle(optionsArray = []) {
-	log("");
-	log.info("📚    Bundling files...");
+	log.info("📚 Bundling files...");
 	var pipeline = optionsArray.map(({ src, dest }) => {
 
 		var fileName = path.extname(dest) ? path.basename(dest) : path.basename(src);
@@ -80,17 +96,17 @@ function bundle(optionsArray = []) {
 
 		return new Promise((resolve, reject) =>
 			browserify({ entries: src })
-			.bundle()
-			.pipe(source(fileName))
-			.pipe(gulpif(args.verbose, gulpprint()))
-			.pipe(buffer())
-			.pipe(gulpif(args.debug, sourcemaps.init({ loadMaps: true })))
-			.pipe(gulpif(args.debug, sourcemaps.write('./')))
-			// .pipe(gulpif(args.debug,
-			// 	minify({ ext: { src: '.js', min: '-min.js' } }),
-			// 	minify({ ext: { src: '-debug.js', min: '.js' }, noSource: true })))
-			.pipe(gulp.dest(destName))
-			.on('end', resolve));
+				.bundle()
+				.pipe(source(fileName))
+				.pipe(gulpif(args.verbose, gulpprint()))
+				.pipe(buffer())
+				.pipe(gulpif(args.debug, sourcemaps.init({ loadMaps: true })))
+				.pipe(gulpif(args.debug, sourcemaps.write('./')))
+				// .pipe(gulpif(args.debug,
+				// 	minify({ ext: { src: '.js', min: '-min.js' } }),
+				// 	minify({ ext: { src: '-debug.js', min: '.js' }, noSource: true })))
+				.pipe(gulp.dest(destName))
+				.on('end', resolve));
 	});
 
 	return Promise.all(pipeline);
@@ -102,14 +118,13 @@ function bundle(optionsArray = []) {
  * @returns {NodeJS.ReadWriteStream}
  */
 function copyFiles(optionsArray = []) {
-	log("");
-	log.info("🔪    Copying files...");
+	log.info("🔪 Copying files...");
 	var pipeline = optionsArray.map(({ src, dest }) => {
 		return new Promise((resolve, reject) =>
 			gulp.src(src)
-			.pipe(gulpif(args.verbose, gulpprint()))
-			.pipe(gulp.dest(dest))
-			.on('end', resolve));
+				.pipe(gulpif(args.verbose, gulpprint()))
+				.pipe(gulp.dest(dest))
+				.on('end', resolve));
 	});
 
 	return Promise.all(pipeline);
@@ -121,11 +136,10 @@ function copyFiles(optionsArray = []) {
  * @returns {Promise<NodeJS.ReadWriteStream>}
  */
 function injectFiles(src) {
-	log("");
-	log.info("💉    Injecting CSS & HTML...");
+	log.info("💉 Injecting CSS & HTML...");
 
 	return gulp.src(src)
-		.pipe(inject(gulp.src([paths.modules.prod + "/**/*.css", paths.modules.prod + "/**/*.js"]), { relative: true }))
+		.pipe(inject(gulp.src([paths.prod.publicLibrary + "**/*.css", paths.prod.publicLibrary + "/**/*.js"]), { relative: true }))
 		.pipe(gulp.dest("prod/"));
 }
 
@@ -137,8 +151,7 @@ function injectFiles(src) {
  * @returns {NodeJS.ReadWriteStream}
  */
 function zipFiles({ src, dest }) {
-	log("");
-	log.info("📦    Zipping files...");
+	log.info("📦 Zipping files...");
 	return gulp.src(src).pipe(zip('prod.zip')).pipe(gulp.dest(dest));
 }
 
@@ -146,8 +159,8 @@ function zipFiles({ src, dest }) {
  * Generates the automatica documentation for the project
  * @param {*} done 
  */
-function jsDoc(done) {
-	gulp.src(jsPaths.apis.concat(jsPaths.jsDocTypes), { read: false })
+function generateDocumentation(done) {
+	gulp.src([paths.dev.api + "*.js", paths.dev.docTypesDefinitions], { read: false })
 		.pipe(gulpif(args.verbose, gulpprint()))
 		.pipe(jsdoc(done));
 

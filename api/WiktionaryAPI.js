@@ -1,7 +1,5 @@
-(function() {
+(() => {
 	'use strict';
-
-	const http = require('../utils/Http');
 
 	class WiktionaryAPI {
 		constructor() {
@@ -15,11 +13,11 @@
 		 */
 		searchTerm(term = '') {
 			return new Promise(async resolve => {
-				chrome.runtime.sendMessage({provider: 'wt', request: 'searchTerm', args: term}, resolve);
+				chrome.runtime.sendMessage({ provider: 'wt', request: 'searchTerm', args: term }, resolve);
 			});
 		}
 	}
 
 	module.exports = new WiktionaryAPI();
 
-}());
+})();

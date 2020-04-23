@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 	/**
 	 * Shorthand function for querySelector
@@ -55,8 +55,6 @@
 		function storageEvents() {
 			popoverDB.onChanges(syncValues);
 		}
-
-		
 
 		return {
 			DOMEvents,
