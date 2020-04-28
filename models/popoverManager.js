@@ -103,12 +103,28 @@
 			return popover;
 		}
 
-		function insertArticle({ title, text, image, url }) {
+		/**
+		 * 
+		 * @param {Object} articleObj
+		 * @param {String} articleObj.extract
+		 * @param {String} articleObj.fullurl
+		 * @param {String} articleObj.pagelanguage
+		 * @param {Object} articleObj.thumbnail
+		 * @param {Number} articleObj.thumbnail.height
+		 * @param {String} articleObj.thumbnail.source
+		 * @param {Number} articleObj.thumbnail.width
+		 */
+		function insertArticle(articleObj) {
 
 			var wikiSect = popover.querySelector('.js-wikiSect');
-			var content = wikipediaArticle({ title, text, image, url });
-			var imageElem = content.querySelector('.js-articleImage');
+			var content = wikipediaArticle({
+				title: articleObj.title,
+				text: articleObj.extract,
+				image: articleObj.thumbnail,
+				url: articleObj.fullurl
+			});
 
+			var imageElem = content.querySelector('.js-articleImage');
 
 			showPage('js-wikiSect');
 			removeChildrenFrom(wikiSect);
@@ -291,13 +307,13 @@
 		function thumbnailToHtml(rawTag) {
 			try {
 				var thumbnail = `
-                <div id="${rawTag.pageId}" lang="${rawTag.lang}" class="js-item item">
+                <div id="${rawTag.pageid}" lang="${rawTag.lang}" class="js-item item">
                     <section class="image">
-                        <img src="${rawTag.image || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
+                        <img src="${rawTag.thumbnail.source || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
                     </section>
                     <section class="info">
                         <div class="js-title title">${rawTag.title}</div>
-                        <div class="description">${rawTag.body}</div>
+                        <div class="description">${rawTag.terms.description[0]}</div>
                     </section>
 				</div>`;
 			} catch (error) {

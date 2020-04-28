@@ -6,7 +6,7 @@
 	 * @summary The api for searching terms, images, and articles on Wikipedia.
 	 */
 	class WikipediaAPI {
-		constructor() {}
+		constructor() { }
 
 		/**
 		 * @summary Searches an image on Wikipedia by given term and size.
@@ -16,8 +16,8 @@
 		 * @returns {Promise<WikipediaImage>} Returns a promise that resolves to an object with url, width, and height properties.
 		 */
 		searchImage({ term, size }) {
-			return new Promise(async resolve => {
-				chrome.runtime.sendMessage({provider: 'wp', request: 'searchImage', args: {term, size}}, resolve);
+			return new Promise(resolve => {
+				chrome.runtime.sendMessage({ provider: 'wp', request: 'searchImage', args: [term, "en", size] }, resolve);
 			});
 
 		}
@@ -31,8 +31,8 @@
 		 */
 		searchTerm({ range = '', term = '' }) {
 
-			return new Promise(async resolve => {
-				chrome.runtime.sendMessage({provider: 'wp', request: 'searchTerm', args: {range, term}}, resolve);
+			return new Promise(resolve => {
+				chrome.runtime.sendMessage({ provider: 'wp', request: 'searchTitle', args: [term, "en", 50] }, resolve);
 			});
 		}
 
@@ -46,7 +46,7 @@
 		 */
 		getPageById({ pageId, language = 'en', imageSize = 250 }) {
 			return new Promise(resolve => {
-				chrome.runtime.sendMessage({provider: 'wp', request: 'getPageById', args: {pageId, language, imageSize}}, resolve);
+				chrome.runtime.sendMessage({ provider: 'wp', request: 'getPageById', args: [pageId, language, imageSize] }, resolve);
 			});
 		}
 
@@ -58,8 +58,8 @@
 		 * @returns {Promise<{WikipediaThumbnail}>} Returns a promise tha resolves to an object `WikipediaThumbnail`.
 		 */
 		getPageList({ range = '', term }) {
-			return new Promise(async resolve => {
-				chrome.runtime.sendMessage({provider: 'wp', request: 'getPageList', args: {range, term}}, resolve);
+			return new Promise(resolve => {
+				chrome.runtime.sendMessage({ provider: 'wp', request: 'searchResults', args: [term, "en"] }, resolve);
 			});
 		}
 	}
