@@ -10,12 +10,12 @@
 @------------------------------------------------@
 */
 
-(async function() {
+(async function () {
 	"use strict";
 
 	const popoverDB = require("../utils/StorageManager");
-	const wikiAPI = require("../api/WikipediaAPI");
-	const wiktAPI = require("../api/WiktionaryAPI");
+	const wikiAPI = require("./WikipediaAPI");
+	const wiktAPI = require("./WiktionaryAPI");
 	const popoverManager = require("../models/popoverManager");
 	const popoverDesigner = require("../models/popoverDesigner");
 

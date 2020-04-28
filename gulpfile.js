@@ -14,7 +14,6 @@ const log = require('fancy-log');
 const watch = require('gulp-watch');
 
 
-gulp.task('document', generateDocumentation);
 gulp.task('prod', buildProd);
 
 
@@ -28,7 +27,6 @@ const paths = {
 		contentScripts: "contentScripts/",
 		optionsPage: "optionsPage/",
 		browserAction: "browserAction/",
-		api: "api/",
 		docTypesDefinitions: "JSDocsTypes.js"
 	},
 	prod: {
@@ -153,16 +151,4 @@ function injectFiles(src) {
 function zipFiles({ src, dest }) {
 	log.info("📦 Zipping files...");
 	return gulp.src(src).pipe(zip('prod.zip')).pipe(gulp.dest(dest));
-}
-
-/**
- * Generates the automatica documentation for the project
- * @param {*} done 
- */
-function generateDocumentation(done) {
-	gulp.src([paths.dev.api + "*.js", paths.dev.docTypesDefinitions], { read: false })
-		.pipe(gulpif(args.verbose, gulpprint()))
-		.pipe(jsdoc(done));
-
-	done();
 }

@@ -1,6 +1,6 @@
 (() => {
     const wikiRepo = require("@g-nogueira/wikipediaapi");
-    const wiktRepo = require("./WiktionaryRepo");
+    const wiktRepo = require("@g-nogueira/wiktionaryapi");
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponde) => {
         processRequest(request).then(sendResponde);
