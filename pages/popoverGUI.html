@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="popoverGUI.js" defer></script>
+</head>
+
+<body>
+
+    <style>
+        :root {
+            --primary-text-color: rgba(0, 0, 0, 0.87);
+            --secundary-text-color: rgba(0, 0, 0, 0.54);
+            --disabled-text-color: rgba(0, 0, 0, 0.38);
+        }
+
+        #popover {
+            all: initial;
+        }
+
+        #popover {
+            will-change: opacity;
+            position: fixed;
+            opacity: 0;
+            background: #ffffff;
+            width: auto;
+            max-width: 500px;
+            box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;
+            text-align: left;
+            z-index: -10;
+            transform: translateY(10%);
+            transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1), opacity .2s, z-index .5s;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif !important;
+            color: rgba(0, 0, 0, .87);
+            font-weight: 400;
+            line-height: 20px;
+        }
+
+        #popover.popover--enabled {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            z-index: 100;
+            position: absolute;
+        }
+
+        #cal1 {
+            position: absolute;
+            height: 0px;
+            width: 0px;
+            top: 100px;
+            left: 100px;
+            overflow: none;
+            z-index: -100;
+        }
+
+        #cal2 {
+            position: absolute;
+            height: 0px;
+            width: 0px;
+            top: 0px;
+            left: 0px;
+            overflow: none;
+            z-index: -100;
+        }
+
+        .contentGroup {
+            // min-height: 200px;
+            min-width: 500px;
+            transition: height .3s cubic-bezier(0.4, 0.0, 1, 1);
+        }
+
+        #wikiSect #wikiArticle {
+            display: flex;
+            flex-flow: row-reverse;
+        }
+
+        #wikiSect .wikiArticle--blank {
+            width: 100%;
+        }
+
+        #wikiSect .wikiArticle--blank .text--blank {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .popoverImage,
+        .popoverImage--blank {
+            max-width: 200px;
+            max-height: 200px;
+            background-size: contain;
+            border-radius: 0 0 5px 0;
+        }
+
+        .popoverImage--blank {
+            width: 200px;
+            height: 200px;
+            background-color: #fafafa;
+        }
+
+        .popoverText {
+            font-family: sans-serif;
+            font-size: 14px;
+            line-height: 20px;
+            color: #777;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            margin: 0;
+        }
+
+        #navbar {
+            display: inline-flex;
+            width: -webkit-fill-available;
+            align-items: center;
+        }
+
+        #navbar .tab {
+            padding-top: 13px;
+            padding-bottom: 13px;
+            flex-grow: 1;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color .3s;
+        }
+
+        #navbar .tab.btn--navigator {
+            //     position: absolute;
+            //     left: 5%;
+            flex-grow: 0.25;
+        }
+
+        #navbar .tab::selection {
+            background: rgba(0, 0, 0, 0) !important;
+        }
+
+        #navbar .tab:hover {
+            background-color: rgba(0, 0, 0, .04);
+        }
+
+        #navbar .tab[disabled] {
+            color: rgba(0, 0, 0, .50);
+            cursor: unset;
+        }
+
+        #navbar .tab[disabled]:hover {
+            background-color: #fff;
+        }
+
+        #dictionaryContent {
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+
+        .dict-lang--sections:last-child {
+            margin-bottom: 10px !important;
+        }
+
+        .info-section {
+            display: flex;
+            flex-flow: row-reverse;
+            padding-left: 10px;
+            overflow: hidden;
+            max-height: 230px;
+        }
+
+        .info {
+            width: 100%;
+            height: auto;
+            align-self: flex-start;
+        }
+
+        #wikiSect {
+            margin-right: -1.3px;
+        }
+
+
+
+        .hidden {
+            display: none !important;
+        }
+
+        .info-section .dict-lang {
+            font-weight: bold;
+            font-size: 120%;
+            border-bottom: 1px solid rgba(0, 0, 0, .20);
+            margin-bottom: 10px;
+            // overflow-y: scroll;
+        }
+
+        .info-section .dict-lang:not(:first-child) {
+            margin-top: 10px;
+        }
+
+        .info-section .dict-partofspeach {
+            font-size: 105%;
+            font-weight: 500;
+        }
+
+        .info-section .dict-lang--sections {
+            list-style: none;
+            padding: initial;
+            margin: initial;
+        }
+
+        .popoverText:hover::-webkit-scrollbar,
+        #wikiSearches:hover::-webkit-scrollbar,
+        #dictionaryContent.info-section:hover::-webkit-scrollbar,
+        .popoverText:hover::-webkit-scrollbar-thumb,
+        #wikiSearches:hover::-webkit-scrollbar-thumb,
+        #dictionaryContent.info-section:hover::-webkit-scrollbar-thumb {
+            visibility: visible !important;
+        }
+
+        .popoverText::-webkit-scrollbar,
+        #wikiSearches::-webkit-scrollbar,
+        #dictionaryContent.info-section::-webkit-scrollbar {
+            visibility: hidden;
+            width: .2em !important;
+        }
+
+        .popoverText::-webkit-scrollbar-thumb,
+        #wikiSearches::-webkit-scrollbar-thumb,
+        #dictionaryContent.info-section::-webkit-scrollbar-thumb {
+            visibility: hidden;
+            background-color: darkgrey !important;
+            outline: 1px solid slategrey !important;
+        }
+
+        .self-column {
+            display: flex;
+            flex-flow: column;
+        }
+
+        ol {
+            -webkit-padding-start: 40px !important;
+            margin: 0 !important;
+        }
+
+        ol li {
+            list-style-type: decimal !important;
+        }
+
+        .popover-arrow {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+            z-index: 100000;
+            top: -10px;
+            position: relative;
+            right: -10px;
+        }
+
+        #wikiSect {
+            min-height: 200px;
+        }
+
+        #wikiSearches {
+            overflow-x: hidden;
+            overflow-y: scroll;
+            display: flex;
+            flex-direction: column;
+            min-height: 230px;
+        }
+
+        #wikiSearches .item {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            padding: 5px 8px 5px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, .2);
+            cursor: pointer;
+        }
+
+        #wikiSearches .item .title {
+            font-weight: 500;
+            font-size: 100%;
+        }
+
+        #wikiSearches .item .title--blank {
+            width: 50%;
+            height: 15px;
+            margin-bottom: 10px;
+            background-color: #fafafa;
+        }
+
+
+        #wikiSearches .item .description {
+            font-size: 90%;
+            line-height: initial;
+            color: rgba(0, 0, 0, 0.54);
+        }
+
+        #wikiSearches .item .description--blank {
+            width: 80%;
+            height: 10px;
+            margin-top: 2.5px;
+            background-color: #fafafa;
+        }
+
+        #wikiSect .description--blank {
+            width: 95%;
+            height: 13px;
+            margin-top: 8px;
+            background-color: #fafafa;
+        }
+
+        #wikiSect .description--blank:nth-child(3n+0),
+        #wikiSearches .item .description--blank:last-child,
+        #wikiSect .description--blank:last-child {
+            width: 70%;
+        }
+
+        #wikiSearches .item .image,
+        #wikiSearches .item .image--blank {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            margin: 0 10px 0 0;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        #wikiSearches .item .image--blank {
+            background-color: #fafafa;
+        }
+
+        #wikiSect a {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+
+
+    <div id="popover" class="js-popover popover--enabled">
+        <section id="navbar">
+            <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator hidden"
+                 target=".js-wikiSearches">
+                <i class="material-icons">👈</i></div>
+            <!--<div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>-->
+            <div class="tab js-tab js-wikiTab"
+                 target=".js-wikiSect"
+                 disabled="disabled">Wikipedia</div>
+            <div class="tab js-tab js-wiktTab"
+                 target=".js-wiktSect">Dictionary</div>
+        </section>
+        <main class="contentGroup js-contentGroup">
+            <section id="wikiSearches"
+                     class="js-wikiSearches js-infoSect info-section">
+                <div id="18617142"
+                     lang="en"
+                     class="js-item item">
+                    <section class="image">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Pouring_liquid_mercury_bionerd.jpg/65px-Pouring_liquid_mercury_bionerd.jpg"
+                             alt="">
+                    </section>
+                    <section class="info">
+                        <div class="js-title title">Mercury (element)</div>
+                        <div class="description">chemical element with symbol Hg and atomic number 80</div>
+                    </section>
+                </div>
+            </section>
+            <section id="wikiSect"
+                     class="js-wikiSect js-infoSect info-section hidden"
+                     style="max-height: 200px;">
+                <div id="wikiArticle"
+                     class="js-wikiArticle">
+                    <img id="popoverImage"
+                         class="popoverImage js-articleImage"
+                         src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/-_Prockter07-edit1.jpg/250px-Mercury_in_color_-_Prockter07-edit1.jpg"
+                         style="height: 200px; width: 200px;">
+                    <p class="js-wikiInfo popoverText">
+                        <strong>
+                            <a href="https://en.wikipedia.org/wiki/Mercury_(planet)"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               title="View on Wikipedia">Mercury is the </a>
+                        </strong>smallest and innermost planet in the Solar System. Its orbit around the Sun takes 87.97 days, the shortest of all the planets in the Solar System. It is named after the Roman deity Mercury, the messenger of the gods.
+                    </p>
+                </div>
+            </section>
+            <section id="dictionaryContent"
+                     class="js-wiktSect js-infoSect info-section self-column hidden"><span id="s1588108821743"
+                      class="dict-lang">English</span>
+                <ul id=""
+                    class="dict-lang--sections">
+                    <li id="`li1588108821743`">
+                        <span class="dict-partofspeach">Proper noun</span>
+                        <ol type="1"
+                            id="dictDefs"
+                            class="dict-definition">
+                            <li id="">
+                                The planet in the solar system with the closest orbit to the Sun, named after the god; represented by ☿.</li>
+                            <li id="">
+                                The Roman god associated with speed, sometimes used as a messenger. He wore winged sandals. Mercury corresponded to the Greek god Hermes.</li>
+                        </ol>
+                    </li>
+                    <li id="`li1588108821744`">
+                        <span class="dict-partofspeach">Noun</span>
+                        <ol type="1"
+                            id="dictDefs"
+                            class="dict-definition">
+                            <li id="">A carrier of tidings; a newsboy; a messenger.</li>
+                            <li id="">A newspaper.</li>
+                        </ol>
+                    </li>
+                </ul><span id="s1588108821744"
+                      class="dict-lang">Middle English</span>
+                <ul id=""
+                    class="dict-lang--sections">
+                    <li id="`li1588108821744`">
+                        <span class="dict-partofspeach">Proper noun</span>
+                        <ol type="1"
+                            id="dictDefs"
+                            class="dict-definition">
+                            <li id="">Alternative form of Mercurie</li>
+                        </ol>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <template id="blankThumbnails">
+        <div class="js-item item item--blank">
+            <section class="image--blank"></section>
+            <section class="info">
+                <div class="js-title title--blank"></div>
+                <div class="description--blank"></div>
+                <div class="description--blank"></div>
+            </section>
+        </div>
+    </template>
+</body>
+
+</html>

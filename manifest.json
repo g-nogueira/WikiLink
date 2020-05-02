@@ -16,30 +16,33 @@
 		],
 		"persistence": true
 	},
-
 	"default_locale": "en",
-
 	"browser_action": {
 		"default_locale": "en",
 		"default_popup": "browserAction/index.html",
 		"default_title": "WikiLink Settings"
 	},
-	"content_scripts": [{
-		"matches": [
-			"<all_urls>"
-		],
-		"js": [
-			"contentScripts/index.js"
-		],
-		"css": [
-			"contentScripts/popover.css"
-		],
-		"run_at": "document_end"
-	}],
+	"content_scripts": [
+		{
+			"matches": [
+				"<all_urls>"
+			],
+			"js": [
+				"contentScripts/index.js"
+			],
+			"css": [
+				"contentScripts/popover.css"
+			],
+			"run_at": "document_end"
+		}
+	],
 	"permissions": [
 		"storage",
 		"tabs",
 		"<all_urls>"
+	],
+	"web_accessible_resources": [
+		"pages/*"
 	],
 	"content_security_policy": "script-src 'self' https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js; object-src 'self'"
 }

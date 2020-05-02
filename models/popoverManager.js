@@ -27,10 +27,10 @@
 
 
 				this.HTMLElement = popover;
-				this.sections = popoverElements();
+				this.sections = this.popoverElements();
 				this.hide = hidePopover;
 				this.render = appendPopover;
-				this.setThumbnails = insertThumbnails;
+				this.setThumbnails = this.insertThumbnails;
 				this.setArticle = insertArticle;
 				this.setDictionary = insertDictionary;
 				this.isLoading = insertBlankData;
@@ -38,6 +38,7 @@
 				this.showPage = showPage;
 				this.addEventListener = (eventName, eventListener) => popover.addEventListener(eventName, eventListener);
 
+				this.createCustomEvents();
 				popover.addEventListener('tabselect', ev => showPage(ev.detail.target, !isDisabled(ev.detail.element)));
 				popover.addEventListener('popoverHidden', ev => disableTab(1));
 				popover.addEventListener('thumbclick', ev => enableTab(1));
@@ -49,50 +50,70 @@
 					}
 				});
 			}
+
+			insertThumbnails(thumbs = []) {
+				if (!thumbs.length) {
+					popover = setThumbsError();
+				} else {
+					const thumbsSect = popover.querySelector('.js-wikiSearches');
+					const thumbnails = thumbnailsToHtml(thumbs);
+
+					thumbnails.querySelectorAll('.js-item').forEach(thumbnail => {
+						if (thumbnail) {
+							let thumbnailClick = new CustomEvent('thumbclick', {
+								bubbles: true,
+								detail: {
+									article: {
+										id: thumbnail.id,
+										lang: thumbnail.attributes.getNamedItem('lang').value,
+										title: thumbnail.querySelector('.js-title').textContent
+									}
+								}
+							});
+
+							thumbnail.addEventListener('click', ev => popover.dispatchEvent(thumbnailClick));
+						}
+					});
+
+					removeChildrenFrom(thumbsSect);
+					thumbsSect.appendChild(thumbnails);
+				}
+
+				return popover;
+			}
+
+			popoverElements() {
+
+				return {
+					resultsTab: popover.querySelector('.js-listTab'),
+					wikiTab: popover.querySelector('.js-wikiTab'),
+					wiktTab: popover.querySelector('.js-wiktTab'),
+					listWrapper: popover.querySelector('.js-wikiSearches'),
+					wikipediaWrapper: popover.querySelector('.js-wikiSect'),
+					wiktionaryWrapper: popover.querySelector('.js-wiktSect'),
+				}
+			}
+
+			createCustomEvents() {
+
+
+				popover.querySelectorAll('.js-tab').forEach(tab => tab.addEventListener('click', ev => {
+					const tabSelect = new CustomEvent('tabselect', {
+						bubbles: true,
+						detail: {
+							target: ev.currentTarget.attributes.getNamedItem('target').value,
+							element: ev.target
+						}
+					});
+
+					popover.dispatchEvent(tabSelect);
+				}));
+			}
 		}
 
 		return new Popover(popover);
 
-		function popoverElements() {
-			return {
-				resultsTab: popover.querySelector('.js-listTab'),
-				wikiTab: popover.querySelector('.js-wikiTab'),
-				wiktTab: popover.querySelector('.js-wiktTab'),
-				listWrapper: popover.querySelector('.js-wikiSearches'),
-				wikipediaWrapper: popover.querySelector('.js-wikiSect'),
-				wiktionaryWrapper: popover.querySelector('.js-wiktSect'),
-			}
-		}
 
-		function insertThumbnails(thumbs = []) {
-			if (!thumbs.length) {
-				popover = setThumbsError();
-			} else {
-				const thumbsSect = popover.querySelector('.js-wikiSearches');
-				const thumbnails = thumbnailsToHtml(thumbs);
-
-				thumbnails.querySelectorAll('.js-item').forEach(thumbnail => {
-					if (thumbnail) {
-						let thumbnailClick = new CustomEvent('thumbclick', {
-							bubbles: true,
-							detail: {
-								article: {
-									id: thumbnail.id,
-									lang: thumbnail.attributes.getNamedItem('lang').value,
-									title: thumbnail.querySelector('.js-title').textContent
-								}
-							}
-						});
-
-						thumbnail.addEventListener('click', ev => popover.dispatchEvent(thumbnailClick));
-					}
-				})
-				removeChildrenFrom(thumbsSect);
-				thumbsSect.appendChild(thumbnails);
-			}
-
-			return popover;
-		}
 
 		function setThumbsError() {
 			var thumbWrapper = popover.querySelector('.js-wikiSearches');
@@ -380,19 +401,7 @@
 				return (selRange.left - rb2.left) * 100 / (rb1.left - rb2.left);
 			}
 
-			popover
-				.querySelectorAll('.js-tab')
-				.forEach(tab => tab.addEventListener('click', ev => {
-					const tabSelect = new CustomEvent('tabselect', {
-						bubbles: true,
-						detail: {
-							target: ev.currentTarget.attributes.getNamedItem('target').value,
-							element: ev.target
-						}
-					});
 
-					popover.dispatchEvent(tabSelect);
-				}));
 		}
 
 		function removeChildrenFrom(element) {
@@ -441,7 +450,7 @@
 				1: '.js-wikiTab',
 				2: '.js-wiktTab'
 			}
-			popover.querySelector(tabs[tabId]).setAttribute('disabled', 'disabled');;
+			popover.querySelector(tabs[tabId]).setAttribute('disabled', 'disabled');
 		}
 
 		/**

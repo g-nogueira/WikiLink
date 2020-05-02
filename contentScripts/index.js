@@ -14,21 +14,13 @@
 	"use strict";
 
 	const popoverDB = require("../utils/StorageManager");
-	const wikiAPI = require("./WikipediaAPI");
-	const wiktAPI = require("./WiktionaryAPI");
-	const popoverManager = require("../models/popoverManager");
-	const popoverDesigner = require("../models/popoverDesigner");
+	const iframeUtils = require("./iframe");
 
-	var element = popoverDesigner.getBasicShell(appendOnBody);
-	var popover = popoverManager(element);
-	var cals = insertCals();
-	var wikipediaAPI = wikiAPI;
-	var wiktionaryAPI = wiktAPI;
+	var popover = new iframeUtils();
 	var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
 	var shortcut = await popoverDB.retrieve('shortcut');
 	var popupMode = await popoverDB.retrieve('popupMode');
 	var keyGroup = [];
-	var selectedString = '';
 
 	initDOMEvents();
 
@@ -50,8 +42,6 @@
 		changePopupMode(popupMode);
 
 		wikilink.addEventListener('mouseleave', onMouseLeave);
-		popover.addEventListener('thumbclick', ev => loadArticle(ev.detail.article.lang, ev.detail.article.id))
-		popover.addEventListener('tabselect', ev => loadWictionary(selectedString));
 
 		function changePopupMode(popupMode) {
 			if (popupMode === 'shortcut') {
@@ -102,62 +92,14 @@
 	}
 
 	function startProcess() {
-		var wSelection = window.getSelection();
-		var selection = wSelection.toString();
-		var selContext = wSelection.focusNode.data;
+		var selectionObj = window.getSelection();
+		var selectionString = selectionObj.toString();
 
-		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
-
-			popover.showPage('js-wikiSearches');
-			selectedString = selection;
-			wikipediaAPI.getPageList({ term: selection, range: selContext }).then(popover.setThumbnails);
-			wiktionaryAPI.getDefinitions(selection.toString()).then(popover.setDictionary);
+		if (isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
 
 			document.body.style.overflow = 'hidden';
-			popover.isLoading({ area: 'thumbnails' });
-			popover.render(wSelection, cals[0], cals[1]);
+			popover.show(selectionString, selectionObj);
 		}
-	}
-
-	function loadArticle(language, pageId) {
-		popover.isLoading({ area: 'article' });
-
-		wikipediaAPI.getPageById({ pageId: pageId, imageSize: 250, language }).then(async article => {
-			popover.setArticle(article);
-			loadWictionary(article.title);
-		});
-	}
-
-	function loadWictionary(title) {
-		wiktionaryAPI
-			.getDefinitions(title)
-			.then(resp => popover.setDictionary(resp))
-	}
-
-	function appendOnBody(popover) {
-		const div = document.createElement('div');
-		const shadow = div.attachShadow({ mode: 'open' });
-
-		div.classList.add('js-wikilink');
-		shadow.appendChild(popover);
-		document.body.appendChild(div);
-
-		return shadow.querySelector('.js-popover');
-	}
-
-	function insertCals() {
-		var cal1, cal2;
-		cal1 = createCal('cal1');
-		cal2 = createCal('cal2');
-		document.body.appendChild(cal1);
-		document.body.appendChild(cal2);
-
-
-		function createCal(id) {
-			return document.createRange().createContextualFragment(`<div id="${id}">&nbsp;</div>`);
-		}
-
-		return [document.querySelector('#cal1'), document.querySelector('#cal2')];
 	}
 
 	function isEmptySelection(selection) {

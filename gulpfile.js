@@ -27,7 +27,9 @@ const paths = {
 		contentScripts: "contentScripts/",
 		optionsPage: "optionsPage/",
 		browserAction: "browserAction/",
-		docTypesDefinitions: "JSDocsTypes.js"
+		docTypesDefinitions: "JSDocsTypes.js",
+		pages: "pages/",
+		root: "./"
 	},
 	prod: {
 		publicLibrary: "prod/public/",
@@ -37,7 +39,8 @@ const paths = {
 		contentScripts: "prod/contentScripts/",
 		optionsPage: "prod/optionsPage/",
 		browserAction: "prod/browserAction/",
-		path: "prod/"
+		pages: "prod/pages",
+		root: "prod/",
 	},
 };
 
@@ -48,36 +51,39 @@ const paths = {
  * @param {*} done 
  */
 function buildProd(done) {
-	const filesToCopy = [
+	const notProcessedFiles = [
 		{ src: paths.dev.publicLibrary + "**/*.*", dest: paths.prod.publicLibrary },
 		{ src: paths.dev.publicImages + "icon01/*.png", dest: paths.prod.publicImages + "icon01/" },
-		{ src: paths.dev.manifest, dest: paths.prod.path },
+		{ src: paths.dev.manifest, dest: paths.prod.root },
 		{ src: paths.dev.locales + "en/*.*", dest: paths.prod.locales + "en" },
 		{ src: paths.dev.locales + "pt_BR/*.*", dest: paths.prod.locales + "pt_BR" },
 		{ src: paths.dev.locales + "pt_PT/*.*", dest: paths.prod.locales + "pt_PT" },
 		{ src: [paths.dev.optionsPage + "*.html", paths.dev.optionsPage + "*.css"], dest: paths.prod.optionsPage },
 		{ src: [paths.dev.browserAction + "*.html", paths.dev.browserAction + "*.css"], dest: paths.prod.browserAction },
-		{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts }
+		{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts },
+		{ src: paths.dev.pages + "*.html", dest: paths.prod.pages }
 	];
 
-	const filesToBundle = [
+	const processedJavascripts = [
 		{ src: paths.dev.background + "eventPage.js", dest: paths.prod.background },
 		{ src: paths.dev.background + "messageManager.js", dest: paths.prod.background },
 		{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts },
 		{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage },
-		{ src: paths.dev.browserAction + "index.js", dest: paths.prod.browserAction }
+		{ src: paths.dev.browserAction + "index.js", dest: paths.prod.browserAction },
+		{ src: paths.dev.pages + "popoverGUI.js", dest: paths.prod.pages }
 	];
 
-	const htmlToProcess = "prod/**/*.html";
+	const processedHtmls = "prod/**/*.html";
 
-	bundle(filesToBundle).then(() => copyFiles(filesToCopy)
-		.then(() => injectFiles(htmlToProcess)
-			.on('end', () => {
-				zipFiles({ src: "prod/**", dest: './' });
-				done();
-			})
-		)
-	);
+	bundle(processedJavascripts)
+		.then(() => copyFiles(notProcessedFiles)
+			.then(() => injectFiles(processedHtmls)
+				.on('end', () => {
+					zipFiles({ src: paths.prod.root + "**", dest: paths.dev.root });
+					done();
+				})
+			)
+		);
 }
 
 /**
