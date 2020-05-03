@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 	/**
 	 * Shorthand function for querySelector
@@ -8,7 +8,7 @@
 	const DOM = elem => document.body.querySelector(elem);
 
 	var mdc = require("@material/snackbar/dist/mdc.snackbar");
-	const popoverDB = require("../utils/StorageManager");
+	const popoverDB = require("../utils/Storage");
 	const MDCSnackbar = mdc.MDCSnackbar;
 	const MDCSnackbarFoundation = mdc.MDCSnackbarFoundation;
 	mdc.MDCSnackbar.attachTo(DOM('.mdc-snackbar'));
@@ -56,7 +56,7 @@
 			popoverDB.onChanges(syncValues);
 		}
 
-		
+
 
 		return {
 			DOMEvents,

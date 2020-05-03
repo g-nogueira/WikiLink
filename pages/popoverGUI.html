@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
+    <link rel="stylesheet" href="/public/library/fontawesome/css/all.min.css">
     <script src="popoverGUI.js" defer></script>
 </head>
 
@@ -27,9 +28,8 @@
             position: fixed;
             opacity: 0;
             background: #ffffff;
-            width: auto;
-            max-width: 500px;
-            box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;
+            width: 500px;
+            height: 276px;
             text-align: left;
             z-index: -10;
             transform: translateY(10%);
@@ -325,89 +325,18 @@
 
     <div id="popover" class="js-popover popover--enabled">
         <section id="navbar">
-            <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator hidden"
-                 target=".js-wikiSearches">
-                <i class="material-icons">👈</i></div>
-            <!--<div class="tab btn--navigator js-tab js-listTab js-wikiNavigator" target=".js-wikiSearches"><i class="material-icons">list</i></div>-->
-            <div class="tab js-tab js-wikiTab"
-                 target=".js-wikiSect"
-                 disabled="disabled">Wikipedia</div>
-            <div class="tab js-tab js-wiktTab"
-                 target=".js-wiktSect">Dictionary</div>
+            <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator hidden" target=".js-wikiSearches">
+                <i class="fas fa-list"></i>
+            </div>
+            <div class="tab js-tab js-wikiTab" target=".js-wikiSect" disabled="disabled">Wikipedia</div>
+            <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
         </section>
         <main class="contentGroup js-contentGroup">
-            <section id="wikiSearches"
-                     class="js-wikiSearches js-infoSect info-section">
-                <div id="18617142"
-                     lang="en"
-                     class="js-item item">
-                    <section class="image">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Pouring_liquid_mercury_bionerd.jpg/65px-Pouring_liquid_mercury_bionerd.jpg"
-                             alt="">
-                    </section>
-                    <section class="info">
-                        <div class="js-title title">Mercury (element)</div>
-                        <div class="description">chemical element with symbol Hg and atomic number 80</div>
-                    </section>
-                </div>
+            <section id="wikiSearches" class="js-wikiSearches js-infoSect info-section">
             </section>
-            <section id="wikiSect"
-                     class="js-wikiSect js-infoSect info-section hidden"
-                     style="max-height: 200px;">
-                <div id="wikiArticle"
-                     class="js-wikiArticle">
-                    <img id="popoverImage"
-                         class="popoverImage js-articleImage"
-                         src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/-_Prockter07-edit1.jpg/250px-Mercury_in_color_-_Prockter07-edit1.jpg"
-                         style="height: 200px; width: 200px;">
-                    <p class="js-wikiInfo popoverText">
-                        <strong>
-                            <a href="https://en.wikipedia.org/wiki/Mercury_(planet)"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               title="View on Wikipedia">Mercury is the </a>
-                        </strong>smallest and innermost planet in the Solar System. Its orbit around the Sun takes 87.97 days, the shortest of all the planets in the Solar System. It is named after the Roman deity Mercury, the messenger of the gods.
-                    </p>
-                </div>
+            <section id="wikiSect" class="js-wikiSect js-infoSect info-section hidden" style="max-height: 200px;">
             </section>
-            <section id="dictionaryContent"
-                     class="js-wiktSect js-infoSect info-section self-column hidden"><span id="s1588108821743"
-                      class="dict-lang">English</span>
-                <ul id=""
-                    class="dict-lang--sections">
-                    <li id="`li1588108821743`">
-                        <span class="dict-partofspeach">Proper noun</span>
-                        <ol type="1"
-                            id="dictDefs"
-                            class="dict-definition">
-                            <li id="">
-                                The planet in the solar system with the closest orbit to the Sun, named after the god; represented by ☿.</li>
-                            <li id="">
-                                The Roman god associated with speed, sometimes used as a messenger. He wore winged sandals. Mercury corresponded to the Greek god Hermes.</li>
-                        </ol>
-                    </li>
-                    <li id="`li1588108821744`">
-                        <span class="dict-partofspeach">Noun</span>
-                        <ol type="1"
-                            id="dictDefs"
-                            class="dict-definition">
-                            <li id="">A carrier of tidings; a newsboy; a messenger.</li>
-                            <li id="">A newspaper.</li>
-                        </ol>
-                    </li>
-                </ul><span id="s1588108821744"
-                      class="dict-lang">Middle English</span>
-                <ul id=""
-                    class="dict-lang--sections">
-                    <li id="`li1588108821744`">
-                        <span class="dict-partofspeach">Proper noun</span>
-                        <ol type="1"
-                            id="dictDefs"
-                            class="dict-definition">
-                            <li id="">Alternative form of Mercurie</li>
-                        </ol>
-                    </li>
-                </ul>
+            <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden">
             </section>
         </main>
     </div>

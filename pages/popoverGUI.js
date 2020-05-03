@@ -13,7 +13,7 @@
 (async function () {
 	"use strict";
 
-	const popoverDB = require("../utils/StorageManager");
+	const popoverDB = require("../utils/Storage");
 	const wikiAPI = require("../contentScripts/WikipediaAPI");
 	const wiktAPI = require("../contentScripts/WiktionaryAPI");
 	const popoverManager = require("../models/popoverManager");

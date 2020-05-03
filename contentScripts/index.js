@@ -13,92 +13,44 @@
 (async function () {
 	"use strict";
 
-	const popoverDB = require("../utils/StorageManager");
-	const popoverUtils = require("./iframe");
+	const storageHelper = require("../utils/Storage");
+	const shortcutHelper = require("../utils/Shortcut");
+	const selectionHelper = require("../utils/Selection");
+	const popoverHelper = require("./Popover");
 
-	var popover = new popoverUtils();
-	var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
-	var shortcut = await popoverDB.retrieve('shortcut');
-	var popupMode = await popoverDB.retrieve('popupMode');
-	var keyGroup = [];
+	var isPopoverEnabled = await storageHelper.retrieve('isEnabled');
+	var shortcut = await storageHelper.retrieve('shortcut');
+	var popoverInstance = new popoverHelper();
 
-	initDOMEvents();
+	popoverInstance.init({
+		iframeUrl: chrome.extension.getURL('pages/popoverGUI.html'),
+		iframeWidth: 501,
+		iframeHeight: 276,
+		shadowMode: "open"
+	});
+	popoverInstance.insertIframe();
 
-
-	////////////////// IMPLEMENTATION //////////////////
-
-	function initDOMEvents() {
-		var wikilink = document.body.querySelector('.js-wikilink');
-		var timeOutId = null;
-
-		popoverDB.onChanges((oldV, newV) => {
-			shortcut = newV.shortcut;
-			popupMode = newV.popupMode;
-			isPopoverEnabled = newV.isEnabled;
-
-			changePopupMode(newV.popupMode);
-		});
-
-		changePopupMode(popupMode);
-
-		wikilink.addEventListener('mouseleave', onMouseLeave);
-
-		function changePopupMode(popupMode) {
-			if (popupMode === 'shortcut') {
-				document.removeEventListener('mouseup', onMouseUp);
-				document.addEventListener('keydown', onKeyDown)
-				document.addEventListener('keyup', onKeyUp)
-			} else if (popupMode === 'default') {
-				document.addEventListener('mouseup', onMouseUp);
-				document.removeEventListener('keydown', onKeyDown)
-				document.removeEventListener('keyup', onKeyUp)
-			}
-		}
-
-		function onMouseLeave(ev) {
-			popover.hide();
-		}
-
-		function onKeyDown(ev) {
-
-			clearTimeout(timeOutId);
-
-			if (keyGroup.toString() === shortcut.toString()) {
-				startProcess();
-				keyGroup = [];
-			} else if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
-				keyGroup.push(ev.code);
-				onKeyDown(ev);
-			}
-			// console.table(keyGroup);
-
-			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
-		}
-
-		function onKeyUp(ev) {
-			var index = keyGroup.indexOf(ev.code);
-			if (index !== -1) {
-				keyGroup.splice(index, 1);
-			}
-		}
-
-		function onMouseUp(ev) {
-			if (ev.which === 1 && !popover.isChild(`#${ev.target.id}`)) {
-				startProcess();
-			}
-		}
-
-	}
-
-	function startProcess() {
-		var selectionObj = window.getSelection();
-		var selectionString = selectionObj.toString();
+	shortcutHelper.startShortcutListener(shortcut);
+	shortcutHelper.addEventListener("shortcutMatch", ev => {
+		let selectionObj = selectionHelper.getSelection();
+		let selectionString = selectionObj.toString();
+		let iframePosition = selectionHelper.getOffsetBottomCoordinates(selectionObj);
 
 		if (isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
 
-			popover.show(selectionString, selectionObj);
+			popoverInstance.show(selectionString, iframePosition);
 		}
-	}
+	});
+
+	storageHelper.onChanges((oldV, newV) => {
+		shortcut = newV.shortcut;
+		isPopoverEnabled = newV.isEnabled;
+		popoverInstance.shortcut = shortcut;
+	});
+
+
+
+	////////////////// IMPLEMENTATION //////////////////
 
 	function isEmptySelection(selection) {
 		//If given argument is not empty neither is white spaces

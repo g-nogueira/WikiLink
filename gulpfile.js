@@ -32,7 +32,7 @@ const paths = {
 		root: "./"
 	},
 	prod: {
-		publicLibrary: "prod/public/",
+		publicLibrary: "prod/public/library/",
 		publicImages: "prod/public/images/",
 		locales: "prod/_locales/",
 		background: "prod/background/",
