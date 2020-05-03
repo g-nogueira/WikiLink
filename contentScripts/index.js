@@ -56,7 +56,6 @@
 		}
 
 		function onMouseLeave(ev) {
-			document.body.style.overflow = 'auto';
 			popover.hide();
 		}
 
@@ -97,7 +96,6 @@
 
 		if (isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
 
-			document.body.style.overflow = 'hidden';
 			popover.show(selectionString, selectionObj);
 		}
 	}

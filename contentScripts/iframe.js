@@ -35,8 +35,8 @@
             iframe.style = `
                 display: block;
                 position: absolute;
-                width: 100%;
-                height: 100%;
+                width: 600px;
+                height: 350px;
                 border: none;
                 z-index: 2139999998;
             `;
