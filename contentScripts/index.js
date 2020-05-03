@@ -18,12 +18,16 @@
 	const selectionHelper = require("../utils/Selection");
 	const PopoverHelper = require("./Popover");
 
-	var settings = {
+	// Initialize instance of class to manage iframe element
+	let popoverInstance = new PopoverHelper();
+
+	let settings = {
 		isPopoverEnabled: await storageHelper.retrieve('isEnabled'),
 		shortcut: await storageHelper.retrieve('shortcut')
 	};
 
-	var popoverInstance = new PopoverHelper();
+
+	// Initialize an iframe element and insert it into the DOM
 	popoverInstance.init({
 		iframeUrl: chrome.extension.getURL('pages/popoverGUI.html'),
 		iframeWidth: 501,
@@ -32,6 +36,7 @@
 	});
 	popoverInstance.insertIframe();
 
+	// Listen for the shortcut to be triggered
 	shortcutHelper.startShortcutListener(settings.shortcut);
 	shortcutHelper.addEventListener("shortcutMatch", (ev) => {
 		let selectionObj = selectionHelper.getSelection();
@@ -39,7 +44,6 @@
 		let iframePosition = selectionHelper.getOffsetBottomCoordinates(selectionObj);
 
 		if (settings.isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
-
 			popoverInstance.show(selectionString, iframePosition);
 		}
 	});
