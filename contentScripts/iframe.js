@@ -9,9 +9,8 @@
      * - "thumbclick" - When the user selects an article of the search response list,
      * - "pagechange" - When a change of page occurs, independent of the trigger,
      */
-    module.exports = class iframeUtils {
+    module.exports = class popoverUtils {
         constructor() {
-
             this.iframe = this.init();
             this.render = this.show;
             this.isChild = this.isPopoverChild;
@@ -21,31 +20,30 @@
         }
 
         init() {
-            let div = document.createElement('div');
-            let shadow = div.attachShadow({ mode: 'open' });
-            let iframe = document.createElement("iframe");
+            let parentElement = document.createElement('div');
+            let shadow = parentElement.attachShadow({ mode: 'open' });
+            let iframeNode = document.createElement("iframe");
 
-            div.classList.add('js-wikilink');
-            div.style = `
-                    background: transparent;
-                    max-width: 600px;
-                    height: 350px;
+            parentElement.classList.add('js-wikilink');
+            parentElement.style = `
+                position: absolute;
+                background: transparent;
             `;
 
-            iframe.style = `
-                display: block;
-                position: absolute;
+            iframeNode.style = `
                 width: 600px;
                 height: 350px;
                 border: none;
                 z-index: 2139999998;
             `;
 
-            shadow.appendChild(iframe);
-            document.body.appendChild(div);
+            shadow.appendChild(iframeNode);
+            document.body.appendChild(parentElement);
 
+            let iframeElement = shadow.querySelector('iframe');
+            iframeElement.parent = parentElement;
 
-            return shadow.querySelector('iframe');
+            return iframeElement;
         }
 
         /**
@@ -54,7 +52,7 @@
          * @param {Selection} selection
          * @returns
          */
-        getPosition(selection) {
+        getOffsetSelectionPosition(selection) {
 
             var temporaryNode = this.createUniqueNode();
             var temporaryNodeTop = 0;
@@ -82,20 +80,16 @@
          * Displays the popover based on given selection, cal1 and cal2 coordinates.
          * @param {Selection} selection The current window selection on DOM.
          */
-        show(title, selection) {
-            let pos = this.getPosition(selection);
+        show(title, selection, options) {
+            let pos = this.getOffsetSelectionPosition(selection);
 
-            this.iframe.style.top = pos.top;
-            this.iframe.style.left = pos.left;
+            this.iframe.parent.style.top = pos.top;
+            this.iframe.parent.style.left = pos.left;
+
+            this.iframe.width = options.width || "500px";
+            this.iframe.height = options.height || "276px";
+
             this.iframe.src = chrome.extension.getURL('pages/popoverGUI.html') + "?title=" + title;
-        }
-
-        isPopoverChild(elemIdentifier = '') {
-            try {
-                return iframe.querySelector(elemIdentifier) === null ? false : true;
-            } catch (error) {
-                return false;
-            }
         }
 
         /**
