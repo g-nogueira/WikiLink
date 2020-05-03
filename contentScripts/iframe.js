@@ -12,11 +12,7 @@
     module.exports = class iframeUtils {
         constructor() {
 
-            let { iframe, cal1, cal2 } = this.init();
-
-            this.iframe = iframe;
-            this.cal1 = cal1;
-            this.cal2 = cal2;
+            this.iframe = this.init();
             this.render = this.show;
             this.isChild = this.isPopoverChild;
 
@@ -28,8 +24,6 @@
             let div = document.createElement('div');
             let shadow = div.attachShadow({ mode: 'open' });
             let iframe = document.createElement("iframe");
-            let cal1 = createCal('cal1');
-            let cal2 = createCal('cal2');
 
             div.classList.add('js-wikilink');
             div.style = `
@@ -47,50 +41,39 @@
                 z-index: 2139999998;
             `;
 
-            document.body.appendChild(cal1);
-            document.body.appendChild(cal2);
             shadow.appendChild(iframe);
             document.body.appendChild(div);
 
 
-            function createCal(id) {
-                return document.createRange().createContextualFragment(`<div id="${id}">&nbsp;</div>`);
-            }
-
-            return { iframe: shadow.querySelector('iframe'), cal1: document.querySelector("#cal1"), cal2: document.querySelector("#cal2") };
+            return shadow.querySelector('iframe');
         }
 
+        /**
+         *
+         *
+         * @param {Selection} selection
+         * @returns
+         */
         getPosition(selection) {
-            /**From:
-             * https://stackoverflow.com/questions/39283159/how-to-keep-selection-but-also-press-button
-             */
-            var selRange = selection.getRangeAt(0).getBoundingClientRect();
+
+            var temporaryNode = this.createUniqueNode();
+            var temporaryNodeTop = 0;
+            var range = selection.getRangeAt(0);
+            var clientRect = range.getBoundingClientRect();
             var position = { top: 0, left: 0 };
-            var rb1 = DOMRect(this.cal1);
-            var rb2 = DOMRect(this.cal2);
 
-            position.top = `${(selRange.bottom - rb2.top) * 100 / (rb1.top - rb2.top)}px`;
-            let leftPosition = calcLeftPos(selRange, rb1, rb2);
+            // Insert a node at the start of the selection and get its position relative to the top of the body
+            range.insertNode(temporaryNode);
+            temporaryNodeTop = temporaryNode.offsetTop;
 
-            if (leftPosition + this.iframe.clientWidth > window.innerWidth) {
-                // popover.attributeStyleMap.set('left', CSS.px(leftPosition) - popover.clientWidth + selRange.width);
-                position.left = `${calcLeftPos(selRange, rb1, rb2) - this.iframe.clientWidth + selRange.width}px`
-            } else {
-                // popover.attributeStyleMap.set('left', CSS.px((selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)));
-                position.left = `${(selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)}px`;
-            }
+            // Determine the position below the selection as scrolledHeight (i.e.: temporaryNodeTop) + selectionHeight
+            position.top = temporaryNodeTop + clientRect.height + "px";
+            position.left = clientRect.left + "px";
+
+            // Remove the previously inserted node
+            temporaryNode.parentElement.removeChild(temporaryNode);
 
             this.iframe.classList.add('popover--enabled');
-
-            function DOMRect(element) {
-                const r = document.createRange()
-                r.selectNode(element)
-                return r.getBoundingClientRect();
-            }
-
-            function calcLeftPos(selRange, rb1, rb2) {
-                return (selRange.left - rb2.left) * 100 / (rb1.left - rb2.left);
-            }
 
             return position;
         }
@@ -98,8 +81,6 @@
         /**
          * Displays the popover based on given selection, cal1 and cal2 coordinates.
          * @param {Selection} selection The current window selection on DOM.
-         * @param {*} cal1 
-         * @param {*} cal2 
          */
         show(title, selection) {
             let pos = this.getPosition(selection);
@@ -132,6 +113,19 @@
 
                 this.iframe.dispatchEvent(hideEvent);
             }, delay);
+        }
+
+        createUniqueNode() {
+            var node = document.createElement("span");
+
+            node.id = this.uniqueId;
+            node.style.position = "absolute";
+
+            return node;
+        }
+
+        get uniqueId() {
+            return (new Date()).getTime();
         }
 
     }
