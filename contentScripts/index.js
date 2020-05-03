@@ -14,9 +14,9 @@
 	"use strict";
 
 	const popoverDB = require("../utils/StorageManager");
-	const iframeUtils = require("./iframe");
+	const popoverUtils = require("./iframe");
 
-	var popover = new iframeUtils();
+	var popover = new popoverUtils();
 	var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
 	var shortcut = await popoverDB.retrieve('shortcut');
 	var popupMode = await popoverDB.retrieve('popupMode');
