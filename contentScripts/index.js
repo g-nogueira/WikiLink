@@ -16,12 +16,14 @@
 	const storageHelper = require("../utils/Storage");
 	const shortcutHelper = require("../utils/Shortcut");
 	const selectionHelper = require("../utils/Selection");
-	const popoverHelper = require("./Popover");
+	const PopoverHelper = require("./Popover");
 
-	var isPopoverEnabled = await storageHelper.retrieve('isEnabled');
-	var shortcut = await storageHelper.retrieve('shortcut');
-	var popoverInstance = new popoverHelper();
+	var settings = {
+		isPopoverEnabled: await storageHelper.retrieve('isEnabled'),
+		shortcut: await storageHelper.retrieve('shortcut')
+	};
 
+	var popoverInstance = new PopoverHelper();
 	popoverInstance.init({
 		iframeUrl: chrome.extension.getURL('pages/popoverGUI.html'),
 		iframeWidth: 501,
@@ -30,13 +32,13 @@
 	});
 	popoverInstance.insertIframe();
 
-	shortcutHelper.startShortcutListener(shortcut);
-	shortcutHelper.addEventListener("shortcutMatch", ev => {
+	shortcutHelper.startShortcutListener(settings.shortcut);
+	shortcutHelper.addEventListener("shortcutMatch", (ev) => {
 		let selectionObj = selectionHelper.getSelection();
 		let selectionString = selectionObj.toString();
 		let iframePosition = selectionHelper.getOffsetBottomCoordinates(selectionObj);
 
-		if (isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
+		if (settings.isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
 
 			popoverInstance.show(selectionString, iframePosition);
 		}
@@ -44,7 +46,7 @@
 
 	storageHelper.onChanges((oldV, newV) => {
 		shortcut = newV.shortcut;
-		isPopoverEnabled = newV.isEnabled;
+		settings.isPopoverEnabled = newV.isEnabled;
 		popoverInstance.shortcut = shortcut;
 	});
 

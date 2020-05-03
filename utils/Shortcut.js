@@ -20,10 +20,7 @@ module.exports = new (class Selection {
 		var keyGroup = [];
 		var that = this;
 
-		document.addEventListener("keydown", onKeyDown);
-		document.addEventListener("keyup", onKeyUp);
-
-		function onKeyDown(ev) {
+		document.addEventListener("keydown", function onKeyDown(ev) {
 
 			clearTimeout(timeOutId);
 
@@ -38,15 +35,14 @@ module.exports = new (class Selection {
 			}
 
 			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
-		}
+		});
 
-		function onKeyUp(ev) {
+		document.addEventListener("keyup", function onKeyUp(ev) {
 			var index = keyGroup.indexOf(ev.code);
 			if (index !== -1) {
 				keyGroup.splice(index, 1);
 			}
-		}
-
+		});
 	}
 
 	get shortcutMatchEvent() {

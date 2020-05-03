@@ -8,12 +8,12 @@ module.exports = new (class Storage {
 
 	constructor() {
 		this._errorCode = {
-			1: key => `Object "${key}" not found`,
+			1: (key) => `Object "${key}" not found`,
 			2: (key, property) => `Object property "${key}.${property}" not found in storage.`,
-			3: property => `Object property ".${property}" not found in storage.`
+			3: (property) => `Object property ".${property}" not found in storage.`
 		};
 
-		this._encodeProp = propertyName => {
+		this._encodeProp = (propertyName) => {
 
 			let props = {
 				isEnabled: 5,
@@ -24,35 +24,35 @@ module.exports = new (class Storage {
 			}
 
 			return props[propertyName];
-		}
+		};
 
-		this._decodeProp = propertyName => {
+		this._decodeProp = (propertyName) => {
 
 			let props = {
-				5: 'isEnabled',
-				1: 'fallbackLang',
-				4: 'nlpLangs',
-				3: 'shortcut',
-				2: 'popupMode'
+				5: "isEnabled",
+				1: "fallbackLang",
+				4: "nlpLangs",
+				3: "shortcut",
+				2: "popupMode"
 			}
 
 			return props[propertyName];
-		}
+		};
 
-		this._decodeObj = obj => {
+		this._decodeObj = (obj) => {
 			let decodedObj = {};
 			Object.keys(obj).forEach(key => {
 				decodedObj[this._decodeProp(key)] = obj[key];
 			});
 
 			return decodedObj;
-		}
+		};
 
 	}
 
 	update(property, value) {
 		return new Promise(async (resolve, reject) => {
-			var dataString = '';
+			var dataString = "";
 			var data = await this.retrieve();
 
 			data[this._encodeProp(property)] = value;
@@ -64,12 +64,12 @@ module.exports = new (class Storage {
 		});
 	}
 
-	retrieve(property = '') {
+	retrieve(property = "") {
 		var errorCount = 0;
 		return new Promise(async (resolve, reject) => {
-			var dataString = '';
+			var dataString = "";
 			try {
-				dataString = await new Promise(resolve => chrome.storage.sync.get('wldt', obj => resolve(obj['wldt'])));
+				dataString = await new Promise(resolve => chrome.storage.sync.get("wldt", obj => resolve(obj["wldt"])));
 				var data = JSON.parse(dataString);
 
 				if (property.length > 0)
@@ -82,10 +82,10 @@ module.exports = new (class Storage {
 					reject(error);
 				} else {
 					let wikilinkData = JSON.stringify({
-						1: 'en',
-						2: 'shortcut',
-						3: ['ShiftLeft', 'AltLeft'],
-						4: ['por', 'eng', 'esp', 'rus'],
+						1: "en",
+						2: "shortcut",
+						3: ["ShiftLeft", "AltLeft"],
+						4: ["por", "eng", "esp", "rus"],
 						5: true
 					});
 					chrome.storage.sync.set({ wldt: wikilinkData }, () => this.retrieve(property));
@@ -107,9 +107,9 @@ module.exports = new (class Storage {
 
 		chrome.storage.onChanged.addListener((changes, areaName) => {
 			//Popover enabled state changed
-			if (changes['wldt']) {
-				fn(decodedObj(JSON.parse(changes['wldt'].oldValue)), decodedObj(JSON.parse(changes['wldt'].newValue)));
-			};
+			if (changes["wldt"]) {
+				fn(decodedObj(JSON.parse(changes["wldt"].oldValue)), decodedObj(JSON.parse(changes["wldt"].newValue)));
+			}
 		});
 	}
 });

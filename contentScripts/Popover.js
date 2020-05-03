@@ -51,17 +51,16 @@ module.exports = class Popover {
         this.iframe = iframeElement;
     }
 
-
     /**
      * Displays the popover based on given selection, cal1 and cal2 coordinates.
      * @param {Selection} selection The current window selection on DOM.
      */
-    show(title, position) {
+    show(title, position, options = {}) {
         this.iframe.parent.style.top = position.top + "px";
         this.iframe.parent.style.left = position.left + "px";
 
-        this.iframe.style.width = this.iframe.style.width || options.width;
-        this.iframe.style.height = this.iframe.style.height || options.height;
+        this.iframe.style.width = options.width || this.iframe.style.width;
+        this.iframe.style.height = options.height || this.iframe.style.height;
 
         this.iframe.src = this.iframeUrl + "?title=" + title;
 
@@ -85,4 +84,4 @@ module.exports = class Popover {
         }, delay);
     }
 
-}
+};
