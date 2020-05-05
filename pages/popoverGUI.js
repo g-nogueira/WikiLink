@@ -14,8 +14,8 @@
 	"use strict";
 
 	const popoverDB = require("../utils/Storage");
-	const wikiAPI = require("../contentScripts/WikipediaAPI");
-	const wiktAPI = require("../contentScripts/WiktionaryAPI");
+	const wikiAPI = require("@g-nogueira/wikipediaapi");
+	const wiktAPI = require("@g-nogueira/wiktionaryapi");
 	const popoverManager = require("../models/popoverManager");
 	const popoverDesigner = require("../models/popoverDesigner");
 
@@ -46,8 +46,8 @@
 
 			popover.showPage('js-wikiSearches');
 			selectedString = title;
-			wikipediaAPI.getPageList({ term: title, range: title }).then(popover.setThumbnails);
-			wiktionaryAPI.getDefinitions(title).then(popover.setDictionary);
+			wikipediaAPI.searchResults(title, "en").then(popover.setThumbnails);
+			wiktionaryAPI.searchTitle(title, "en").then(popover.setDictionary);
 
 			popover.isLoading({ area: 'thumbnails' });
 		}
@@ -56,7 +56,7 @@
 	function loadArticle(language, pageId) {
 		popover.isLoading({ area: 'article' });
 
-		wikipediaAPI.getPageById({ pageId: pageId, imageSize: 250, language }).then(async article => {
+		wikipediaAPI.getPageById(pageId, "en", 250).then((article) => {
 			popover.setArticle(article);
 			loadWictionary(article.title);
 		});
@@ -64,7 +64,7 @@
 
 	function loadWictionary(title) {
 		wiktionaryAPI
-			.getDefinitions(title)
+			.searchTitle(title, "en")
 			.then(resp => popover.setDictionary(resp))
 	}
 

@@ -36,6 +36,7 @@
 	});
 	popoverInstance.insertIframe();
 
+
 	// Listen for the shortcut to be triggered
 	shortcutHelper.startShortcutListener(settings.shortcut);
 	shortcutHelper.addEventListener("shortcutMatch", (ev) => {
