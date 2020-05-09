@@ -18,10 +18,9 @@
 	const selectionHelper = require("../utils/Selection");
 	const PopoverHelper = require("./Popover");
 
-	// Initialize instance of class to manage iframe element
-	let popoverInstance = new PopoverHelper();
 
-	let settings = {
+	let popoverInstance = new PopoverHelper();
+	let userSettings = {
 		isPopoverEnabled: await storageHelper.retrieve('isEnabled'),
 		shortcut: await storageHelper.retrieve('shortcut')
 	};
@@ -38,29 +37,33 @@
 
 
 	// Listen for the shortcut to be triggered
-	shortcutHelper.startShortcutListener(settings.shortcut);
-	shortcutHelper.addEventListener("shortcutMatch", (ev) => {
+	shortcutHelper.init(userSettings.shortcut);
+	shortcutHelper.addEventListener("shortcutMatch", onShortcutMatch);
+
+	// Listen for changes on storage
+	storageHelper.onChanges(onStorageChange);
+
+
+
+	function onShortcutMatch(ev) {
 		let selectionObj = selectionHelper.getSelection();
 		let selectionString = selectionObj.toString();
-		let iframePosition = selectionHelper.getOffsetBottomCoordinates(selectionObj);
+		let iframePosition = selectionHelper.getOffsetBottomPosition(selectionObj);
 
-		if (settings.isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
+		if (userSettings.isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
 			popoverInstance.show(selectionString, iframePosition);
 		}
-	});
+	}
 
-	storageHelper.onChanges((oldV, newV) => {
+	function onStorageChange(oldV, newV) {
 		shortcut = newV.shortcut;
-		settings.isPopoverEnabled = newV.isEnabled;
+		userSettings.isPopoverEnabled = newV.isEnabled;
 		popoverInstance.shortcut = shortcut;
-	});
-
-
-
-	////////////////// IMPLEMENTATION //////////////////
+	}
 
 	function isEmptySelection(selection) {
 		//If given argument is not empty neither is white spaces
 		return !(selection && /\S/.test(selection));
 	}
+
 }());

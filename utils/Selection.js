@@ -1,53 +1,53 @@
 (() => {
 	"use strict";
 
-	module.exports = new (class Selection {
+	module.exports = new (class SelectionHelper {
 
 		constructor() {
 			this.selection = {};
 		}
 
+		/**
+		 * Get the current selection.
+		 *
+		 * @returns {Selection}
+		 */
 		getSelection() {
 			return window.getSelection();
 		}
 
 		/**
-		 *
+		 * Gets the ClientRect of a selection.
 		 *
 		 * @param {Selection} selection
-		 * @returns
+		 * @returns {DOMRect}
 		 */
 		getSelectionPosition(selection) {
 
-			var temporaryNode = this.createUniqueNode();
 			var range = selection.getRangeAt(0);
-			var clientRect = range.getBoundingClientRect();
-			var position = { top: 0, left: 0 };
+			var DOMRect = range.getBoundingClientRect();
 
-			// Determine the position of the selection as selectionHeight
-			position.top = clientRect.height;
-			position.left = clientRect.left;
-
-			// Remove the previously inserted node
-			temporaryNode.parentElement.removeChild(temporaryNode);
-
-			return position;
+			return DOMRect;
 		}
 
-		getOffsetBottomCoordinates(selection) {
-			var temporaryNode = this.createUniqueNode();
+		/**
+		 * Gets a ClientRect from the bottom left corner of a selection.
+		 *
+		 * @param {Selection} selection
+		 * @returns {DOMRect}
+		 */
+		getOffsetBottomPosition(selection) {
+			var temporaryNode = this._createUniqueNode();
 			var temporaryNodeTop = 0;
 			var range = selection.getRangeAt(0);
 			var clientRect = range.getBoundingClientRect();
-			var position = { top: 0, left: 0 };
 
 			// Insert a node at the start of the selection and get its position relative to the top of the body
 			range.insertNode(temporaryNode);
 			temporaryNodeTop = temporaryNode.offsetTop;
 
 			// Determine the position below the selection as scrolledHeight (i.e.: temporaryNodeTop) + selectionHeight
-			position.top = temporaryNodeTop + clientRect.height;
-			position.left = clientRect.left;
+			var position = new DOMRect(clientRect.x, clientRect.height + temporaryNodeTop, clientRect.width, clientRect.height);
 
 			// Remove the previously inserted node
 			temporaryNode.parentElement.removeChild(temporaryNode);
@@ -56,7 +56,7 @@
 		}
 
 
-		createUniqueNode() {
+		_createUniqueNode() {
 			var node = document.createElement("span");
 
 			node.id = (new Date()).getTime();

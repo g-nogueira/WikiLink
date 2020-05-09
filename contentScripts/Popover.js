@@ -1,19 +1,28 @@
 "use strict";
 
-/**
- * A popover DOM management API
- * The Popover element used in the manager dispatches some events:
- * - "shortcutMatch" - When the user clicks on a tab (List, Wikipedia, or Wiktionary),
- */
-module.exports = class Popover {
+const Events = require("../utils/Events")
+module.exports = class Popover extends Events {
     constructor() {
+        super();
+
+        this.events = {
+            popoverHidden: "popoverHidden"
+        };
         this.iframeUrl = "";
         this.iframe = {};
         this.shadowMode = "open";
-
-        this.addEventListener = (eventName, eventListener) => this.iframe.addEventListener(eventName, eventListener);
     }
 
+    /**
+     * Initializes DOM preferences
+     *
+     * @param {Object} options
+     * @param {String} options.iframeUrl
+     * @param {Number} options.iframeWidth
+     * @param {Number} options.iframeHeight
+     * @param {"open"|"closed"} options.shadowMode A string specifying the encapsulation mode for the shadow DOM tree
+     * @returns
+     */
     init(options) {
         this.iframeUrl = options.iframeUrl;
         this.iframeWidth = options.iframeWidth || 501;
@@ -23,6 +32,10 @@ module.exports = class Popover {
         return this;
     }
 
+    /**
+     * Inserts an iframe into the DOM using the options specified on `init()` method.
+     *
+     */
     insertIframe() {
         let parentElement = document.createElement("div");
         let shadow = parentElement.attachShadow({ mode: this.shadowMode });
@@ -49,11 +62,19 @@ module.exports = class Popover {
         iframeElement.parent = parentElement;
 
         this.iframe = iframeElement;
+        this._dispatcher = iframeElement;
     }
 
     /**
-     * Displays the popover based on given selection, cal1 and cal2 coordinates.
-     * @param {Selection} selection The current window selection on DOM.
+     * Displays the iframe on the specified x,y coordinates.
+     * 
+     * @param {String} title
+     * @param {Object} position
+     * @param {Number} position.top
+     * @param {Number} position.left
+     * @param {Object} [options={}]
+     * @param {Number} options.width
+     * @param {Number} options.height
      */
     show(title, position, options = {}) {
         this.iframe.parent.style.top = position.top + "px";
@@ -68,19 +89,15 @@ module.exports = class Popover {
     }
 
     /**
-     * @param {number} delay The delay in milliseconds to hide the popover.
+     * Hides the iframe
+     *
+     * @param {*} options
+     * @param {Number} [delay=300] A delay in milliseconds to hide the iframe.
      */
     hide(options, delay = 300) {
         setTimeout(() => {
             this.iframe.classList.remove("popover--enabled");
-            const hideEvent = new CustomEvent("popoverHidden", {
-                bubbles: true,
-                detail: {
-                    element: this.iframe,
-                }
-            });
-
-            this.iframe.dispatchEvent(hideEvent);
+            this.dispatchEvent(this.events.popoverHidden, { element: this.iframe });
         }, delay);
     }
 

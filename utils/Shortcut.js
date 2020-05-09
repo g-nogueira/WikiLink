@@ -1,19 +1,24 @@
 "use strict";
-
-module.exports = new (class Selection {
+const Events = require("./Events");
+module.exports = new (class ShortcutHelper extends Events {
 
 	constructor() {
-		this.shortcut = [];
-		this.dispatcher = document;
+		super();
 
-		this.addEventListener = this.dispatcher.addEventListener;
+		this.shortcut = [];
 		this.events = {
-			shortcutMatchEvent: this.shortcutMatchEvent
+			/** The `shortcutMatch` event is fired when a matching shortcut is pressed. */
+			shortcutMatch: "shortcutMatch"
 		};
+
 	}
 
-	startShortcutListener(shortcut) {
-		this.dispatcher = document.createElement("div");
+	/**
+	 *
+	 *
+	 * @param {Array<String>} shortcut An array of key names
+	 */
+	init(shortcut) {
 		this.shortcut = shortcut;
 
 		var timeOutId = null;
@@ -26,7 +31,7 @@ module.exports = new (class Selection {
 
 			if (keyGroup.toString() === shortcut.toString()) {
 
-				that.dispatcher.dispatchEvent(that.events.shortcutMatchEvent);
+				that.dispatchEvent(that.events.shortcutMatch, { shortcut: shortcut });
 				keyGroup = [];
 
 			} else if (keyGroup.length < shortcut.length && !keyGroup.includes(ev.code)) {
@@ -42,13 +47,6 @@ module.exports = new (class Selection {
 			if (index !== -1) {
 				keyGroup.splice(index, 1);
 			}
-		});
-	}
-
-	get shortcutMatchEvent() {
-		return new CustomEvent("shortcutMatch", {
-			bubbles: true,
-			detail: {}
 		});
 	}
 

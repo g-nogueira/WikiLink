@@ -4,7 +4,7 @@
 /**
  * Manages and facilitate storage (chrome.storage.sync) requests and watchers.
  */
-module.exports = new (class Storage {
+module.exports = new (class StorageHelper {
 
 	constructor() {
 		this._errorCode = {
