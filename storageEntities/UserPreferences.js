@@ -32,7 +32,7 @@ module.exports = class UserPreferences extends Storage {
             userPreferences = [];
         }
 
-        let userPreferenceIndex = userPreferences.findIndex((userPreference) => userPreference.id === this.id)
+        let userPreferenceIndex = userPreferences.findIndex((userPreference) => userPreference.id === this.id);
         if (!localUserPreference.id || userPreferenceIndex === -1) {
             // Creates a user preference
             localUserPreference.id = uuid();
@@ -51,4 +51,4 @@ module.exports = class UserPreferences extends Storage {
     }
 
 
-}
+};

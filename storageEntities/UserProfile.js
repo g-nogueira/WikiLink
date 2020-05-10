@@ -27,11 +27,11 @@ module.exports = class UserProfile extends Storage {
             response = this.createStorage(this.storageName, localUserProfile);
         } else {
             localUserProfile.modifiedOn = new Date();
-            response = this.updateStorage(this.storageName, localUserProfile)
+            response = this.updateStorage(this.storageName, localUserProfile);
         }
 
         return response;
     }
 
 
-}
+};

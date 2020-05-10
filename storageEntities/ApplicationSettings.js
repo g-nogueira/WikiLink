@@ -21,7 +21,7 @@ module.exports = class ApplicationSettings extends Storage {
             return null;
         }
 
-        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.id === id)
+        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.id === id);
 
         if (applicationSettingIndex === -1) {
             return null;
@@ -53,7 +53,7 @@ module.exports = class ApplicationSettings extends Storage {
             applicationSettings = [];
         }
 
-        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.id === this.id)
+        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.id === this.id);
 
         if (applicationSettingIndex === -1) {
             throw new Error("Application Setting not found.");
@@ -69,4 +69,4 @@ module.exports = class ApplicationSettings extends Storage {
     }
 
 
-}
+};

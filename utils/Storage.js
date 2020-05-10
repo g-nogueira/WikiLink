@@ -18,7 +18,7 @@ module.exports = class StorageHelper extends Events {
 
 		chrome.storage.onChanged.addListener((changes, areaName) => {
 
-			if (storageName.length > 0) {
+			if (this.storageName.length > 0) {
 				this.dispatchEvent(this.events.storageChange, {
 					oldValue: changes[this.storageName].oldValue,
 					newValue: changes[this.storageName].newValue
