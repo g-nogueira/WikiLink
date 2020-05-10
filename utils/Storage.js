@@ -1,12 +1,37 @@
 "use strict";
 
 
+const Events = require("../utils/Events");
+
 /**
- * Manages and facilitate storage (chrome.storage.sync) requests and watchers.
+ * Manages and facilitates storage (chrome.storage.sync) requests and watchers.
  */
-module.exports = new (class StorageHelper {
+module.exports = class StorageHelper extends Events {
 
 	constructor() {
+		super();
+
+		this.storageName = "";
+		this.events = {
+			storageChange: "storageChange"
+		};
+
+		chrome.storage.onChanged.addListener((changes, areaName) => {
+
+			if (storageName.length > 0) {
+				this.dispatchEvent(this.events.storageChange, {
+					oldValue: changes[this.storageName].oldValue,
+					newValue: changes[this.storageName].newValue
+				});
+			} else {
+				this.dispatchEvent(this.events.storageChange, {
+					oldValue: changes.oldValue,
+					newValue: changes.newValue
+				});
+			}
+
+		});
+
 		this._errorCode = {
 			1: (key) => `Object "${key}" not found`,
 			2: (key, property) => `Object property "${key}.${property}" not found in storage.`,
@@ -49,6 +74,36 @@ module.exports = new (class StorageHelper {
 		};
 
 	}
+
+	retrieveStorage(name) {
+		return new Promise((resolve, reject) => {
+
+			chrome.storage.sync.get(name, (obj) => {
+
+				if (obj[name]) {
+					resolve(obj[name]);
+				}
+				else {
+					resolve(null);
+				}
+
+			});
+		});
+	}
+
+
+	updateStorage(name, value) {
+		return new Promise((resolve, reject) => {
+			chrome.storage.sync.set({ [name]: value }, () => resolve(true));
+		});
+	}
+
+	createStorage(name, value) {
+		return new Promise((resolve, reject) => {
+			chrome.storage.sync.set({ [name]: value }, () => resolve(true));
+		});
+	}
+
 
 	update(property, value) {
 		return new Promise(async (resolve, reject) => {
@@ -111,5 +166,6 @@ module.exports = new (class StorageHelper {
 				fn(decodedObj(JSON.parse(changes["wldt"].oldValue)), decodedObj(JSON.parse(changes["wldt"].newValue)));
 			}
 		});
+
 	}
-});
+};

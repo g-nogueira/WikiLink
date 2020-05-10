@@ -8,9 +8,12 @@ module.exports = class Popover extends Events {
         this.events = {
             popoverHidden: "popoverHidden"
         };
-        this.iframeUrl = "";
-        this.iframe = {};
-        this.shadowMode = "open";
+        this.iframeUrl;
+        this.iframe;
+        this.iframeWidth;
+        this.iframeHeight;
+        this.iframeStyle;
+        this.shadowMode;
     }
 
     /**
@@ -20,6 +23,7 @@ module.exports = class Popover extends Events {
      * @param {String} options.iframeUrl
      * @param {Number} options.iframeWidth
      * @param {Number} options.iframeHeight
+     * @param {String} options.iframeStyle
      * @param {"open"|"closed"} options.shadowMode A string specifying the encapsulation mode for the shadow DOM tree
      * @returns
      */
@@ -27,7 +31,14 @@ module.exports = class Popover extends Events {
         this.iframeUrl = options.iframeUrl;
         this.iframeWidth = options.iframeWidth || 501;
         this.iframeHeight = options.iframeHeight || 276;
-        this.shadowMode = options.shadowMode;
+        this.shadowMode = options.shadowMode || "open";
+        this.iframeStyle = options.iframeStyle || `
+            width: ${this.iframeWidth}px;
+            height: ${this.iframeHeight}px;
+            border: none;
+            z-index: 2139999998;
+            box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;
+        `;
 
         return this;
     }
@@ -43,17 +54,12 @@ module.exports = class Popover extends Events {
 
         parentElement.classList.add("js-wikilink");
         parentElement.style = `
-                position: absolute;
-                background: transparent;
-            `;
+            position: absolute;
+            background: transparent;
+        `;
 
-        iframeNode.style = `
-                width: ${this.iframeWidth}px;
-                height: ${this.iframeHeight}px;
-                border: none;
-                z-index: 2139999998;
-                box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;
-            `;
+        iframeNode.style = this.iframeStyle;
+
 
         shadow.appendChild(iframeNode);
         document.body.appendChild(parentElement);
