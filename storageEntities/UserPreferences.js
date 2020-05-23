@@ -10,7 +10,7 @@ module.exports = class UserPreferences extends Storage {
         this.storageName = "UserPreferences";
         this.id = 0;
         this.label = "";
-        this.value = JSON.encode("");
+        this.value = "";
         this.description = "";
         this.disabled = true;
         this.modifiedOn = null;
@@ -35,7 +35,6 @@ module.exports = class UserPreferences extends Storage {
         let userPreferenceIndex = userPreferences.findIndex((userPreference) => userPreference.id === this.id);
         if (!localUserPreference.id || userPreferenceIndex === -1) {
             // Creates a user preference
-            localUserPreference.id = uuid();
             userPreferences.push(localUserPreference);
             response = this.createStorage(this.storageName, userPreferences);
 
@@ -46,6 +45,29 @@ module.exports = class UserPreferences extends Storage {
 
             response = this.updateStorage(this.storageName, localUserPreference);
         }
+
+        return await Promise.all(response);
+    }
+
+    async create() {
+        let response = null;
+        let userPreferences = await this.retrieveStorage(this.storageName);
+        let localUserPreference = {
+            label: this.label,
+            value: this.value,
+            description: this.description,
+            disabled: this.disabled,
+            modifiedOn: null
+        };
+
+        if (!Array.isArray(userPreferences) || userPreferences.length === 0) {
+            userPreferences = [];
+        }
+
+        // Creates a user preference
+        userPreferences.push(localUserPreference);
+
+        response = await this.updateStorage(this.storageName, userPreferences);
 
         return response;
     }

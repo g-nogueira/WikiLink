@@ -8,7 +8,7 @@ module.exports = class ApplicationSettings extends Storage {
 
         this.storageName = "ApplicationSettings";
         this.label = "";
-        this.value = JSON.encode("");
+        this.value = "";
         this.description = "";
         this.modifiedOn = null;
     }
@@ -49,7 +49,7 @@ module.exports = class ApplicationSettings extends Storage {
             modifiedOn: this.modifiedOn
         };
 
-        if (!Array.isArray(applicationSettings)) {
+        if (!Array.isArray(applicationSettings) || applicationSettings.length === 0) {
             applicationSettings = [];
         }
 
@@ -63,7 +63,29 @@ module.exports = class ApplicationSettings extends Storage {
         localApplicationSetting.modifiedOn = new Date();
         applicationSettings[applicationSettingIndex] = localApplicationSetting;
 
-        response = this.updateStorage(this.storageName, localApplicationSetting);
+        response = await this.updateStorage(this.storageName, applicationSettings);
+
+        return response;
+    }
+
+    async create() {
+        let response = null;
+        let applicationSettings = await this.retrieveStorage(this.storageName);
+        let localApplicationSetting = {
+            label: this.label,
+            value: this.value,
+            description: this.description,
+            modifiedOn: null
+        };
+
+        if (!Array.isArray(applicationSettings) || applicationSettings.length === 0) {
+            applicationSettings = [];
+        }
+
+        // Creates a user preference
+        applicationSettings.push(localApplicationSetting);
+
+        response = await this.updateStorage(this.storageName, applicationSettings);
 
         return response;
     }
