@@ -10,8 +10,6 @@ module.exports = class Popover extends Events {
         };
         this.iframeUrl;
         this.iframe;
-        this.iframeWidth;
-        this.iframeHeight;
         this.iframeStyle;
         this.shadowMode;
     }
@@ -29,12 +27,10 @@ module.exports = class Popover extends Events {
      */
     init(options) {
         this.iframeUrl = options.iframeUrl;
-        this.iframeWidth = options.iframeWidth || 501;
-        this.iframeHeight = options.iframeHeight || 276;
         this.shadowMode = options.shadowMode || "open";
         this.iframeStyle = options.iframeStyle || `
-            width: ${this.iframeWidth}px;
-            height: ${this.iframeHeight}px;
+            width: ${options.iframeWidth || 501}px;
+            height: ${options.iframeHeight || 276}px;
             border: none;
             z-index: 2139999998;
             box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;

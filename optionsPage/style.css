@@ -1,6 +1,4 @@
 :root {
-    --sidemenu-width: 240px;
-    --sidemenu-width-negative: -240px;
     --primary-color: #009688;
     --primary-text-color: rgba(0, 0, 0, 0.87);
     --secundary-text-color: rgba(0, 0, 0, 0.54);
@@ -20,7 +18,6 @@ body{
     color: var(--primary-text-color);
     height: 100%;
 }
-
 
 
 .card{
@@ -52,58 +49,9 @@ body{
     }
 }
 
-.form > *{
-    padding: 20px 15px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    font-size: 13px;
-
-}
-
-.form-section{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.form-section.logo{
-    justify-content: center;
-    width: 100%;
-    padding: 0;
-}
-
 .logo{
     width: 80%;
     height: 80%;
-}
-
-input:not([type="checkbox"]), select{
-    color: rgb(117, 117, 117);
-    outline: none;
-    border: none;
-    border-bottom: 1px solid rgba(0,0,0,.12);
-    padding: 4px 0;
-    width: 200px;
-    
-}
-
-input:focus,
-select:focus{
-    color: initial;
-    border-bottom: 2px solid #3f51b5;
-}
-
-select{
-    cursor: pointer;
-}
-
-.d-column{
-    display: flex;
-    flex-direction: column;
-}
-
-fieldset{
-    border: none;
 }
 
 .mdl-shadow--4dp{

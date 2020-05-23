@@ -17,8 +17,10 @@
 	const shortcutHelper = require("../utils/Shortcut");
 	const selectionHelper = require("../utils/Selection");
 	const PopoverHelper = require("./Popover");
+	const applicationSettings = new (require("../storageEntities/ApplicationSettings"));
 
 
+	applicationSettings.getAll();
 	let popoverInstance = new PopoverHelper();
 	let userSettings = {
 		isPopoverEnabled: await storageHelper.retrieve('isEnabled'),
@@ -29,9 +31,8 @@
 	// Initialize an iframe element and insert it into the DOM
 	popoverInstance.init({
 		iframeUrl: chrome.extension.getURL('pages/popoverGUI.html'),
-		iframeWidth: 501,
-		iframeHeight: 276,
-		shadowMode: "open"
+		iframeStyle: applicationSettings.list.filter((el) => el.label === "modal.style")[0],
+		shadowMode: applicationSettings.list.filter((el) => el.label === "modal.shadowMode")[0]
 	});
 	popoverInstance.insertIframe();
 
