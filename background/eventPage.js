@@ -1,55 +1,77 @@
-﻿(function() {
+﻿(function () {
 	"use strict";
 
-	chrome.runtime.onInstalled.addListener(initializeDB);
+	chrome.runtime.onInstalled.addListener(() => {
+		bootstrapApplicationSettings();
+		bootstrapUserPreferences();
+	});
 
-	/**
-	 * 1: fallBackLanguage: 1: 'en' || 2: 'es' || 3: 'pt' || 4: 'ru'
-	 * 2: popupMode: 1:'default' || 2: 'shortcut'
-	 * 3: shortcutToShowPopover: 'keyId + keyId'
-	 * 4: listOfLanguagesToProcess: [1?, 2?, 3?, 4?]
-	 * 5: isPopoverEnabled : true || false
-	 */
-	async function initializeDB() {
+	const storage = new (require("../utils/Storage"));
+	const applicationSettings = new (require("../storageEntities/ApplicationSettings"));
+	const userPreferences = new (require("../storageEntities/UserPreferences"));
 
-		let wikilinkData = JSON.stringify({
-			1: 'en',
-			2: 'shortcut',
-			3: ['ShiftLeft', 'AltLeft'],
-			4: ['por', 'eng', 'esp', 'rus'],
-			5: true
-		});
 
-		retrieve().then(response => {
-			if (typeof response !== 'object') {
-				chrome.storage.sync.set({ wldt: wikilinkData }, () => {});
+	async function bootstrapApplicationSettings() {
+		await applicationSettings.getAll();
+
+		if (applicationSettings.list.length > 0) {
+			return;
+		}
+
+		var settings = [
+			{
+				label: "modal.style",
+				value: `width: 501px;
+					height:276px;
+					border: none;
+					z-index: 2139999998;
+					box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;`,
+				description: ""
+			},
+			{
+				label: "modal.shadowMode",
+				value: "open",
+				description: ""
 			}
-		}).catch(error => {
-			chrome.storage.sync.set({ wldt: wikilinkData }, () => {});
-			chrome.runtime.reload();
-		});
+		];
 
+		for (const setting of settings) {
 
+			applicationSettings.label = setting.label;
+			applicationSettings.value = setting.value;
+			applicationSettings.description = setting.description;
+
+			await applicationSettings.create();
+
+		}
 	}
 
-	function retrieve(property = '') {
-		return new Promise(async (resolve, reject) => {
-			var dataString = '';
-			try {
-				dataString = await new Promise(resolve => chrome.storage.sync.get('wldt', obj => resolve(obj['wldt'])));
-				var data = JSON.parse(dataString);
+	async function bootstrapUserPreferences() {
+		await userPreferences.getAll();
 
-				if (property.length > 0)
-					resolve(data[this._encodeProp(property)])
-				else resolve(data);
+		if (userPreferences.list.length > 0) {
+			return;
+		}
 
-			} catch (error) {
-				console.log("Is on catch block");
-				reject(error);
+		var preferences = [
+			{
+				label: "shortcuts.toggleModal",
+				value: ["ShiftLeft", "AltLeft"],
+				description: ""
 			}
+		];
 
-		});
+		for (const preference of preferences) {
+
+			userPreferences.label = preference.label;
+			userPreferences.value = preference.value;
+			userPreferences.description = preference.description;
+
+			await userPreferences.create();
+
+		}
 	}
+
 
 	// chrome.contextMenus.create({
 	//     title: 'Search \"%s\" on Wikipedia',
