@@ -13,15 +13,15 @@ module.exports = class ApplicationSettings extends Storage {
         this.modifiedOn = null;
     }
 
-    async get(id) {
+    async get(label) {
         let response = null;
         let applicationSettings = await this.retrieveStorage(this.storageName);
 
-        if (!Array.isArray(applicationSettings) || !id) {
+        if (!Array.isArray(applicationSettings) || !label) {
             return null;
         }
 
-        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.id === id);
+        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.label === label);
 
         if (applicationSettingIndex === -1) {
             return null;
@@ -29,7 +29,6 @@ module.exports = class ApplicationSettings extends Storage {
 
         response = applicationSettings[applicationSettingIndex];
 
-        this.id = response.id;
         this.label = response.label;
         this.value = response.value;
         this.description = response.description;
@@ -42,7 +41,6 @@ module.exports = class ApplicationSettings extends Storage {
         let response = null;
         let applicationSettings = await this.retrieveStorage(this.storageName);
         let localApplicationSetting = {
-            id: this.id,
             label: this.label,
             value: this.value,
             description: this.description,
@@ -53,7 +51,7 @@ module.exports = class ApplicationSettings extends Storage {
             applicationSettings = [];
         }
 
-        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.id === this.id);
+        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.label === this.label);
 
         if (applicationSettingIndex === -1) {
             throw new Error("Application Setting not found.");
