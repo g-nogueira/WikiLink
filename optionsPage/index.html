@@ -15,7 +15,7 @@
 <body>
     <main class="main">
         <div class="card card--large mdl-shadow--4dp">
-            <form class="form js-form">
+            <form id="form_userPreferences">
 
                 <div class="form-section logo">
                     <a href="https://github.com/g-nogueira/WikiLink"><img class="logo" src="https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/readme/01Artboard%207150.png" alt=""></a>
@@ -32,27 +32,28 @@
                 </div>
 
                 <div>
-                    <label for="shortcuts_togglemodal">Shortcut</label>
-                    <input type="text" id="shortcuts_togglemodal" class="" placeholder="Enter your shortcut here!">
+                    <label for="shortcuts_toggleModal">Shortcut</label>
+                    <input type="text" id="shortcuts_toggleModal" class="" placeholder="Enter your shortcut here!">
                 </div>
 
+            </form>
 
-                <div>
-                    <hr>
-                    Modal
-                </div>
-                <div id="applicationSettings">
+            <div>
+                <hr>
+                Modal
+            </div>
+            <form id="form_applicationSettings">
 
-                </div>
                 <div>
                     <label for="modal_style">Style</label>
-                    <textarea id="modal_style" rows="10"></textarea>
+                    <textarea id="modal_style" rows="10" style="resize:both;"></textarea>
                 </div>
                 <div>
-                    <label for="modal_shadowmode">ShadowMode</label>
-                    <input id="modal_shadowmode"></input>
+                    <label for="modal_shadowMode">ShadowMode</label>
+                    <input id="modal_shadowMode"></input>
                 </div>
             </form>
+
         </div>
     </main>
 
