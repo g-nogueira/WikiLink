@@ -8,45 +8,36 @@ module.exports = class UserPreferences extends Storage {
         super();
 
         this.storageName = "UserPreferences";
-        this.id = 0;
         this.label = "";
         this.value = "";
         this.description = "";
-        this.disabled = true;
+        this.disabled = false;
         this.modifiedOn = null;
     }
 
-    async createOrUpdate() {
+    async get(label) {
         let response = null;
         let userPreferences = await this.retrieveStorage(this.storageName);
-        let localUserPreference = {
-            id: this.id,
-            label: this.label,
-            value: this.value,
-            description: this.description,
-            disabled: this.disabled,
-            modifiedOn: this.modifiedOn
-        };
 
-        if (!Array.isArray(userPreferences)) {
-            userPreferences = [];
+        if (!Array.isArray(userPreferences) || !label) {
+            return null;
         }
 
-        let userPreferenceIndex = userPreferences.findIndex((userPreference) => userPreference.id === this.id);
-        if (!localUserPreference.id || userPreferenceIndex === -1) {
-            // Creates a user preference
-            userPreferences.push(localUserPreference);
-            response = this.createStorage(this.storageName, userPreferences);
+        let applicationSettingIndex = userPreferences.findIndex((applicationSetting) => applicationSetting.label === label);
 
-        } else {
-            // Updates a user preference
-            localUserPreference.modifiedOn = new Date();
-            userPreferences[userPreferenceIndex] = localUserPreference;
-
-            response = this.updateStorage(this.storageName, localUserPreference);
+        if (applicationSettingIndex === -1) {
+            return null;
         }
 
-        return await Promise.all(response);
+        response = userPreferences[applicationSettingIndex];
+
+        this.label = response.label;
+        this.value = response.value;
+        this.description = response.description;
+        this.disabled = response.disabled;
+        this.modifiedOn = response.modifiedOn;
+
+        return response;
     }
 
     async create() {
@@ -68,6 +59,36 @@ module.exports = class UserPreferences extends Storage {
         userPreferences.push(localUserPreference);
 
         response = await this.updateStorage(this.storageName, userPreferences);
+
+        return response;
+    }
+
+    async update() {
+        let response = null;
+        let applicationSettings = await this.retrieveStorage(this.storageName);
+        let localUserPreference = {
+            label: this.label,
+            value: this.value,
+            description: this.description,
+            disabled: this.disabled,
+            modifiedOn: this.modifiedOn
+        };
+
+        if (!Array.isArray(applicationSettings) || applicationSettings.length === 0) {
+            applicationSettings = [];
+        }
+
+        let applicationSettingIndex = applicationSettings.findIndex((applicationSetting) => applicationSetting.label === this.label);
+
+        if (applicationSettingIndex === -1) {
+            throw new Error("Application Setting not found.");
+        }
+
+        // Updates a user preference
+        localUserPreference.modifiedOn = new Date();
+        applicationSettings[applicationSettingIndex] = localUserPreference;
+
+        response = await this.updateStorage(this.storageName, applicationSettings);
 
         return response;
     }
