@@ -22,15 +22,22 @@ module.exports = class Events {
      *
      * @param {String} type
      * @param {Any} details Any custom data to be dispatch with the event.
+     * @param {Event} ev The parent event, if any.
      * @param {Boolean} canBubble A boolean indicating whether the event goes through its target's ancestors in reverse tree order.
      * @param {Boolean} cancelable A boolean indicating whether the event can be canceled by invoking the preventDefault() method.
      */
-    dispatchEvent(type, details, canBubble = true, cancelable = true) {
+    dispatchEvent(type, details, ev = null, canBubble = true, cancelable = true) {
+
+        var _details = details;
+
+        if (ev !== null) {
+            _details.ev = ev;
+        }
 
         const event = new CustomEvent(type, {
             bubbles: canBubble,
             cancelable: cancelable,
-            detail: details,
+            detail: _details,
         })
 
 
