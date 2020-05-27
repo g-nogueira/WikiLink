@@ -48,6 +48,17 @@
 		}
 
 
+		/**
+		 * Verifies if a Selection object is collapsed or white spaces
+		 *
+		 * @param {Selection} selection
+		 * @returns
+		 */
+		isEmpty(selection) {
+			//If given argument is not empty neither is white spaces
+			return !(selection && /\S/.test(selection));
+		}
+
 		_createUniqueNode() {
 			var node = document.createElement("span");
 

@@ -6,37 +6,29 @@ module.exports = class Popover extends Events {
         super();
 
         this.events = {
-            popoverHidden: "popoverHidden"
+            hidden: "popoverHidden",
+            focusOut: "focusOut",
         };
         this.iframeUrl;
-        this.iframe;
         this.iframeStyle;
         this.shadowMode;
+
+        this._iframeWrapper = document.createElement("div");
+        this._iframeWrapper.dataset.visible = 0;
+        this._iframe = document.createElement("iframe");
+
+        this._init();
+
     }
 
-    /**
-     * Initializes DOM preferences
-     *
-     * @param {Object} options
-     * @param {String} options.iframeUrl
-     * @param {Number} options.iframeWidth
-     * @param {Number} options.iframeHeight
-     * @param {String} options.iframeStyle
-     * @param {"open"|"closed"} options.shadowMode A string specifying the encapsulation mode for the shadow DOM tree
-     * @returns
-     */
-    init(options) {
-        this.iframeUrl = options.iframeUrl;
-        this.shadowMode = options.shadowMode || "open";
-        this.iframeStyle = options.iframeStyle || `
-            width: ${options.iframeWidth || 501}px;
-            height: ${options.iframeHeight || 276}px;
-            border: none;
-            z-index: 2139999998;
-            box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;
-        `;
+    _init() {
+        document.body.addEventListener("click", (ev) => {
+            if (this.isHidden) {
+                return;
+            }
 
-        return this;
+            this.dispatchEvent(this.events.focusOut, {}, ev);
+        });
     }
 
     /**
@@ -44,9 +36,9 @@ module.exports = class Popover extends Events {
      *
      */
     insertIframe() {
-        let parentElement = document.createElement("div");
+        let parentElement = this._iframeWrapper;
         let shadow = parentElement.attachShadow({ mode: this.shadowMode });
-        let iframeNode = document.createElement("iframe");
+        let iframeNode = this._iframe;
 
         parentElement.classList.add("js-wikilink");
         parentElement.style = `
@@ -63,7 +55,7 @@ module.exports = class Popover extends Events {
         let iframeElement = shadow.querySelector("iframe");
         iframeElement.parent = parentElement;
 
-        this.iframe = iframeElement;
+        this._iframe = iframeElement;
         this._dispatcher = iframeElement;
     }
 
@@ -79,15 +71,15 @@ module.exports = class Popover extends Events {
      * @param {Number} options.height
      */
     show(title, position, options = {}) {
-        this.iframe.parent.style.top = position.top + "px";
-        this.iframe.parent.style.left = position.left + "px";
+        this._iframe.parent.style.top = position.top + "px";
+        this._iframe.parent.style.left = position.left + "px";
 
-        this.iframe.style.width = options.width || this.iframe.style.width;
-        this.iframe.style.height = options.height || this.iframe.style.height;
+        this._iframe.style.width = options.width || this._iframe.style.width;
+        this._iframe.style.height = options.height || this._iframe.style.height;
 
-        this.iframe.src = this.iframeUrl + "?title=" + title;
-
-        this.iframe.classList.add("popover--enabled");
+        this._iframe.src = this.iframeUrl + "?title=" + title;
+        this._iframeWrapper.style.display = "block";
+        this._iframeWrapper.dataset.visible = 1;
     }
 
     /**
@@ -98,9 +90,14 @@ module.exports = class Popover extends Events {
      */
     hide(options, delay = 300) {
         setTimeout(() => {
-            this.iframe.classList.remove("popover--enabled");
-            this.dispatchEvent(this.events.popoverHidden, { element: this.iframe });
+            this._iframeWrapper.style.display = "none";
+            this._iframeWrapper.dataset.visible = 0;
+            this.dispatchEvent(this.events.hidden, {});
         }, delay);
+    }
+
+    get isHidden() {
+        return this._iframeWrapper.dataset.visible == false;
     }
 
 };

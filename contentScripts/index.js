@@ -31,43 +31,47 @@
 
 
 	// Initialize an iframe element and insert it into the DOM
-	popoverInstance.init({
-		iframeUrl: chrome.extension.getURL('pages/popoverGUI.html'),
-		iframeStyle: applicationSettings.list.filter((el) => el.label === "modal.style")[0].value,
-		shadowMode: applicationSettings.list.filter((el) => el.label === "modal.shadowMode")[0].value
-	});
+	popoverInstance.iframeUrl = chrome.extension.getURL('pages/popoverGUI.html');
+	popoverInstance.iframeStyle = applicationSettings.list.filter((el) => el.label === "modal.style")[0].value;
+	popoverInstance.shadowMode = applicationSettings.list.filter((el) => el.label === "modal.shadowMode")[0].value
 	popoverInstance.insertIframe();
 
 
 	// Listen for the shortcut to be triggered
-
 	shortcutHelper.shortcut = [userSettings.shortcut];
 	shortcutHelper.addEventListener(shortcutHelper.events.shortcutMatch, onShortcutMatch);
 
 	// Listen for changes on storage
 	storageHelper.addEventListener(storageHelper.events.storageChange, onStorageChange);
 
+	popoverInstance.addEventListener(popoverInstance.events.focusOut, (ev) => popoverInstance.hide())
 
 
+	/**
+	 * Callback for when the user presses the shortcuts.toggleModal shortcut
+	 *
+	 * @param {Event} ev
+	 */
 	function onShortcutMatch(ev) {
 		let selectionObj = selectionHelper.getSelection();
 		let selectionString = selectionObj.toString();
 		let iframePosition = selectionHelper.getOffsetBottomPosition(selectionObj);
 
-		if (userSettings.isPopoverEnabled && !selectionString.isCollapsed && !isEmptySelection(selectionString)) {
+		if (userSettings.isPopoverEnabled && !selectionString.isCollapsed && !selectionHelper.isEmpty(selectionString)) {
 			popoverInstance.show(selectionString, iframePosition);
 		}
 	}
 
+	/**
+	 * Callback for when chrome.storage.sync changes
+	 *
+	 * @param {*} oldV
+	 * @param {*} newV
+	 */
 	function onStorageChange(oldV, newV) {
 		shortcut = newV.shortcut;
 		userSettings.isPopoverEnabled = newV.isEnabled;
 		popoverInstance.shortcut = shortcut;
-	}
-
-	function isEmptySelection(selection) {
-		//If given argument is not empty neither is white spaces
-		return !(selection && /\S/.test(selection));
 	}
 
 }());
