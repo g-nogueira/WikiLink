@@ -26,11 +26,19 @@
 
 		applicationSettings.list.forEach((el) => {
 			let id = `#${el.label.replace(".", "_")}`;
+
+			if (!DOM(id)) {
+				return;
+			}
 			DOM(id).value = el.value;
 		});
 
 		userPreferences.list.forEach((el) => {
 			let id = `#${el.label.replace(".", "_")}`;
+
+			if (!DOM(id)) {
+				return;
+			}
 			DOM(id).value = el.value;
 		});
 	}
@@ -64,6 +72,8 @@
 		// 3. On focusout rollback to original value, if empty
 		input.addEventListener("focusout", (ev) => {
 			if (input.value !== "") {
+				// Manually triggers change event, else it won't trigger 
+				DOM("#form_userPreferences").dispatchEvent(new Event("change"));
 				return;
 			}
 
