@@ -55,6 +55,11 @@
 
 		var preferences = [
 			{
+				label: "modal.isEnabled",
+				value: true,
+				description: ""
+			},
+			{
 				label: "shortcuts.toggleModal",
 				value: ["ShiftLeft", "AltLeft"],
 				description: ""
