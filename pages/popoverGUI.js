@@ -13,7 +13,7 @@
 (async function () {
 	"use strict";
 
-	const popoverDB = require("../utils/Storage");
+	const userPreferences = new (require("../storageEntities/UserPreferences"));
 	const wikiAPI = require("@g-nogueira/wikipediaapi");
 	const wiktAPI = require("@g-nogueira/wiktionaryapi");
 	const popoverManager = require("../models/popoverManager");
@@ -23,7 +23,7 @@
 	var popover = popoverManager(element);
 	var wikipediaAPI = wikiAPI;
 	var wiktionaryAPI = wiktAPI;
-	var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
+	var isPopoverEnabled = await userPreferences.get("modal.isEnabled");
 	var selectedString = '';
 
 	initDOMEvents();

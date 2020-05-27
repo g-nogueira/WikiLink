@@ -13,36 +13,39 @@
 (async function () {
 	"use strict";
 
-	const storageHelper = require("../utils/Storage");
 	const shortcutHelper = require("../utils/Shortcut");
 	const selectionHelper = require("../utils/Selection");
 	const PopoverHelper = require("./Popover");
 	const applicationSettings = new (require("../storageEntities/ApplicationSettings"));
+	const userPreferences = new (require("../storageEntities/UserPreferences"));
+	const storageHelper = new (require("../utils/Storage"));
 
 
-	applicationSettings.getAll();
+	await applicationSettings.getAll();
+	await userPreferences.getAll();
 	let popoverInstance = new PopoverHelper();
 	let userSettings = {
-		isPopoverEnabled: await storageHelper.retrieve('isEnabled'),
-		shortcut: await storageHelper.retrieve('shortcut')
+		isPopoverEnabled: userPreferences.list.filter((up) => up.label === "modal.isEnabled")[0].value,
+		shortcut: userPreferences.list.filter((up) => up.label === "shortcuts.toggleModal")[0].value
 	};
 
 
 	// Initialize an iframe element and insert it into the DOM
 	popoverInstance.init({
 		iframeUrl: chrome.extension.getURL('pages/popoverGUI.html'),
-		iframeStyle: applicationSettings.list.filter((el) => el.label === "modal.style")[0],
-		shadowMode: applicationSettings.list.filter((el) => el.label === "modal.shadowMode")[0]
+		iframeStyle: applicationSettings.list.filter((el) => el.label === "modal.style")[0].value,
+		shadowMode: applicationSettings.list.filter((el) => el.label === "modal.shadowMode")[0].value
 	});
 	popoverInstance.insertIframe();
 
 
 	// Listen for the shortcut to be triggered
-	shortcutHelper.init(userSettings.shortcut);
-	shortcutHelper.addEventListener("shortcutMatch", onShortcutMatch);
+
+	shortcutHelper.shortcut = [userSettings.shortcut];
+	shortcutHelper.addEventListener(shortcutHelper.events.shortcutMatch, onShortcutMatch);
 
 	// Listen for changes on storage
-	storageHelper.onChanges(onStorageChange);
+	storageHelper.addEventListener(storageHelper.events.storageChange, onStorageChange);
 
 
 
