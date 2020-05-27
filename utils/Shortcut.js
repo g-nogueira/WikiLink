@@ -41,7 +41,7 @@ module.exports = new (class ShortcutHelper extends Events {
 				return;
 			}
 
-			let shortcut = that.shortcut.filter((sc) => keyPressingGroung.toString() === sc.toString())[0];
+			let shortcut = that.shortcut.filter((sc) => keyPressingGroung.toString() === sc.toString());
 			let keyDown = ev.code;
 
 			clearTimeout(timeOutId);
@@ -49,7 +49,7 @@ module.exports = new (class ShortcutHelper extends Events {
 			if (shortcut.length > 0) {
 
 				// Dispatch shortcutMatch event
-				that.dispatchEvent(that.events.shortcutMatch, { shortcut: shortcut }, ev);
+				that.dispatchEvent(that.events.shortcutMatch, { shortcut: shortcut[0] }, ev);
 				keyPressingGroung = [];
 
 			} else if (!keyPressingGroung.includes(keyDown)) {
