@@ -44,6 +44,8 @@ module.exports = class Popover extends Events {
         parentElement.style = `
             position: absolute;
             background: transparent;
+            display: none;
+            z-index: 2139999998;
         `;
 
         iframeNode.style = this.iframeStyle;
@@ -85,10 +87,9 @@ module.exports = class Popover extends Events {
     /**
      * Hides the iframe
      *
-     * @param {*} options
-     * @param {Number} [delay=300] A delay in milliseconds to hide the iframe.
+     * @param {Number} [delay=0] A delay in milliseconds to hide the iframe.
      */
-    hide(options, delay = 300) {
+    hide(delay = 0) {
         setTimeout(() => {
             this._iframeWrapper.style.display = "none";
             this._iframeWrapper.dataset.visible = 0;

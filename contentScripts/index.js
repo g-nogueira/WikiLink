@@ -44,7 +44,7 @@
 	// Listen for changes on storage
 	storageHelper.addEventListener(storageHelper.events.storageChange, onStorageChange);
 
-	popoverInstance.addEventListener(popoverInstance.events.focusOut, (ev) => popoverInstance.hide())
+	popoverInstance.addEventListener(popoverInstance.events.focusOut, (ev) => popoverInstance.hide());
 
 
 	/**
