@@ -24,7 +24,6 @@
 				value: `width: 501px;
 					height:276px;
 					border: none;
-					z-index: 2139999998;
 					box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px #a2a9b1;`,
 				description: ""
 			},
