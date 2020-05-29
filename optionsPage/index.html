@@ -5,60 +5,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <!-- inject:css -->
-    <!-- endinject -->
-    <link rel="stylesheet" href="style.css">
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>WikiLink Options</title>
 </head>
 
-<body>
-    <main class="main">
-        <div class="card card--large mdl-shadow--4dp">
-            <form id="form_userPreferences">
+<body class="container">
+    <main class="row">
+        <div class="card col-7 mt-5 mx-auto">
+            <a href="https://github.com/g-nogueira/WikiLink">
+                <img class="card-img-top" src="https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/readme/01Artboard%207150.png" alt="">
+            </a>
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pills-advanced-tab" data-toggle="pill" href="#pills-advanced" role="tab" aria-controls="pills-advanced" aria-selected="false">Advanced</a>
+                </li>
+            </ul>
+            <section class="card-body">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <form id="form_userPreferences">
+                            <div>
+                                <label for="instructions">Instructions:</label>
+                                <div id="instructions">
+                                    <ol>
+                                        <li>Select a word</li>
+                                        <li>Press the <strong id="shortcut">{{shortcut}}</strong> keys</li>
+                                    </ol>
+                                </div>
+                            </div>
 
-                <div class="form-section logo">
-                    <a href="https://github.com/g-nogueira/WikiLink"><img class="logo" src="https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/readme/01Artboard%207150.png" alt=""></a>
-                </div>
-
-                <div>
-                    <label for="instructions">Instructions:</label>
-                    <div id="instructions">
-                        <ol>
-                            <li>Select a word</li>
-                            <li>Press the <strong id="shortcut">{{shortcut}}</strong> keys</li>
-                        </ol>
+                            <div class="form-group">
+                                <label for="shortcuts_toggleModal">Shortcut</label>
+                                <input type="text" class="form-control" id="shortcuts_toggleModal" placeholder="Enter your shortcut here!">
+                            </div>
+                        </form>
                     </div>
+                    <div class="tab-pane fade" id="pills-advanced" role="tabpanel" aria-labelledby="pills-advanced-tab">
+                        <form id="form_applicationSettings">
+                            <div class="form-group">
+                                <label for="modal_style">Iframe Style</label>
+                                <textarea class="form-control" id="modal_style" placeholder="Enter your shortcut here!" rows="10"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="modal_shadowMode">ShadowMode</label>
+                                <input id="modal_shadowMode" class="form-control"></input>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">...</div>
                 </div>
-
-                <div>
-                    <label for="shortcuts_toggleModal">Shortcut</label>
-                    <input type="text" id="shortcuts_toggleModal" class="" placeholder="Enter your shortcut here!">
-                </div>
-
-            </form>
-
-            <div>
-                <hr>
-                Modal
-            </div>
-            <form id="form_applicationSettings">
-
-                <div>
-                    <label for="modal_style">Style</label>
-                    <textarea id="modal_style" rows="10" style="resize:both;"></textarea>
-                </div>
-                <div>
-                    <label for="modal_shadowMode">ShadowMode</label>
-                    <input id="modal_shadowMode"></input>
-                </div>
-            </form>
-
+            </section>
         </div>
     </main>
 
-    <!-- inject:js -->
-    <!-- endinject -->
+    <script src="/public/library/jquery-3.4.1/jquery.min.js"></script>
+    <script src="/public/library/popper/popper.min.js"></script>
+    <script src="/public/library/bootstrap/bootstrap.min.js"></script>
     <script src="index.js"></script>
 </body>
 
