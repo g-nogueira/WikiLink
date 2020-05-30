@@ -14,9 +14,6 @@
 
         insertThumbnails(popover, blankThumbnails());
 
-        popover.querySelectorAll('.js-infoSect').forEach(section => section.classList.add('hidden'));
-        popover.querySelector('.js-wikiSearches').classList.remove('hidden');
-
         if (!callback)
             return popover;
 
@@ -27,7 +24,7 @@
 
     function insertThumbnails(popover, thumbnails) {
 
-        popover.querySelector('.js-wikiSearches').appendChild(thumbnails);
+        popover.querySelector('#tabResultList ul').appendChild(thumbnails);
 
         return popover;
     }
@@ -39,7 +36,7 @@
     function blankThumbnails(quantity = 6) {
 
         var fragment = document.createDocumentFragment();
-        var template = document.querySelector("#blankThumbnails");
+        var template = document.querySelector("#blankListGroupItem");
 
         for (let i = 0; i < quantity; i++) {
 

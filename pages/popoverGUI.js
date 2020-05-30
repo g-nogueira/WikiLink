@@ -19,6 +19,7 @@
 	const popoverManager = require("../models/popoverManager");
 	const popoverDesigner = require("../models/popoverDesigner");
 
+
 	var element = popoverDesigner.getBasicShell();
 	var popover = popoverManager(element);
 	var wikipediaAPI = wikiAPI;
@@ -26,6 +27,8 @@
 	var isPopoverEnabled = await userPreferences.get("modal.isEnabled");
 	var selectedString = '';
 
+	popover.thumbnailImageNotFoundUrl = "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"
+	popover.wikipediaImageNotFoundUrl = "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png"
 	initDOMEvents();
 
 
@@ -44,10 +47,10 @@
 
 		if (isPopoverEnabled && title) {
 
-			popover.showPage('js-wikiSearches');
+			$(popover.HTMLElement.querySelector("#tabResultList")).tab("show");
 			selectedString = title;
-			wikipediaAPI.searchResults(title, "en").then(popover.setThumbnails);
-			wiktionaryAPI.searchTitle(title, "en").then(popover.setDictionary);
+			wikipediaAPI.searchResults(title, "en").then((thumbs) => popover.setThumbnails(thumbs));
+			wiktionaryAPI.searchTitle(title, "en").then((data) => popover.setDictionary(data));
 
 			popover.isLoading({ area: 'thumbnails' });
 		}

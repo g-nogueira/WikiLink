@@ -26,37 +26,28 @@
 					throw new TypeError('The given popover is not a instance of HTMLElement');
 
 
+				this.thumbnailImageNotFoundUrl;
+				this.wikipediaImageNotFoundUrl;
+
+
 				this.HTMLElement = popover;
 				this.sections = this.popoverElements();
-				this.hide = hidePopover;
-				this.render = appendPopover;
 				this.setThumbnails = this.insertThumbnails;
-				this.setArticle = insertArticle;
+				this.setArticle = (article) => insertArticle(article, this.wikipediaImageNotFoundUrl);
 				this.setDictionary = insertDictionary;
 				this.isLoading = insertBlankData;
-				this.isChild = isPopoverChild;
-				this.showPage = showPage;
 				this.addEventListener = (eventName, eventListener) => popover.addEventListener(eventName, eventListener);
 
 				this.createCustomEvents();
-				popover.addEventListener('tabselect', ev => showPage(ev.detail.target, !isDisabled(ev.detail.element)));
-				popover.addEventListener('popoverHidden', ev => disableTab(1));
-				popover.addEventListener('thumbclick', ev => enableTab(1));
-				popover.addEventListener('pagechange', ev => {
-					if (ev.detail.element === this.sections.wikipediaWrapper || ev.detail.element === this.sections.wiktionaryWrapper) {
-						showElements(this.sections.resultsTab);
-					} else {
-						hideElements(this.sections.resultsTab);
-					}
-				});
+				// popover.addEventListener('show.bs.tab', ev => loadTab(ev.target));
 			}
 
 			insertThumbnails(thumbs = []) {
 				if (!thumbs.length) {
 					popover = setThumbsError();
 				} else {
-					const thumbsSect = popover.querySelector('.js-wikiSearches');
-					const thumbnails = thumbnailsToHtml(thumbs);
+					const thumbsSect = popover.querySelector('#tabResultList ul');
+					const thumbnails = thumbnailsToHtml(thumbs, this.thumbnailImageNotFoundUrl);
 
 					thumbnails.querySelectorAll('.js-item').forEach(thumbnail => {
 						if (thumbnail) {
@@ -65,8 +56,8 @@
 								detail: {
 									article: {
 										id: thumbnail.id,
-										lang: thumbnail.attributes.getNamedItem('lang').value,
-										title: thumbnail.querySelector('.js-title').textContent
+										lang: thumbnail.dataset.lang,
+										title: thumbnail.querySelector("#title-" + thumbnail.id).textContent
 									}
 								}
 							});
@@ -88,9 +79,9 @@
 					resultsTab: popover.querySelector('.js-listTab'),
 					wikiTab: popover.querySelector('.js-wikiTab'),
 					wiktTab: popover.querySelector('.js-wiktTab'),
-					listWrapper: popover.querySelector('.js-wikiSearches'),
-					wikipediaWrapper: popover.querySelector('.js-wikiSect'),
-					wiktionaryWrapper: popover.querySelector('.js-wiktSect'),
+					listWrapper: popover.querySelector('#tabResultList ul'),
+					wikipediaWrapper: popover.querySelector('#tabWikipedia'),
+					wiktionaryWrapper: popover.querySelector('#tabWiktionary'),
 				}
 			}
 
@@ -116,7 +107,7 @@
 
 
 		function setThumbsError() {
-			var thumbWrapper = popover.querySelector('.js-wikiSearches');
+			var thumbWrapper = popover.querySelector('#tabResultList ul');
 
 			removeChildrenFrom(thumbWrapper);
 			thumbWrapper.appendChild(document.createTextNode(`Didn't find any info 😕`));
@@ -135,19 +126,19 @@
 		 * @param {String} articleObj.thumbnail.source
 		 * @param {Number} articleObj.thumbnail.width
 		 */
-		function insertArticle(articleObj) {
+		function insertArticle(articleObj, wikipediaImageNotFoundUrl) {
 
-			var wikiSect = popover.querySelector('.js-wikiSect');
+			var wikiSect = popover.querySelector('#tabWikipedia');
 			var content = wikipediaArticle({
 				title: articleObj.title,
 				text: articleObj.extract,
 				image: articleObj.thumbnail,
 				url: articleObj.fullurl
-			});
+			}, wikipediaImageNotFoundUrl);
 
 			var imageElem = content.querySelector('.js-articleImage');
 
-			showPage('js-wikiSect');
+			$(wikiSect.querySelector("#tabWikipedia")).tab("show");
 			removeChildrenFrom(wikiSect);
 
 			imageElem.onload = () => {
@@ -172,8 +163,8 @@
 
 		function insertBlankData({ area = '' }) {
 
-			var wikiSect = popover.querySelector('.js-wikiSect');
-			var thumbWrapper = popover.querySelector('.js-wikiSearches');
+			var wikiSect = popover.querySelector('#tabWikipedia');
+			var thumbWrapper = popover.querySelector('#tabResultList ul');
 
 			var areaToDisplay = {
 				thumbnails: () => {
@@ -184,7 +175,7 @@
 
 				},
 				article: () => {
-					showPage('js-wikiSect');
+					$(wikiSect.querySelector("#tabWikipedia")).tab("show");
 					const previousArticle = wikiSect.querySelector('.js-wikiArticle');
 					if (previousArticle)
 						wikiSect.removeChild(previousArticle)
@@ -201,14 +192,11 @@
 		}
 
 		function insertDictionary(data) {
-			var wiktWrapper = popover.querySelector('.js-wiktSect');
+			var wiktWrapper = popover.querySelector('#tabWiktionary');
 			var wiktWrapper = removeChildrenFrom(wiktWrapper);
 
 			if (data) {
 				wiktWrapper.appendChild(wiktionaryArticle(data));
-				enableTab(2);
-			} else {
-				disableTab(2);
 			}
 
 		}
@@ -221,42 +209,42 @@
 		function wiktionaryArticle(article) {
 
 			var section = document.createDocumentFragment();
+			var template = document.querySelector("#partOfSpeechItem");
 
-			Object.entries(article).forEach(entrie => { //foreach language
+			for (const entry of Object.entries(article)) {
 				try {
-					var partsOfSpeech = entrie[1]
-					var language = entrie[1][0].language;
+					var partsOfSpeech = entry[1]
+					var language = entry[1][0].language;
 
 					const span = newElement('span', `s${uniqueId()}`, ['dict-lang'])
 					const ul = newElement('ul', '', ['dict-lang--sections']);
 
-					partsOfSpeech.forEach(group => {
+					for (const group of partsOfSpeech) {
 
-						const liPoS = document.createRange().createContextualFragment(`
-                    	<li id="\`li${uniqueId()}\`">
-                    	    <span class="dict-partofspeach">${group.partOfSpeech}</span>
-                    	    <ol type="1" id="dictDefs" class="dict-definition">
-                    	    </ol>
-                    	</li>`);
+						let partOfSpeechItem = template.content.cloneNode(true);
 
+						partOfSpeechItem.firstElementChild.id = "li" + uniqueId();
+						partOfSpeechItem.querySelector("span").innerText = group.partOfSpeech;
 
-						group.definitions.forEach(def => {
+						for (const def of group.definitions) {
+
 							const wordDefinition = newElement('li');
 							wordDefinition.innerText = def.definition.replace(/(<script(\s|\S)*?<\/script>)|(<style(\s|\S)*?<\/style>)|(<!--(\s|\S)*?-->)|(<\/?(\s|\S)*?>)/g, '');
-							liPoS.querySelector('#dictDefs').appendChild(wordDefinition);
-						});
+							partOfSpeechItem.querySelector('#dictDefs').appendChild(wordDefinition);
+
+						}
 
 						span.innerText = language;
-						ul.appendChild(liPoS);
+						ul.appendChild(partOfSpeechItem);
 						section.appendChild(span);
 						section.appendChild(ul);
+					}
 
-
-					});
 				} catch (error) {
-					disableTab(2);
+					throw new Error("Wiktionary didn't return a valid response");
 				}
-			});
+			}
+
 
 			return section;
 		}
@@ -266,8 +254,7 @@
 		 * @param {string} text The article's text.
 		 * @returns {object} text The article's image data (source).
 		 */
-		function wikipediaArticle({ title, text, image, url }) {
-			var section = document.createDocumentFragment();
+		function wikipediaArticle({ title, text, image, url }, imageNotFoundUrl) {
 			var originalWord = (() => {
 				let loweredText = text.toLowerCase();
 				let loweredTitle = title.toLowerCase();
@@ -275,15 +262,20 @@
 				let endIndex = startIndex + title.length;
 				return text.substring(startIndex, endIndex)
 			})();
-			var formatedText = text.replace(originalWord, `<strong><a href="${url}" target="_blank" rel="noopener noreferrer" title="View on Wikipedia">${originalWord}</a></strong>`)
-			let frag = `
-                <div id="wikiArticle" class="js-wikiArticle">
-                    <img id="popoverImage" class="popoverImage js-articleImage" src="${image.source || 'https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--200.png'}">
-                    <p class="js-wikiInfo popoverText">${formatedText}</p>
-                </div>
-                `;
 
-			return section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+			var template = document.querySelector("#wikipediaArticle");
+			var node = template.content.cloneNode(true);
+
+			let inputImg = node.querySelector("img");
+			let inputText = node.querySelector("p");
+
+			var formatedText = text.replace(originalWord, `<strong><a href="${url}" target="_blank" rel="noopener noreferrer" title="View on Wikipedia">${originalWord}</a></strong>`)
+
+			inputImg.src = image.source || imageNotFoundUrl;
+			inputText.innerHTML = formatedText;
+
+
+			return node;
 		}
 
 		/**
@@ -314,94 +306,52 @@
 		 * @param {object} thumbList The data returned from the wiktionary.
 		 * @returns {DocumentFragment} The list of thumbnails.
 		 */
-		function thumbnailsToHtml(thumbList) {
+		function thumbnailsToHtml(thumbList, imageNotFoundUrl) {
 
 			var section = document.createDocumentFragment();
+			let template = document.querySelector("#listGroupItem");
 
 			thumbList
-				.map(thumbnailToHtml)
+				.map((listItem) => {
+
+					let listGroupItem = template.content.cloneNode(true);
+					let inputDescription = listGroupItem.querySelector("#description-");
+					let inputTitle = listGroupItem.querySelector("#title-");
+					let inputImg = listGroupItem.querySelector("img");
+
+
+					listGroupItem.firstElementChild.id = listItem.pageid;
+					listGroupItem.firstElementChild.dataset.lang = listItem.lang;
+
+					inputTitle.id += listItem.pageid;
+					inputDescription.id += listItem.pageid;
+
+					inputImg.src = listItem.thumbnail.source || imageNotFoundUrl;
+					inputTitle.innerText = listItem.title;
+					inputDescription.innerText = listItem.terms && listItem.terms.description[0];
+
+
+
+					return listGroupItem;
+
+				})
 				.forEach(thumbnail => section.appendChild(thumbnail));
 
 			return section;
 		}
 
-		function thumbnailToHtml(rawTag) {
-			try {
-				var thumbnail = `
-                <div id="${rawTag.pageid}" lang="${rawTag.lang}" class="js-item item">
-                    <section class="image">
-                        <img src="${rawTag.thumbnail.source || "https://raw.githubusercontent.com/g-nogueira/WikiLink/master/public/images/404/01image404--70.png"}" alt="">
-                    </section>
-                    <section class="info">
-                        <div class="js-title title">${rawTag.title}</div>
-                        <div class="description">${rawTag.terms.description[0]}</div>
-                    </section>
-				</div>`;
-			} catch (error) {
-				var thumbnail = `<div></div>`;
-			}
-			return newFragment(thumbnail).firstElementChild;
-		}
-
 		function blankThumbnails(quantity = 6) {
 
 			var section = document.createDocumentFragment();
+			let template = document.querySelector("#blankListGroupItem");
+
 
 			for (let i = 0; i < quantity; i++) {
-				let frag = `
-                <div class="js-item item item--blank">
-                    <section class="image--blank"></section>
-                    <section class="info">
-                        <div class="js-title title--blank"></div>
-                        <div class="description--blank"></div>
-                        <div class="description--blank"></div>
-                    </section>
-                </div>`;
-
-				section.appendChild(document.createRange().createContextualFragment(frag).firstElementChild);
+				let listGroupItem = template.content.cloneNode(true);
+				section.appendChild(listGroupItem);
 			}
 
 			return section;
-		}
-
-		/**
-		 * Displays the popover based on given selection, cal1 and cal2 coordinates.
-		 * @param {Selection} selection The current window selection on DOM.
-		 * @param {*} cal1 
-		 * @param {*} cal2 
-		 */
-		function appendPopover(selection, cal1, cal2) {
-			/**From:
-			 * https://stackoverflow.com/questions/39283159/how-to-keep-selection-but-also-press-button
-			 */
-			var selRange = selection.getRangeAt(0).getBoundingClientRect();
-			var rb1 = DOMRect(cal1);
-			var rb2 = DOMRect(cal2);
-
-			popover.style.top = `${(selRange.bottom - rb2.top) * 100 / (rb1.top - rb2.top)}px`;
-			let leftPosition = calcLeftPos(selRange, rb1, rb2);
-
-			if (leftPosition + popover.clientWidth > window.innerWidth) {
-				// popover.attributeStyleMap.set('left', CSS.px(leftPosition) - popover.clientWidth + selRange.width);
-				popover.style.left = `${calcLeftPos(selRange, rb1, rb2) - popover.clientWidth + selRange.width}px`
-			} else {
-				// popover.attributeStyleMap.set('left', CSS.px((selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)));
-				popover.style.left = `${(selRange.left - rb2.left) * 100 / (rb1.left - rb2.left)}px`;
-			}
-
-			popover.classList.add('popover--enabled');
-
-			function DOMRect(element) {
-				const r = document.createRange()
-				r.selectNode(element)
-				return r.getBoundingClientRect();
-			}
-
-			function calcLeftPos(selRange, rb1, rb2) {
-				return (selRange.left - rb2.left) * 100 / (rb1.left - rb2.left);
-			}
-
-
 		}
 
 		function removeChildrenFrom(element) {
@@ -410,31 +360,6 @@
 			}
 
 			return element;
-		}
-
-		function isPopoverChild(elemIdentifier = '') {
-			try {
-				return popover.querySelector(elemIdentifier) === null ? false : true;
-			} catch (error) {
-				return false;
-			}
-		}
-
-		/**
-		 * @param {number} delay The delay in milliseconds to hide the popover.
-		 */
-		function hidePopover(delay = 300) {
-			setTimeout(() => {
-				popover.classList.remove('popover--enabled');
-				const hideEvent = new CustomEvent('popoverHidden', {
-					bubbles: true,
-					detail: {
-						element: popover,
-					}
-				});
-
-				popover.dispatchEvent(hideEvent);
-			}, delay);
 		}
 
 		function uniqueId() {
@@ -453,73 +378,6 @@
 			popover.querySelector(tabs[tabId]).setAttribute('disabled', 'disabled');
 		}
 
-		/**
-		 * Enables a tab by given id.
-		 * @param {number} tabId  The id of the tab to be enabled (1: Wikipedia | 2: Wiktionary).
-		 */
-		function enableTab(tabId) {
-			var tabs = {
-				1: '.js-wikiTab',
-				2: '.js-wiktTab'
-			}
-			if (popover.querySelector(tabs[tabId]).hasAttribute('disabled')) {
-				popover.querySelector(tabs[tabId]).removeAttribute('disabled');
-			}
-		}
-
-		function newFragment(codeString = '<div></div>') {
-			return document.createRange().createContextualFragment(codeString);
-		}
-
-		function isDisabled(element) {
-			return element.hasAttribute('disabled');
-		}
-
-		function hideElements(identifier = '') {
-
-			if (identifier instanceof HTMLElement) {
-
-				identifier.classList.add('hidden');
-
-			} else if (identifier instanceof NodeList) {
-
-				identifier.forEach(el => el.classList.add('hidden'));
-
-			} else if (Array.isArray(identifier)) {
-
-				identifier.forEach(el => {
-					popover.querySelectorAll(el).forEach(el => el.classList.add('hidden'));
-				});
-
-			} else if (typeof identifier === "string") {
-
-				popover.querySelectorAll(identifier).forEach(el => el.classList.add('hidden'));
-			}
-		}
-
-		function showElements(identifier = '') {
-			if (identifier instanceof HTMLElement) {
-
-				identifier.classList.remove('hidden');
-
-			} else if (identifier instanceof NodeList) {
-
-				identifier.forEach(el => el.classList.remove('hidden'));
-
-			} else if (Array.isArray(identifier)) {
-
-				identifier.forEach(el => {
-					popover.querySelectorAll(el).forEach(el => el.classList.remove('hidden'));
-				});
-
-			} else if (typeof identifier === "string") {
-
-				popover.querySelectorAll(identifier).forEach(el => el.classList.remove('hidden'));
-			}
-
-
-		}
-
 		function newElement(element = 'div', id = '', classList = []) {
 			var el = document.createElement(element);
 			el.id = id || el.id;
@@ -528,32 +386,6 @@
 			}
 
 			return el;
-		}
-
-		function showPage(pageClass, condition = true) {
-			if (condition) {
-				var className = pageClass.match(/([^.].+)/g)[0];
-				var previousPage;
-				popover.querySelectorAll('.js-infoSect').forEach(section => {
-					if (!section.classList.contains('hidden'))
-						previousPage = section;
-					if (!section.classList.contains(className)) {
-						hideElements(section);
-					} else {
-						section.classList.remove('hidden');
-						const changePageEvent = new CustomEvent('pagechange', {
-							bubbles: true,
-							detail: {
-								className: className,
-								element: section,
-								previous: previousPage
-							}
-						});
-
-						popover.dispatchEvent(changePageEvent);
-					}
-				});
-			}
 		}
 	}
 })();

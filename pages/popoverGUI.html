@@ -7,6 +7,7 @@
     <title>Document</title>
 
     <link rel="stylesheet" href="/public/library/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="popoverGUI.js" defer></script>
 </head>
 
@@ -23,33 +24,11 @@
             all: initial;
         }
 
-        #popover {
-            will-change: opacity;
-            position: fixed;
-            opacity: 0;
-            background: #ffffff;
-            width: 500px;
-            height: 276px;
-            text-align: left;
-            z-index: -10;
-            transform: translateY(10%);
-            transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1), opacity .2s, z-index .5s;
-            border-radius: 5px;
-            font-size: 14px;
-            font-family: 'Roboto', sans-serif !important;
-            color: rgba(0, 0, 0, .87);
-            font-weight: 400;
-            line-height: 20px;
-        }
-
         #popover.popover--enabled {
             display: block;
             opacity: 1;
             transform: translateY(0);
             z-index: 100;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
 
         .contentGroup {
@@ -58,16 +37,16 @@
             transition: height .3s cubic-bezier(0.4, 0.0, 1, 1);
         }
 
-        #wikiSect #wikiArticle {
+        #tabWikipedia #wikiArticle {
             display: flex;
             flex-flow: row-reverse;
         }
 
-        #wikiSect .wikiArticle--blank {
+        #tabWikipedia .wikiArticle--blank {
             width: 100%;
         }
 
-        #wikiSect .wikiArticle--blank .text--blank {
+        #tabWikipedia .wikiArticle--blank .text--blank {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
@@ -135,7 +114,7 @@
             background-color: #fff;
         }
 
-        #dictionaryContent {
+        #tabWiktionary {
             overflow-x: hidden;
             overflow-y: scroll;
         }
@@ -158,7 +137,7 @@
             align-self: flex-start;
         }
 
-        #wikiSect {
+        #tabWikipedia {
             margin-right: -1.3px;
         }
 
@@ -192,24 +171,24 @@
         }
 
         .popoverText:hover::-webkit-scrollbar,
-        #wikiSearches:hover::-webkit-scrollbar,
-        #dictionaryContent.info-section:hover::-webkit-scrollbar,
+        #tabResultList:hover::-webkit-scrollbar,
+        #tabWiktionary.info-section:hover::-webkit-scrollbar,
         .popoverText:hover::-webkit-scrollbar-thumb,
-        #wikiSearches:hover::-webkit-scrollbar-thumb,
-        #dictionaryContent.info-section:hover::-webkit-scrollbar-thumb {
+        #tabResultList:hover::-webkit-scrollbar-thumb,
+        #tabWiktionary.info-section:hover::-webkit-scrollbar-thumb {
             visibility: visible !important;
         }
 
         .popoverText::-webkit-scrollbar,
-        #wikiSearches::-webkit-scrollbar,
-        #dictionaryContent.info-section::-webkit-scrollbar {
+        #tabResultList::-webkit-scrollbar,
+        #tabWiktionary.info-section::-webkit-scrollbar {
             visibility: hidden;
             width: .2em !important;
         }
 
         .popoverText::-webkit-scrollbar-thumb,
-        #wikiSearches::-webkit-scrollbar-thumb,
-        #dictionaryContent.info-section::-webkit-scrollbar-thumb {
+        #tabResultList::-webkit-scrollbar-thumb,
+        #tabWiktionary.info-section::-webkit-scrollbar-thumb {
             visibility: hidden;
             background-color: darkgrey !important;
             outline: 1px solid slategrey !important;
@@ -241,68 +220,31 @@
             right: -10px;
         }
 
-        #wikiSect {
+        #tabWikipedia {
             min-height: 200px;
         }
 
-        #wikiSearches {
+        #tabResultList {
             overflow-x: hidden;
             overflow-y: scroll;
-            display: flex;
-            flex-direction: column;
             min-height: 230px;
         }
 
-        #wikiSearches .item {
-            display: inline-flex;
-            align-items: center;
-            flex-shrink: 0;
-            padding: 5px 8px 5px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, .2);
-            cursor: pointer;
-        }
-
-        #wikiSearches .item .title {
-            font-weight: 500;
-            font-size: 100%;
-        }
-
-        #wikiSearches .item .title--blank {
-            width: 50%;
-            height: 15px;
-            margin-bottom: 10px;
-            background-color: #fafafa;
-        }
-
-
-        #wikiSearches .item .description {
-            font-size: 90%;
-            line-height: initial;
-            color: rgba(0, 0, 0, 0.54);
-        }
-
-        #wikiSearches .item .description--blank {
-            width: 80%;
-            height: 10px;
-            margin-top: 2.5px;
-            background-color: #fafafa;
-        }
-
-        #wikiSect .description--blank {
+        #tabWikipedia .description--blank {
             width: 95%;
             height: 13px;
             margin-top: 8px;
             background-color: #fafafa;
         }
 
-        #wikiSect .description--blank:nth-child(3n+0),
-        #wikiSearches .item .description--blank:last-child,
-        #wikiSect .description--blank:last-child {
+        #tabWikipedia .description--blank:nth-child(3n+0),
+        #tabResultList .item .description--blank:last-child,
+        #tabWikipedia .description--blank:last-child {
             width: 70%;
         }
 
-        #wikiSearches .item .image,
-        #wikiSearches .item .image--blank {
+        #tabResultList .item .image,
+        #tabResultList .item .image--blank {
             width: 70px;
             height: 70px;
             display: flex;
@@ -312,11 +254,11 @@
             flex-shrink: 0;
         }
 
-        #wikiSearches .item .image--blank {
+        #tabResultList .item .image--blank {
             background-color: #fafafa;
         }
 
-        #wikiSect a {
+        #tabWikipedia a {
             text-decoration: none;
             color: inherit;
         }
@@ -324,33 +266,87 @@
 
 
     <div id="popover" class="js-popover popover--enabled">
-        <section id="navbar">
-            <div class="tab btn--navigator js-tab js-listTab js-wikiNavigator hidden" target=".js-wikiSearches">
-                <i class="fas fa-list"></i>
+        <div class="card" style="max-height: 275px; max-width: 500px;">
+            <div class="card-header p-0" style="background-color: #fff;">
+                <ul class="nav nav-tabs card-header-tabs nav-fill m-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" role="tab" href="#tabResultList" aria-selected="true"><i class="fas fa-list"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" role="tab" href="#tabWikipedia" aria-selected="false">Wikipedia</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" role="tab" href="#tabWiktionary" aria-selected="false">Dictionary</a>
+                    </li>
+                </ul>
             </div>
-            <div class="tab js-tab js-wikiTab" target=".js-wikiSect" disabled="disabled">Wikipedia</div>
-            <div class="tab js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
-        </section>
-        <main class="contentGroup js-contentGroup">
-            <section id="wikiSearches" class="js-wikiSearches js-infoSect info-section">
-            </section>
-            <section id="wikiSect" class="js-wikiSect js-infoSect info-section hidden" style="max-height: 200px;">
-            </section>
-            <section id="dictionaryContent" class="js-wiktSect js-infoSect info-section self-column hidden">
-            </section>
-        </main>
+            <!-- <section id="card-header">
+                <div class="row">
+                    <div class="col btn--navigator js-tab js-listTab js-wikiNavigator hidden" target=".js-tabResultList">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="col js-tab js-wikiTab" target="#tabWikipedia" disabled="disabled">Wikipedia</div>
+                    <div class="col js-tab js-wiktTab" target=".js-wiktSect">Dictionary</div>
+                </div>
+            </section> -->
+            <main class="card-body px-0">
+                <div class="tab-content">
+                    <section id="tabResultList" class="tab-pane active" style="max-height: 230px;">
+                        <ul class="list-group">
+                        </ul>
+                    </section>
+                    <section id="tabWikipedia" class="tab-pane" style="max-height: 230px;">
+                    </section>
+                    <section id="tabWiktionary" class="tab-pane self-column" style="max-height: 230px;">
+                    </section>
+                </div>
+            </main>
+        </div>
     </div>
 
-    <template id="blankThumbnails">
-        <div class="js-item item item--blank">
+    <template id="blankListGroupItem">
+        <li class="js-item item item--blank list-group-item">
             <section class="image--blank"></section>
             <section class="info">
-                <div class="js-title title--blank"></div>
+                <div class="title--blank"></div>
                 <div class="description--blank"></div>
                 <div class="description--blank"></div>
             </section>
+        </li>
+    </template>
+
+    <template id="listGroupItem">
+        <li id="" data-lang="en" class="list-group-item js-item">
+            <div class="media">
+                <img class="mr-3 align-self-center" src="" alt="">
+                <section class="media-body">
+                    <div id="title-" class="mt-0"></div>
+                    <div id="description-" class="text-muted" style="font-size: .8rem;"></div>
+                </section>
+            </div>
+        </li>
+    </template>
+
+    <template id="wikipediaArticle">
+        <div id="wikiArticle" class="js-wikiArticle">
+            <img id="popoverImage" class="popoverImage js-articleImage" src="">
+            <p class="js-wikiInfo popoverText"></p>
         </div>
     </template>
+
+    <template id="partOfSpeechItem">
+        <li id="">
+            <span class="dict-partofspeach"></span>
+            <ol type="1" id="dictDefs" class="dict-definition">
+            </ol>
+        </li>
+    </template>
+
+
+    <script src="/public/library/jquery-3.4.1/jquery.min.js"></script>
+    <script src="/public/library/popper/popper.min.js"></script>
+    <script src="/public/library/bootstrap/bootstrap.min.js"></script>
 </body>
+
 
 </html>
