@@ -26,7 +26,7 @@ const paths = {
 		background: "background/",
 		contentScripts: "contentScripts/",
 		optionsPage: "optionsPage/",
-		browserAction: "browserAction/",
+		action: "action/",
 		docTypesDefinitions: "JSDocsTypes.js",
 		pages: "pages/",
 		root: "./"
@@ -38,7 +38,7 @@ const paths = {
 		background: "prod/background/",
 		contentScripts: "prod/contentScripts/",
 		optionsPage: "prod/optionsPage/",
-		browserAction: "prod/browserAction/",
+		action: "prod/action/",
 		pages: "prod/pages",
 		root: "prod/",
 	},
@@ -59,17 +59,18 @@ function buildProd(done) {
 		{ src: paths.dev.locales + "pt_BR/*.*", dest: paths.prod.locales + "pt_BR" },
 		{ src: paths.dev.locales + "pt_PT/*.*", dest: paths.prod.locales + "pt_PT" },
 		{ src: [paths.dev.optionsPage + "*.html", paths.dev.optionsPage + "*.css"], dest: paths.prod.optionsPage },
-		{ src: [paths.dev.browserAction + "*.html", paths.dev.browserAction + "*.css"], dest: paths.prod.browserAction },
+		{ src: [paths.dev.action + "*.html", paths.dev.action + "*.css"], dest: paths.prod.action },
 		{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts },
 		{ src: paths.dev.pages + "*.html", dest: paths.prod.pages }
 	];
 
 	const processedJavascripts = [
-		{ src: paths.dev.background + "eventPage.js", dest: paths.prod.background },
-		{ src: paths.dev.background + "messageManager.js", dest: paths.prod.background },
+		// { src: paths.dev.background + "eventPage.js", dest: paths.prod.background },
+		// { src: paths.dev.background + "messageManager.js", dest: paths.prod.background },
+		{ src: paths.dev.background + "worker.js", dest: paths.prod.background },
 		{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts },
 		{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage },
-		{ src: paths.dev.browserAction + "index.js", dest: paths.prod.browserAction },
+		{ src: paths.dev.action + "index.js", dest: paths.prod.action },
 		{ src: paths.dev.pages + "popoverGUI.js", dest: paths.prod.pages }
 	];
 

@@ -1,6 +1,3 @@
-"use strict";
-
-
 const Events = require("../utils/Events");
 
 /**

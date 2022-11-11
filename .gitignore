@@ -9,3 +9,5 @@ prod/*
 
 # Docs generated automatically by gulp-jsdoc3 and gulp.
 *.zip
+/prod.zip
+/prod_.zip
