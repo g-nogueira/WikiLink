@@ -1,0 +1,2 @@
+require("./eventPage")();
+require("./messageManager")();

@@ -63,7 +63,7 @@
 
 				http.get(url).then(response => {
 
-					let pages = findKey('pages', JSON.parse(response));
+					let pages = findKey('pages', response);
 					let data = {
 						title: pages[0].title,
 						body: pages[0].extract,
@@ -96,7 +96,7 @@
 				var url = `https://${language ==='rel'?'en' : language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks ? '%7Clanglinks' : ''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`;
 
 				http.get(url).then(response => {
-					let pages = findKey('pages', JSON.parse(response));
+					let pages = findKey('pages', response);
 					let data = {
 						title: pages[0].title || '',
 						text: pages[0].extract || '',
@@ -131,7 +131,7 @@
 				var url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`;
 
 				http.get(url).then(list => {
-					let pages = findKey('pages', JSON.parse(list));
+					let pages = findKey('pages', list);
 					let data = [];
 
 					if (Object.entries(pages).length > 0) {

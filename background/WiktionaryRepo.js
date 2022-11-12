@@ -16,7 +16,7 @@
 		searchTerm(term = '') {
 			return new Promise(async (resolve, reject) => {
 				const wikt = await http.get(`https://en.wiktionary.org/api/rest_v1/page/definition/${term.toLowerCase().trim()}`);
-				const response = JSON.parse(wikt);
+				const response = wikt;
 				if (response.title) {
 					resolve(undefined);
 				}
