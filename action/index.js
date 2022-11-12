@@ -1,3 +1,5 @@
+// import {MDCSnackbar} from '@material/snackbar';
+
 (function () {
 	'use strict';
 	/**
@@ -6,18 +8,18 @@
 	 * @returns {HTMLElement} 
 	 */
 	const DOM = elem => document.body.querySelector(elem);
+	const MDCSnackbar = require('@material/snackbar').MDCSnackbar;
 
-	var mdc = require("@material/snackbar/dist/mdc.snackbar");
 	const popoverDB = new (require("../utils/Storage"));
-	const MDCSnackbar = mdc.MDCSnackbar;
-	const MDCSnackbarFoundation = mdc.MDCSnackbarFoundation;
-	mdc.MDCSnackbar.attachTo(DOM('.mdc-snackbar'));
-	const snackbar = new MDCSnackbar(DOM('.mdc-snackbar'))
+	const snackbar = new MDCSnackbar(DOM('.mdc-snackbar'));
+	
 	var shortcutSnapshot = '';
 	var keyGroup = {
 		codes: [],
 		pressing: []
 	};
+	
+	snackbar.actionButtonText = 'OK';
 
 	initializer().DOMEvents()
 	initializer().elementsValues()
@@ -75,7 +77,8 @@
 	function onFocusOut(ev) {
 		if (DOM('.js-popupShortcut').value) {
 			saveShortcut().then(() => {
-				snackbar.show({ message: 'Shortcut saved!' });
+				snackbar.labelText = 'Shortcut saved!';
+				snackbar.open();
 
 				var instructionText = DOM('#instructions #shortcut').innerText;
 				DOM('#instructions #shortcut').innerText = DOM('.js-popupShortcut').value.replace(",", " + ");
@@ -130,14 +133,16 @@
 	function saveLanguage() {
 		var fallbackLanguage = DOM('.js-fallbackLanguage').value;
 		popoverDB.update('fallbackLang', fallbackLanguage).then(() => {
-			snackbar.show({ message: ' Language saved' });
+			snackbar.labelText = ' Language saved';
+			snackbar.open();
 		})
 	}
 
 	function savePopupMode() {
 		var popupMode = DOM('.js-popupMode').value;
 		popoverDB.update('popupMode', popupMode).then(() => {
-			snackbar.show({ message: 'Popup trigger saved' });
+			snackbar.labelText = 'Popup trigger saved';
+			snackbar.open();
 		});
 	}
 
@@ -156,7 +161,8 @@
 			}
 		});
 		popoverDB.update('nlpLangs', languages).then(() => {
-			snackbar.show({ message: 'Detection Algorithms saved' });
+			snackbar.labelText = 'Detection Algorithms saved';
+			snackbar.open();
 		});
 	}
 }());
