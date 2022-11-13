@@ -1,11 +1,9 @@
 (() => {
+	"use strict";
 
-	'use strict';
-
-	const franc = require('franc');
-	const http = require('../utils/Http');
-	const popoverDB = require('../utils/StorageManager');
-
+	const franc = require("franc");
+	const popoverDB = require("../utils/StorageManager");
+	const WKAPI = require("@g-nogueira/wikipediaapi");
 
 	/**
 	 * @summary The api for searching terms, images, and articles on Wikipedia.
@@ -20,24 +18,18 @@
 		 * @param {number} options.size The height in pixels of the image;
 		 * @returns {Promise<WikipediaImage>} Returns a promise that resolves to an object with url, width, and height properties.
 		 */
-		searchImage({ term, size }) {
-			return new Promise(resolve => {
-				http.get(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${term}&pithumbsize=${size}&format=json`)
-					.then(response => {
+		async searchImage({ term, size }) {
+			// THIS IS NEVER USED, SO IT WASN'T TESTED
 
-						let image = findKey('thumbnail', JSON.parse(response));
-						resolve(image);
+			let page = await WKAPI.searchImage(term, "en", size);
 
-					}).catch(error => {
+			if (!page) {
+				return { url: "", width: 250, height: 250 };
+			}
 
-						let imageInfo = {};
-						imageInfo.url = '';
-						imageInfo.width = 250;
-						imageInfo.height = 250;
+			let image = findKey("thumbnail", JSON.parse(page));
 
-						resolve(imageInfo);
-					})
-			});
+			return image;
 		}
 
 		/**
@@ -47,35 +39,25 @@
 		 * @param {string} [options.range] A set of words in the same language as the term.
 		 * @returns {Promise<{WikipediaPage}>} Returns a promise tha resolves to an object `WikipediaPage`.
 		 */
-		searchTerm({ range = '', term = '' }) {
+		async searchTerm({ range = "", term = "" }) {
+			// THIS IS NEVER USED, SO IT WASN'T TESTED
 
-			return new Promise(async resolve => {
-				const fallbackLang = await popoverDB.retrieve('fallbackLang');
-				var nlpWhiteList = await popoverDB.retrieve('nlpLangs') || ['eng'];
+			const fallbackLang = await popoverDB.retrieve("fallbackLang");
+			let nlpWhiteList = (await popoverDB.retrieve("nlpLangs")) || ["eng"];
 
-				var lang = identifyLanguage(range.trim(), nlpWhiteList);
-				var settings = {
-					langLinks: true,
-					sentences: 3
-				};
-				lang = lang === 'und' ? fallbackLang : lang;
-				var url = `https:///${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${settings.langLinks?'%7Clanglinks':''}%7Cinfo&indexpageids=1&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${settings.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&titles=${term}&redirects=1`;
+			let lang = identifyLanguage(range.trim(), nlpWhiteList);
+			lang = lang === "und" ? fallbackLang : lang;
 
-				http.get(url).then(response => {
+			let page = await WKAPI.searchTitle(term, lang, imageSize);
 
-					let pages = findKey('pages', response);
-					let data = {
-						title: pages[0].title,
-						body: pages[0].extract,
-						image: pages[0].thumbnail,
-						url: pages[0].fullurl
-					}
+			let data = {
+				title: page.title,
+				body: page.extract,
+				image: page.thumbnail,
+				url: page.fullurl,
+			};
 
-					resolve(data);
-
-				}).catch(error => resolve(null));
-
-			});
+			return data;
 		}
 
 		/**
@@ -86,28 +68,16 @@
 		 * @param {number|string} [options.imageSize=250] The height of the article's image, in pixel.
 		 * @returns {Promise<{WikipediaPage}>} Returns a promise tha resolves to an object `WikipediaPage`.
 		 */
-		getPageById({ pageId, language = 'en', imageSize = 250 }) {
-			return new Promise(resolve => {
+		async getPageById({ pageId, language = "en", imageSize = 250 }) {
+			let page = await WKAPI.getPageById(pageId, language, imageSize);
+			let data = {
+				title: page.title || "",
+				text: page.extract || "",
+				image: page.thumbnail || {},
+				url: page.fullurl || "",
+			};
 
-				var definitions = {
-					langLinks: true,
-					sentences: 3
-				};
-				var url = `https://${language ==='rel'?'en' : language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks ? '%7Clanglinks' : ''}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${definitions.sentences}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`;
-
-				http.get(url).then(response => {
-					let pages = findKey('pages', response);
-					let data = {
-						title: pages[0].title || '',
-						text: pages[0].extract || '',
-						image: pages[0].thumbnail || {},
-						url: pages[0].fullurl || ''
-					}
-
-					resolve(data);
-
-				}).catch(error => resolve(null));
-			});
+			return data;
 		}
 
 		/**
@@ -117,43 +87,24 @@
 		 * @param {string} options.term The full or partial article title to be searched for.
 		 * @returns {Promise<{WikipediaThumbnail}>} Returns a promise tha resolves to an object `WikipediaThumbnail`.
 		 */
-		getPageList({ range = '', term }) {
-			return new Promise(async resolve => {
+		async getPageList({ range = "", term }) {
+			let nlpWhiteList = (await popoverDB.retrieve("nlpLangs")) || ["eng"];
+			let lang = identifyLanguage(range, nlpWhiteList);
 
-				var nlpWhiteList = await popoverDB.retrieve('nlpLangs') || ['eng'];
-				var lang = identifyLanguage(range, nlpWhiteList);
+			let list = await WKAPI.searchResults(term, lang, 70, false);
+			let data = [];
 
-				var disambiguation = {
-					en: 'disambiguation',
-					pt: 'desambiguação',
-					es: 'desambiguación'
-				};
-				var url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&revids=&generator=prefixsearch&formatversion=2&piprop=thumbnail&pithumbsize=70&pilimit=10&wbptterms=description&gpssearch=${term}&gpslimit=10`;
-
-				http.get(url).then(list => {
-					let pages = findKey('pages', list);
-					let data = [];
-
-					if (Object.entries(pages).length > 0) {
-						data = pages.map(page => {
-							var isDesambiguation = page.terms && page.terms.description[0].includes(disambiguation[lang]);
-							if (!isDesambiguation) {
-								return {
-									index: page.index,
-									pageId: page.pageid,
-									title: page.title,
-									body: page.terms && page.terms.description[0] || '',
-									image: page.thumbnail && page.thumbnail.source || '',
-									lang: lang
-								};
-							}
-						});
-						data.sort((elA, elB) => elA.index - elB.index);
-					}
-
-					resolve(data);
-				});
-			});
+			if (Object.entries(list).length > 0) {
+				data = list.map((page) => ({
+					index: page.index,
+					pageId: page.pageid,
+					title: page.title,
+					body: (page.terms && page.terms.description[0]) || "",
+					image: (page.thumbnail && page.thumbnail.source) || "",
+					lang: lang,
+				}));
+			}
+			return data;
 		}
 	}
 
@@ -163,52 +114,48 @@
 	 * @summary Deep searches given key in the given object.
 	 * @param {object} obj The object to be deep searched.
 	 * @param {string} key The key to deep search in the object.
-	 * 
+	 *
 	 */
 	function findKey(key, obj) {
-
 		return keyToFind(key);
 
 		function keyToFind(key) {
 			var result = {};
 
-			Object.keys(obj).forEach(el => {
+			Object.keys(obj).forEach((el) => {
 				if (el === key) {
 					result = obj[el];
-				} else if (typeof obj[el] == 'object') {
+				} else if (typeof obj[el] == "object") {
 					result = findKey(key, obj[el]);
 				}
 			});
 
 			return result;
 		}
-
 	}
 
 	/**
 	 * Identifies the language of given argument string. The default is english.
 	 * @param {string} extract The string to identify the language.
 	 */
-	function identifyLanguage(extract, langs = ['eng']) {
+	function identifyLanguage(extract, langs = ["eng"]) {
 		// var testUTF8 = /([^\u0000-\u0040\u005B-\u0060\u007B-\u00BF\u02B0-\u036F\u00D7\u00F7\u2000-\u2BFF])+/g;
 		// var testDiacritics = /[\u00C0-\u00FF]/g;
 		// var text = extract && extract.match(testUTF8).toString();
 		// var isDiacritic = testDiacritics.test(text);
 
 		var languages = {
-			por: 'pt',
-			eng: 'en',
-			spa: 'es',
-			rus: 'ru',
+			por: "pt",
+			eng: "en",
+			spa: "es",
+			rus: "ru",
 		};
-
 
 		if (langs.length === 1) {
 			return languages[langs[0]];
 		} else {
 			let francRes = franc(extract, { whitelist: langs });
-			return languages[francRes] || 'en';
+			return languages[francRes] || "en";
 		}
 	}
-
 })();

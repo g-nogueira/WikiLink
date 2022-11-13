@@ -35,14 +35,14 @@ const paths = {
 		docTypesDefinitions: "JSDocsTypes.js",
 	},
 	prod: {
-		publicLibrary: "prod/public/",
-		publicImages: "prod/public/images/",
-		locales: "prod/_locales/",
-		background: "prod/background/",
-		contentScripts: "prod/contentScripts/",
-		optionsPage: "prod/optionsPage/",
-		action: "prod/action/",
-		path: "prod/",
+		publicLibrary: "dist/public/",
+		publicImages: "dist/public/images/",
+		locales: "dist/_locales/",
+		background: "dist/background/",
+		contentScripts: "dist/contentScripts/",
+		optionsPage: "dist/optionsPage/",
+		action: "dist/action/",
+		path: "dist/",
 	},
 };
 
@@ -65,7 +65,7 @@ const filesToBundle = [
 	{ src: paths.dev.action + "index.js", dest: paths.prod.action, browserify: null },
 ];
 
-const htmlToProcess = "prod/**/*.html";
+const htmlToProcess = `${paths.prod.path}**/*.html`;
 
 
 /**
@@ -78,7 +78,7 @@ function buildProd(done) {
 	bundle().then(() =>
 		copyFiles(filesToCopy).then(() =>
 			injectFiles(htmlToProcess).on("end", () => {
-				zipFiles({ src: "prod/**", dest: "./" });
+				zipFiles({ src: `${paths.prod.path}/**`, dest: "./" });
 				done();
 			})
 		)
@@ -137,9 +137,14 @@ function bundle() {
  * @returns {NodeJS.ReadWriteStream}
  */
 function copyFiles(optionsArray = []) {
-	log.info("🔪 Copying files...");
+	log.info("📄 Copying files...");
 	var pipeline = optionsArray.map(({ src, dest }) => {
-		return new Promise((resolve, reject) => gulp.src(src).pipe(gulpif(args.verbose, gulpprint())).pipe(gulp.dest(dest)).on("end", resolve));
+		return new Promise((resolve, reject) => 
+		gulp
+		.src(src)
+		.pipe(gulpif(args.verbose, gulpprint()))
+		.pipe(gulp.dest(dest))
+		.on("end", resolve));
 	});
 
 	return Promise.all(pipeline);
@@ -156,7 +161,7 @@ function injectFiles(src) {
 	return gulp
 		.src(src)
 		.pipe(inject(gulp.src([paths.prod.publicLibrary + "**/*.css", paths.prod.publicLibrary + "/**/*.js"]), { relative: true }))
-		.pipe(gulp.dest("prod/"));
+		.pipe(gulp.dest(paths.prod.path));
 }
 
 /**
@@ -168,11 +173,11 @@ function injectFiles(src) {
  */
 function zipFiles({ src, dest }) {
 	log.info("📦 Zipping files...");
-	return gulp.src(src).pipe(zip("prod.zip")).pipe(gulp.dest(dest));
+	return gulp.src(src).pipe(zip("dist.zip")).pipe(gulp.dest(dest));
 }
 
 /**
- * Generates the automatica documentation for the project
+ * Generates the automatic documentation for the project
  * @param {*} done
  */
 function generateDocumentation(done) {
