@@ -1,22 +1,22 @@
-const gulp = require('gulp');
-const browserify = require('browserify');
-const source = require('vinyl-source-stream');
-const buffer = require('vinyl-buffer');
-const sourcemaps = require('gulp-sourcemaps');
-const args = require('yargs').argv;
-const gulpprint = require('gulp-print').default;
-const gulpif = require('gulp-if');
-const jsdoc = require('gulp-jsdoc3');
-const inject = require('gulp-inject');
-const zip = require('gulp-zip');
-const path = require('path');
-const log = require('fancy-log');
-const watch = require('gulp-watch');
+const gulp = require("gulp");
+const ts = require("gulp-typescript");
+const tsProject = ts.createProject("tsconfig.json");
+const browserify = require("browserify");
+const source = require("vinyl-source-stream");
+const buffer = require("vinyl-buffer");
+const sourcemaps = require("gulp-sourcemaps");
+const args = require("yargs").argv;
+const gulpprint = require("gulp-print").default;
+const gulpif = require("gulp-if");
+const jsdoc = require("gulp-jsdoc3");
+const inject = require("gulp-inject");
+const zip = require("gulp-zip");
+const path = require("path");
+const log = require("fancy-log");
+const watch = require("gulp-watch");
 
-
-gulp.task('document', generateDocumentation);
-gulp.task('prod', buildProd);
-
+gulp.task("document", generateDocumentation);
+gulp.task("build", buildProd);
 
 const paths = {
 	dev: {
@@ -29,7 +29,7 @@ const paths = {
 		optionsPage: "optionsPage/",
 		action: "action/",
 		api: "api/",
-		docTypesDefinitions: "JSDocsTypes.js"
+		docTypesDefinitions: "JSDocsTypes.js",
 	},
 	prod: {
 		publicLibrary: "prod/public/",
@@ -39,15 +39,13 @@ const paths = {
 		contentScripts: "prod/contentScripts/",
 		optionsPage: "prod/optionsPage/",
 		action: "prod/action/",
-		path: "prod/"
+		path: "prod/",
 	},
 };
 
-
-
 /**
  * Does all the processing to transfer files to production.
- * @param {*} done 
+ * @param {*} done
  */
 function buildProd(done) {
 	const filesToCopy = [
@@ -59,26 +57,34 @@ function buildProd(done) {
 		{ src: paths.dev.locales + "pt_PT/*.*", dest: paths.prod.locales + "pt_PT" },
 		{ src: [paths.dev.optionsPage + "*.html", paths.dev.optionsPage + "*.css"], dest: paths.prod.optionsPage },
 		{ src: [paths.dev.action + "*.html", paths.dev.action + "*.css"], dest: paths.prod.action },
-		{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts }
+		{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts },
 	];
 
 	const filesToBundle = [
 		{ src: paths.dev.background + "worker.js", dest: paths.prod.background },
 		{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts },
 		{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage },
-		{ src: paths.dev.action + "index.js", dest: paths.prod.action }
+		{ src: paths.dev.action + "index.js", dest: paths.prod.action },
 	];
 
 	const htmlToProcess = "prod/**/*.html";
 
-	bundle(filesToBundle).then(() => copyFiles(filesToCopy)
-		.then(() => injectFiles(htmlToProcess)
-			.on('end', () => {
-				zipFiles({ src: "prod/**", dest: './' });
-				done();
-			})
+	transpile().then(() =>
+		bundle(filesToBundle).then(() =>
+			copyFiles(filesToCopy).then(() =>
+				injectFiles(htmlToProcess).on("end", () => {
+					zipFiles({ src: "prod/**", dest: "./" });
+					done();
+				})
+			)
 		)
 	);
+}
+
+function transpile() {
+	return new Promise((resolve, reject) => {
+		tsProject.src().pipe(tsProject()).js.pipe(gulp.dest("dist")).on("end", resolve);
+	});
 }
 
 /**
@@ -89,7 +95,6 @@ function buildProd(done) {
 function bundle(optionsArray = []) {
 	log.info("📚 Bundling files...");
 	var pipeline = optionsArray.map(({ src, dest }) => {
-
 		var fileName = path.extname(dest) ? path.basename(dest) : path.basename(src);
 		var destName = path.extname(dest) ? path.dirname(dest) : dest;
 
@@ -100,12 +105,13 @@ function bundle(optionsArray = []) {
 				.pipe(gulpif(args.verbose, gulpprint()))
 				.pipe(buffer())
 				.pipe(gulpif(args.debug, sourcemaps.init({ loadMaps: true })))
-				.pipe(gulpif(args.debug, sourcemaps.write('./')))
+				.pipe(gulpif(args.debug, sourcemaps.write("./")))
 				// .pipe(gulpif(args.debug,
 				// 	minify({ ext: { src: '.js', min: '-min.js' } }),
 				// 	minify({ ext: { src: '-debug.js', min: '.js' }, noSource: true })))
 				.pipe(gulp.dest(destName))
-				.on('end', resolve));
+				.on("end", resolve)
+		);
 	});
 
 	return Promise.all(pipeline);
@@ -119,11 +125,7 @@ function bundle(optionsArray = []) {
 function copyFiles(optionsArray = []) {
 	log.info("🔪 Copying files...");
 	var pipeline = optionsArray.map(({ src, dest }) => {
-		return new Promise((resolve, reject) =>
-			gulp.src(src)
-				.pipe(gulpif(args.verbose, gulpprint()))
-				.pipe(gulp.dest(dest))
-				.on('end', resolve));
+		return new Promise((resolve, reject) => gulp.src(src).pipe(gulpif(args.verbose, gulpprint())).pipe(gulp.dest(dest)).on("end", resolve));
 	});
 
 	return Promise.all(pipeline);
@@ -137,7 +139,8 @@ function copyFiles(optionsArray = []) {
 function injectFiles(src) {
 	log.info("💉 Injecting CSS & HTML...");
 
-	return gulp.src(src)
+	return gulp
+		.src(src)
 		.pipe(inject(gulp.src([paths.prod.publicLibrary + "**/*.css", paths.prod.publicLibrary + "/**/*.js"]), { relative: true }))
 		.pipe(gulp.dest("prod/"));
 }
@@ -151,12 +154,12 @@ function injectFiles(src) {
  */
 function zipFiles({ src, dest }) {
 	log.info("📦 Zipping files...");
-	return gulp.src(src).pipe(zip('prod.zip')).pipe(gulp.dest(dest));
+	return gulp.src(src).pipe(zip("prod.zip")).pipe(gulp.dest(dest));
 }
 
 /**
  * Generates the automatica documentation for the project
- * @param {*} done 
+ * @param {*} done
  */
 function generateDocumentation(done) {
 	gulp.src([paths.dev.api + "*.js", paths.dev.docTypesDefinitions], { read: false })
