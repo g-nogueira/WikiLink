@@ -19,6 +19,7 @@ const fancy_log = require("fancy-log");
 
 gulp.task("document", generateDocumentation);
 gulp.task("build", buildProd);
+gulp.task("watch", watchFiles);
 
 const paths = {
 	dev: {
@@ -58,23 +59,22 @@ const filesToCopy = [
 ];
 
 const filesToBundle = [
-	{ src: paths.dev.background + "worker.js", dest: paths.prod.background },
-	{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts },
-	{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage },
-	{ src: paths.dev.action + "index.js", dest: paths.prod.action },
+	{ src: paths.dev.background + "worker.js", dest: paths.prod.background, browserify: null },
+	{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts, browserify: null },
+	{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage, browserify: null },
+	{ src: paths.dev.action + "index.js", dest: paths.prod.action, browserify: null },
 ];
 
 const htmlToProcess = "prod/**/*.html";
 
-let watchedBrowserify = watchify(browserify({ entries: filesToBundle.map(el => el.src) }).plugin(tsify));
-watchedBrowserify.on("update", bundle);
-watchedBrowserify.on("log", fancy_log);
 
 /**
  * Does all the processing to transfer files to production.
  * @param {*} done
  */
 function buildProd(done) {
+	watchFiles();
+
 	bundle().then(() =>
 		copyFiles(filesToCopy).then(() =>
 			injectFiles(htmlToProcess).on("end", () => {
@@ -85,11 +85,16 @@ function buildProd(done) {
 	);
 }
 
-function transpile() {
-	return new Promise((resolve, reject) => {
-		tsProject.src().pipe(tsProject()).js.pipe(gulp.dest("dist")).on("end", resolve);
+function watchFiles(done) {
+	filesToBundle.forEach(({ src, dest }, i) => {
+		filesToBundle[i].browserify = watchify(browserify({ entries: src }).plugin(tsify))
+			.on("update", bundle)
+			.on("log", fancy_log);
+
+		done && done();
 	});
 }
+
 
 /**
  * Creates bundles of files and its dependencies.
@@ -101,12 +106,13 @@ function bundle() {
 
 	let optionsArray = filesToBundle;
 
-	let pipeline = optionsArray.map(({ src, dest }) => {
+	let pipeline = optionsArray.map(({ src, dest, browserify }) => {
+		log.info(src);
 		let fileName = path.extname(dest) ? path.basename(dest) : path.basename(src);
 		let destName = path.extname(dest) ? path.dirname(dest) : dest;
 
 		return new Promise((resolve, reject) =>
-			watchedBrowserify
+			browserify
 				.bundle()
 				.on("error", fancy_log)
 				.pipe(source(fileName))

@@ -6,7 +6,6 @@
   "scripts": {
     "start": "",
     "test": "browser-sync optionsPage -w",
-    "bundle": "browserify background/WikipediaAPI.js -o background/bundles/WikiAPIBundle.js",
     "build": "gulp build"
   },
   "dependencies": {
