@@ -28,31 +28,41 @@ class SearchManager extends BackgroundCommunicator {
 	 * @param {number|string} [options.imageSize=250] The height of the article's image, in pixel.
 	 */
 	async getArticle(pageId: string, language = "en", imageSize = 250): Promise<Article> {
-		let article : Article = await this.sendMessage({ provider: "wp", request: "getPageById", args: { pageId, language, imageSize } });
+		let article: Article = await this.sendMessage({ provider: "wp", request: "getPageById", args: { pageId, language, imageSize } });
 
-        return article;
+		return article;
+	}
+
+	/**
+	 * @summary Searches a given term definition.
+	 * @param {String} obj.term The term to be searched.
+	 */
+	async getDefinitions(term: string): Promise<{ [key: string]: WiktionaryResult[]; }> {
+		let wiktionary: { [key: string]: WiktionaryResult[] } = await this.sendMessage({ provider: "wt", request: "searchTerm", args: term });
+
+        return wiktionary;
 	}
 }
 
 interface Article {
-    title: string;
-    text: string;
-    image: ExternalImage;
-    // {
-    //     "title": "Npm (software)",
-    //     "text": "npm (originally short for Node Package Manager) is a package manager for the JavaScript programming language maintained by npm, Inc. npm is the default package manager for the JavaScript runtime environment Node.js. It consists of a command line client, also called npm, and an online database of public and paid-for private packages, called the npm registry.",
-    //     "image": {
-    //         "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/250px-Npm-logo.svg.png",
-    //         "width": 250,
-    //         "height": 97
-    //     },
-    //     "url": "https://en.wikipedia.org/wiki/Npm_(software)"
-    // }
+	title: string;
+	text: string;
+	image: ExternalImage;
+	// {
+	//     "title": "Npm (software)",
+	//     "text": "npm (originally short for Node Package Manager) is a package manager for the JavaScript programming language maintained by npm, Inc. npm is the default package manager for the JavaScript runtime environment Node.js. It consists of a command line client, also called npm, and an online database of public and paid-for private packages, called the npm registry.",
+	//     "image": {
+	//         "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/250px-Npm-logo.svg.png",
+	//         "width": 250,
+	//         "height": 97
+	//     },
+	//     "url": "https://en.wikipedia.org/wiki/Npm_(software)"
+	// }
 }
 interface ExternalImage {
-    source: URL;
-    width: number;
-    height: number;
+	source: URL;
+	width: number;
+	height: number;
 }
 
 interface WikipediaThumbnail {

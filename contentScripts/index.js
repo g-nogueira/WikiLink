@@ -14,8 +14,6 @@
 	"use strict";
 
 	const popoverDB = require("../utils/StorageManager");
-	const wikiAPI = require("../api/WikipediaAPI");
-	const wiktAPI = require("../api/WiktionaryAPI");
 	const searcher = require("../utils/SearchManager");
 	const popoverManager = require("../models/popoverManager");
 	const popoverDesigner = require("../models/popoverDesigner");
@@ -23,8 +21,6 @@
 	var element = popoverDesigner.getBasicShell(appendOnBody);
 	var popover = popoverManager(element);
 	var cals = insertCals();
-	var wikipediaAPI = wikiAPI;
-	var wiktionaryAPI = wiktAPI;
 	var isPopoverEnabled = await popoverDB.retrieve("isEnabled");
 	var shortcut = await popoverDB.retrieve("shortcut");
 	var popupMode = await popoverDB.retrieve("popupMode");
@@ -107,12 +103,11 @@
 		var wSelection = window.getSelection();
 		var selection = wSelection.toString();
 		var selContext = wSelection.focusNode.data;
-		
+
 		selectedString = selection;
 
 		// Popover enabled?
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
-			
 			// Switch to tab 0
 			popover.showPage("js-wikiSearches");
 
@@ -131,8 +126,8 @@
 
 	/**
 	 * Shows a specific article in the popup.
-	 * @param {string} language 
-	 * @param {string} pageId 
+	 * @param {string} language
+	 * @param {string} pageId
 	 */
 	async function loadArticle(language, pageId) {
 		popover.isLoading({ area: "article" });
@@ -143,8 +138,13 @@
 		loadWictionary(article.title);
 	}
 
-	function loadWictionary(title) {
-		wiktionaryAPI.getDefinitions(title).then((resp) => popover.setDictionary(resp));
+	/**
+	 * Shows a specific term definition in the popup
+	 * @param {string} title
+	 */
+	async function loadWictionary(title) {
+		let definition = await searcher.getDefinitions(title);
+		popover.setDictionary(definition);
 	}
 
 	function appendOnBody(popover) {
