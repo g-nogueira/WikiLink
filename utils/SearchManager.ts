@@ -10,55 +10,157 @@ class SearchManager extends BackgroundCommunicator {
 	 * @param {string} [range] A set of words in the same language as the term.
 	 * @param {string} term The full or partial article title to be searched for.
 	 */
-	async searchTerm(term: string, range: string): Promise<{ pages: WikipediaThumbnail; definitions: { [key: string]: WiktionaryResult[]; }; }>{
-		let pageList : WikipediaThumbnail = await this.sendMessage({ provider: "wp", request: "getPageList", args: { range, term } });
-		let wiktionary : { [key: string]: WiktionaryResult[]; } = await this.sendMessage({ provider: "wt", request: "searchTerm", args: term });
+	async searchTerm(term: string, range: string): Promise<{ pages: WikipediaThumbnail; definitions: { [key: string]: WiktionaryResult[] } }> {
+		let pageList: WikipediaThumbnail = await this.sendMessage({ provider: "wp", request: "getPageList", args: { range, term } });
+		let wiktionary: { [key: string]: WiktionaryResult[] } = await this.sendMessage({ provider: "wt", request: "searchTerm", args: term });
 
-        return {
-            pages: pageList,
-            definitions: wiktionary,
-        }
+		return {
+			pages: pageList,
+			definitions: wiktionary,
+		};
 	}
-};
+
+	/**
+	 * @summary Searchs a single page on Wikipedia containing given id.
+	 * @param {object} options
+	 * @param {number|string} options.pageId The id of the article page.
+	 * @param {string} [options.language=en] A set of words in the same language as the term.
+	 * @param {number|string} [options.imageSize=250] The height of the article's image, in pixel.
+	 */
+	async getArticle(pageId: string, language = "en", imageSize = 250): Promise<Article> {
+		let article : Article = await this.sendMessage({ provider: "wp", request: "getPageById", args: { pageId, language, imageSize } });
+
+        return article;
+	}
+}
+
+interface Article {
+    title: string;
+    text: string;
+    image: ExternalImage;
+    // {
+    //     "title": "Npm (software)",
+    //     "text": "npm (originally short for Node Package Manager) is a package manager for the JavaScript programming language maintained by npm, Inc. npm is the default package manager for the JavaScript runtime environment Node.js. It consists of a command line client, also called npm, and an online database of public and paid-for private packages, called the npm registry.",
+    //     "image": {
+    //         "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/250px-Npm-logo.svg.png",
+    //         "width": 250,
+    //         "height": 97
+    //     },
+    //     "url": "https://en.wikipedia.org/wiki/Npm_(software)"
+    // }
+}
+interface ExternalImage {
+    source: URL;
+    width: number;
+    height: number;
+}
 
 interface WikipediaThumbnail {
-    /**
-     * The index number of the thumbnail in the search result set.
-     */
-    index: number;
-    /**
-     * The title of the thumbnail.
-     */
-    title: string;
-    /**
-     * The id of the article page.
-     */
-    pageId: number;
-    /**
-     * The text of the thumbnail.
-     */
-    body: string;
-    /**
-     * The language of the article.
-     */
-    lang: string;
-    /**
-     * The url for the image of the thumbnail.
-     */
-    image: URL;
+	/**
+	 * The index number of the thumbnail in the search result set.
+	 */
+	index: number;
+	/**
+	 * The title of the thumbnail.
+	 */
+	title: string;
+	/**
+	 * The id of the article page.
+	 */
+	pageId: number;
+	/**
+	 * The text of the thumbnail.
+	 */
+	body: string;
+	/**
+	 * The language of the article.
+	 */
+	lang: string;
+	/**
+	 * The url for the image of the thumbnail.
+	 */
+	image: URL;
 }
 interface WiktionaryResult {
-    partOfSpeech: "Abbreviation" | "Acronym" | "Adjective" | "Adverb" | "Affix" | "AnsweringParticle" | "Article" | "AuxiliaryVerb" | "Character" | "Collocation" | "CombiningForm" | "ComparativeParticle" | "Conjunction" | "Contraction" | "DemonstrativePronoun" | "Determiner" | "Expression" | "FirstName" | "FocusParticle" | "Gismu" | "Hanzi" | "Hiragana" | "Idiom" | "IndefinitePronoun" | "Initialism" | "IntensifyingParticle" | "Interjection" | "InterrogativeAdverb" | "InterrogativePronoun" | "Kanji" | "Katakana" | "LastName" | "Letter" | "Lexeme" | "MeasureWord" | "Mnemonic" | "ModalParticle" | "NegativeParticle" | "Noun" | "NounPhrase" | "Number" | "Numeral" | "Onomatopoeia" | "Participle" | "Particle" | "PersonalPronoun" | "Phrase" | "PlaceNameEnding" | "PluraleTantum" | "PossessivePronoun" | "Postposition" | "Prefix" | "Preposition" | "Pronoun" | "ProperNoun" | "Proverb" | "PunctuationMark" | "ReflexivePronoun" | "RelativePronoun" | "Salutation" | "SingulareTantum" | "Subordinator" | "Suffix" | "Symbol" | "Toponym" | "Transliteration" | "Verb" | "WordForm";
-    language: string;
-    definitions: WiktionaryDefinition[];
+	partOfSpeech:
+		| "Abbreviation"
+		| "Acronym"
+		| "Adjective"
+		| "Adverb"
+		| "Affix"
+		| "AnsweringParticle"
+		| "Article"
+		| "AuxiliaryVerb"
+		| "Character"
+		| "Collocation"
+		| "CombiningForm"
+		| "ComparativeParticle"
+		| "Conjunction"
+		| "Contraction"
+		| "DemonstrativePronoun"
+		| "Determiner"
+		| "Expression"
+		| "FirstName"
+		| "FocusParticle"
+		| "Gismu"
+		| "Hanzi"
+		| "Hiragana"
+		| "Idiom"
+		| "IndefinitePronoun"
+		| "Initialism"
+		| "IntensifyingParticle"
+		| "Interjection"
+		| "InterrogativeAdverb"
+		| "InterrogativePronoun"
+		| "Kanji"
+		| "Katakana"
+		| "LastName"
+		| "Letter"
+		| "Lexeme"
+		| "MeasureWord"
+		| "Mnemonic"
+		| "ModalParticle"
+		| "NegativeParticle"
+		| "Noun"
+		| "NounPhrase"
+		| "Number"
+		| "Numeral"
+		| "Onomatopoeia"
+		| "Participle"
+		| "Particle"
+		| "PersonalPronoun"
+		| "Phrase"
+		| "PlaceNameEnding"
+		| "PluraleTantum"
+		| "PossessivePronoun"
+		| "Postposition"
+		| "Prefix"
+		| "Preposition"
+		| "Pronoun"
+		| "ProperNoun"
+		| "Proverb"
+		| "PunctuationMark"
+		| "ReflexivePronoun"
+		| "RelativePronoun"
+		| "Salutation"
+		| "SingulareTantum"
+		| "Subordinator"
+		| "Suffix"
+		| "Symbol"
+		| "Toponym"
+		| "Transliteration"
+		| "Verb"
+		| "WordForm";
+	language: string;
+	definitions: WiktionaryDefinition[];
 }
 interface WiktionaryDefinition {
-    definition: string;
-    parsedExamples: WiktionaryParsedExample[];
+	definition: string;
+	parsedExamples: WiktionaryParsedExample[];
 }
 interface WiktionaryParsedExample {
-    translation: string;
-    example: string;
+	translation: string;
+	example: string;
 }
 
 module.exports = new SearchManager();

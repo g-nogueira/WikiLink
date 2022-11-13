@@ -99,32 +99,48 @@
 		}
 	}
 
+	/**
+	 * Starts the process of showing the popup
+	 */
 	async function startProcess() {
+		// Get the current selection
 		var wSelection = window.getSelection();
 		var selection = wSelection.toString();
 		var selContext = wSelection.focusNode.data;
+		
+		selectedString = selection;
 
+		// Popover enabled?
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
+			
+			// Switch to tab 0
 			popover.showPage("js-wikiSearches");
-			selectedString = selection;
+
+			// Show popup as loading
+			document.body.style.overflow = "hidden";
+			popover.isLoading({ area: "thumbnails" });
+			popover.render(wSelection, cals[0], cals[1]);
+
+			// Fetch search results async then show them
 			searcher.searchTerm(selection, selContext).then((result) => {
 				popover.setThumbnails(result.pages);
 				popover.setDictionary(result.definitions);
 			});
-
-			document.body.style.overflow = "hidden";
-			popover.isLoading({ area: "thumbnails" });
-			popover.render(wSelection, cals[0], cals[1]);
 		}
 	}
 
-	function loadArticle(language, pageId) {
+	/**
+	 * Shows a specific article in the popup.
+	 * @param {string} language 
+	 * @param {string} pageId 
+	 */
+	async function loadArticle(language, pageId) {
 		popover.isLoading({ area: "article" });
 
-		wikipediaAPI.getPageById({ pageId: pageId, imageSize: 250, language }).then(async (article) => {
-			popover.setArticle(article);
-			loadWictionary(article.title);
-		});
+		let article = await searcher.getArticle(pageId, language);
+
+		popover.setArticle(article);
+		loadWictionary(article.title);
 	}
 
 	function loadWictionary(title) {
