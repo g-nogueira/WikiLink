@@ -59,7 +59,7 @@ const filesToCopy = [
 ];
 
 const filesToBundle = [
-	{ src: paths.dev.background + "worker.js", dest: paths.prod.background, browserify: null },
+	{ src: paths.dev.background + "worker.js", dest: paths.prod.background, watchedBrowserify: null },
 	{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts, browserify: null },
 	{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage, browserify: null },
 	{ src: paths.dev.action + "index.js", dest: paths.prod.action, browserify: null },
@@ -87,7 +87,7 @@ function buildProd(done) {
 
 function watchFiles(done) {
 	filesToBundle.forEach(({ src, dest }, i) => {
-		filesToBundle[i].browserify = watchify(browserify({ entries: src }).plugin(tsify))
+		filesToBundle[i].watchedBrowserify = watchify(browserify({ entries: src }).plugin(tsify))
 			.on("update", bundle)
 			.on("log", fancy_log);
 
@@ -106,13 +106,13 @@ function bundle() {
 
 	let optionsArray = filesToBundle;
 
-	let pipeline = optionsArray.map(({ src, dest, browserify }) => {
+	let pipeline = optionsArray.map(({ src, dest, watchedBrowserify }) => {
 		log.info(src);
 		let fileName = path.extname(dest) ? path.basename(dest) : path.basename(src);
 		let destName = path.extname(dest) ? path.dirname(dest) : dest;
 
 		return new Promise((resolve, reject) =>
-			browserify
+			(args.detached ? browserify({ entries: src }).plugin(tsify) : watchedBrowserify)
 				.bundle()
 				.on("error", fancy_log)
 				.pipe(source(fileName))

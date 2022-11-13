@@ -6,7 +6,8 @@
   "scripts": {
     "start": "",
     "test": "browser-sync optionsPage -w",
-    "build": "gulp build"
+    "build": "gulp build",
+    "build-detached": "gulp build --detached"
   },
   "dependencies": {
     "@g-nogueira/wikipediaapi": "github:g-nogueira/WikipediaAPI",
