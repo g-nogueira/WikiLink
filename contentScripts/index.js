@@ -10,12 +10,13 @@
 @------------------------------------------------@
 */
 
-(async function() {
+(async function () {
 	"use strict";
 
 	const popoverDB = require("../utils/StorageManager");
 	const wikiAPI = require("../api/WikipediaAPI");
 	const wiktAPI = require("../api/WiktionaryAPI");
+	const searcher = require("../utils/SearchManager");
 	const popoverManager = require("../models/popoverManager");
 	const popoverDesigner = require("../models/popoverDesigner");
 
@@ -24,19 +25,18 @@
 	var cals = insertCals();
 	var wikipediaAPI = wikiAPI;
 	var wiktionaryAPI = wiktAPI;
-	var isPopoverEnabled = await popoverDB.retrieve('isEnabled');
-	var shortcut = await popoverDB.retrieve('shortcut');
-	var popupMode = await popoverDB.retrieve('popupMode');
+	var isPopoverEnabled = await popoverDB.retrieve("isEnabled");
+	var shortcut = await popoverDB.retrieve("shortcut");
+	var popupMode = await popoverDB.retrieve("popupMode");
 	var keyGroup = [];
-	var selectedString = '';
+	var selectedString = "";
 
 	initDOMEvents();
-
 
 	////////////////// IMPLEMENTATION //////////////////
 
 	function initDOMEvents() {
-		var wikilink = document.body.querySelector('.js-wikilink');
+		var wikilink = document.body.querySelector(".js-wikilink");
 		var timeOutId = null;
 
 		popoverDB.onChanges((oldV, newV) => {
@@ -49,29 +49,28 @@
 
 		changePopupMode(popupMode);
 
-		wikilink.addEventListener('mouseleave', onMouseLeave);
-		popover.addEventListener('thumbclick', ev => loadArticle(ev.detail.article.lang, ev.detail.article.id))
-		popover.addEventListener('tabselect', ev => loadWictionary(selectedString));
+		wikilink.addEventListener("mouseleave", onMouseLeave);
+		popover.addEventListener("thumbclick", (ev) => loadArticle(ev.detail.article.lang, ev.detail.article.id));
+		popover.addEventListener("tabselect", (ev) => loadWictionary(selectedString));
 
 		function changePopupMode(popupMode) {
-			if (popupMode === 'shortcut') {
-				document.removeEventListener('mouseup', onMouseUp);
-				document.addEventListener('keydown', onKeyDown)
-				document.addEventListener('keyup', onKeyUp)
-			} else if (popupMode === 'default') {
-				document.addEventListener('mouseup', onMouseUp);
-				document.removeEventListener('keydown', onKeyDown)
-				document.removeEventListener('keyup', onKeyUp)
+			if (popupMode === "shortcut") {
+				document.removeEventListener("mouseup", onMouseUp);
+				document.addEventListener("keydown", onKeyDown);
+				document.addEventListener("keyup", onKeyUp);
+			} else if (popupMode === "default") {
+				document.addEventListener("mouseup", onMouseUp);
+				document.removeEventListener("keydown", onKeyDown);
+				document.removeEventListener("keyup", onKeyUp);
 			}
 		}
 
 		function onMouseLeave(ev) {
-			document.body.style.overflow = 'auto';
+			document.body.style.overflow = "auto";
 			popover.hide();
 		}
 
 		function onKeyDown(ev) {
-
 			clearTimeout(timeOutId);
 
 			if (keyGroup.toString() === shortcut.toString()) {
@@ -83,7 +82,7 @@
 			}
 			// console.table(keyGroup);
 
-			timeOutId = setTimeout(() => keyGroup = [], 10 * 1000);
+			timeOutId = setTimeout(() => (keyGroup = []), 10 * 1000);
 		}
 
 		function onKeyUp(ev) {
@@ -98,70 +97,67 @@
 				startProcess();
 			}
 		}
-
 	}
 
-	function startProcess() {
+	async function startProcess() {
 		var wSelection = window.getSelection();
 		var selection = wSelection.toString();
 		var selContext = wSelection.focusNode.data;
 
 		if (isPopoverEnabled && !selection.isCollapsed && !isEmptySelection(selection)) {
-
-			popover.showPage('js-wikiSearches');
+			popover.showPage("js-wikiSearches");
 			selectedString = selection;
-			wikipediaAPI.getPageList({ term: selection, range: selContext }).then(popover.setThumbnails);
-			wiktionaryAPI.getDefinitions(selection.toString()).then(popover.setDictionary);
+			searcher.searchTerm(selection, selContext).then((result) => {
+				popover.setThumbnails(result.pages);
+				popover.setDictionary(result.definitions);
+			});
 
-			document.body.style.overflow = 'hidden';
-			popover.isLoading({ area: 'thumbnails' });
+			document.body.style.overflow = "hidden";
+			popover.isLoading({ area: "thumbnails" });
 			popover.render(wSelection, cals[0], cals[1]);
 		}
 	}
 
 	function loadArticle(language, pageId) {
-		popover.isLoading({ area: 'article' });
+		popover.isLoading({ area: "article" });
 
-		wikipediaAPI.getPageById({ pageId: pageId, imageSize: 250, language }).then(async article => {
+		wikipediaAPI.getPageById({ pageId: pageId, imageSize: 250, language }).then(async (article) => {
 			popover.setArticle(article);
 			loadWictionary(article.title);
 		});
 	}
 
 	function loadWictionary(title) {
-		wiktionaryAPI
-			.getDefinitions(title)
-			.then(resp => popover.setDictionary(resp))
+		wiktionaryAPI.getDefinitions(title).then((resp) => popover.setDictionary(resp));
 	}
 
 	function appendOnBody(popover) {
-		const div = document.createElement('div');
-		const shadow = div.attachShadow({ mode: 'open' });
+		const div = document.createElement("div");
+		const shadow = div.attachShadow({ mode: "open" });
 
-		div.classList.add('js-wikilink');
+		div.classList.add("js-wikilink");
 		shadow.appendChild(popover);
 		document.body.appendChild(div);
 
-		return shadow.querySelector('.js-popover');
+		return shadow.querySelector(".js-popover");
 	}
 
 	function insertCals() {
 		var cal1, cal2;
-		cal1 = createCal('cal1');
-		cal2 = createCal('cal2');
+		cal1 = createCal("cal1");
+		cal2 = createCal("cal2");
 		document.body.appendChild(cal1);
 		document.body.appendChild(cal2);
-
 
 		function createCal(id) {
 			return document.createRange().createContextualFragment(`<div id="${id}">&nbsp;</div>`);
 		}
 
-		return [document.querySelector('#cal1'), document.querySelector('#cal2')];
+		return [document.querySelector("#cal1"), document.querySelector("#cal2")];
 	}
 
 	function isEmptySelection(selection) {
 		//If given argument is not empty neither is white spaces
 		return !(selection && /\S/.test(selection));
 	}
-}());
+})();

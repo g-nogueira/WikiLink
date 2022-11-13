@@ -9,7 +9,7 @@
 		/**
 		 * @summary It searches a given term on wiktionary.
 		 * @param {String} obj.term The term to be searched on wiktionary.
-		 * @returns {Promise.<object>} Returns a Promise that resolves to an object with ....
+		 * @returns {Promise<object>} Returns a Promise that resolves to an object with ....
 		 */
 		searchTerm(term = '') {
 			return new Promise(async resolve => {
