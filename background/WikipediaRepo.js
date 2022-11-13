@@ -83,30 +83,16 @@
 		 * @param {number|string} [options.imageSize=250] The height of the article's image, in pixel.
 		 * @returns {Promise<{WikipediaPage}>} Returns a promise tha resolves to an object `WikipediaPage`.
 		 */
-		getPageById({ pageId, language = "en", imageSize = 250 }) {
-			return new Promise((resolve) => {
-				var definitions = {
-					langLinks: true,
-					sentences: 3,
-				};
-				var url = `https://${language === "rel" ? "en" : language}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription%7Cextracts${definitions.langLinks ? "%7Clanglinks" : ""}%7Cinfo&indexpageids=1&pageids=${pageId}&formatversion=2&piprop=thumbnail&pithumbsize=${imageSize}&pilimit=10&exsentences=${
-					definitions.sentences
-				}&exintro=1&explaintext=1&llprop=url&inprop=url&redirects=1`;
+		async getPageById({ pageId, language = "en", imageSize = 250 }) {
+			let page = await WKAPI.getPageById(pageId, language, imageSize);
+			let data = {
+				title: page.title || "",
+				text: page.extract || "",
+				image: page.thumbnail || {},
+				url: page.fullurl || "",
+			};
 
-				http.get(url)
-					.then((response) => {
-						let pages = findKey("pages", response);
-						let data = {
-							title: pages[0].title || "",
-							text: pages[0].extract || "",
-							image: pages[0].thumbnail || {},
-							url: pages[0].fullurl || "",
-						};
-
-						resolve(data);
-					})
-					.catch((error) => resolve(null));
-			});
+			return data;
 		}
 
 		/**
