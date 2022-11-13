@@ -13,7 +13,9 @@ const inject = require("gulp-inject");
 const zip = require("gulp-zip");
 const path = require("path");
 const log = require("fancy-log");
-const watch = require("gulp-watch");
+const watchify = require("watchify");
+const tsify = require("tsify");
+const fancy_log = require("fancy-log");
 
 gulp.task("document", generateDocumentation);
 gulp.task("build", buildProd);
@@ -43,40 +45,42 @@ const paths = {
 	},
 };
 
+const filesToCopy = [
+	{ src: paths.dev.publicLibrary + "**/*.*", dest: paths.prod.publicLibrary },
+	{ src: paths.dev.publicImages + "icon01/*.png", dest: paths.prod.publicImages + "icon01/" },
+	{ src: paths.dev.manifest, dest: paths.prod.path },
+	{ src: paths.dev.locales + "en/*.*", dest: paths.prod.locales + "en" },
+	{ src: paths.dev.locales + "pt_BR/*.*", dest: paths.prod.locales + "pt_BR" },
+	{ src: paths.dev.locales + "pt_PT/*.*", dest: paths.prod.locales + "pt_PT" },
+	{ src: [paths.dev.optionsPage + "*.html", paths.dev.optionsPage + "*.css"], dest: paths.prod.optionsPage },
+	{ src: [paths.dev.action + "*.html", paths.dev.action + "*.css"], dest: paths.prod.action },
+	{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts },
+];
+
+const filesToBundle = [
+	{ src: paths.dev.background + "worker.js", dest: paths.prod.background },
+	{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts },
+	{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage },
+	{ src: paths.dev.action + "index.js", dest: paths.prod.action },
+];
+
+const htmlToProcess = "prod/**/*.html";
+
+let watchedBrowserify = watchify(browserify({ entries: filesToBundle.map(el => el.src) }).plugin(tsify));
+watchedBrowserify.on("update", bundle);
+watchedBrowserify.on("log", fancy_log);
+
 /**
  * Does all the processing to transfer files to production.
  * @param {*} done
  */
 function buildProd(done) {
-	const filesToCopy = [
-		{ src: paths.dev.publicLibrary + "**/*.*", dest: paths.prod.publicLibrary },
-		{ src: paths.dev.publicImages + "icon01/*.png", dest: paths.prod.publicImages + "icon01/" },
-		{ src: paths.dev.manifest, dest: paths.prod.path },
-		{ src: paths.dev.locales + "en/*.*", dest: paths.prod.locales + "en" },
-		{ src: paths.dev.locales + "pt_BR/*.*", dest: paths.prod.locales + "pt_BR" },
-		{ src: paths.dev.locales + "pt_PT/*.*", dest: paths.prod.locales + "pt_PT" },
-		{ src: [paths.dev.optionsPage + "*.html", paths.dev.optionsPage + "*.css"], dest: paths.prod.optionsPage },
-		{ src: [paths.dev.action + "*.html", paths.dev.action + "*.css"], dest: paths.prod.action },
-		{ src: paths.dev.contentScripts + "*.css", dest: paths.prod.contentScripts },
-	];
-
-	const filesToBundle = [
-		{ src: paths.dev.background + "worker.js", dest: paths.prod.background },
-		{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts },
-		{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage },
-		{ src: paths.dev.action + "index.js", dest: paths.prod.action },
-	];
-
-	const htmlToProcess = "prod/**/*.html";
-
-	transpile().then(() =>
-		bundle(filesToBundle).then(() =>
-			copyFiles(filesToCopy).then(() =>
-				injectFiles(htmlToProcess).on("end", () => {
-					zipFiles({ src: "prod/**", dest: "./" });
-					done();
-				})
-			)
+	bundle().then(() =>
+		copyFiles(filesToCopy).then(() =>
+			injectFiles(htmlToProcess).on("end", () => {
+				zipFiles({ src: "prod/**", dest: "./" });
+				done();
+			})
 		)
 	);
 }
@@ -92,15 +96,19 @@ function transpile() {
  * @param {Array<FileSourceDestination>} optionsArray The options object.
  * @returns {Promise<NodeJS.ReadWriteStream>}
  */
-function bundle(optionsArray = []) {
+function bundle() {
 	log.info("📚 Bundling files...");
-	var pipeline = optionsArray.map(({ src, dest }) => {
-		var fileName = path.extname(dest) ? path.basename(dest) : path.basename(src);
-		var destName = path.extname(dest) ? path.dirname(dest) : dest;
+
+	let optionsArray = filesToBundle;
+
+	let pipeline = optionsArray.map(({ src, dest }) => {
+		let fileName = path.extname(dest) ? path.basename(dest) : path.basename(src);
+		let destName = path.extname(dest) ? path.dirname(dest) : dest;
 
 		return new Promise((resolve, reject) =>
-			browserify({ entries: src })
+			watchedBrowserify
 				.bundle()
+				.on("error", fancy_log)
 				.pipe(source(fileName))
 				.pipe(gulpif(args.verbose, gulpprint()))
 				.pipe(buffer())
