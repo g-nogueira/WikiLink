@@ -6,8 +6,7 @@
   "scripts": {
     "start": "",
     "test": "browser-sync optionsPage -w",
-    "bundle": "browserify background/WikipediaAPI.js -o background/bundles/WikiAPIBundle.js",
-    "build": "gulp prod"
+    "build": "gulp build"
   },
   "dependencies": {
     "@material/snackbar": "^0.36.0",
@@ -16,6 +15,7 @@
     "material-design-lite": "^1.3.0"
   },
   "devDependencies": {
+    "@types/node": "^18.11.9",
     "browserify": "^16.2.3",
     "fancy-log": "^1.3.3",
     "gulp": "github:gulpjs/gulp#v4.0.0-alpha.3",
@@ -27,12 +27,15 @@
     "gulp-print": "^5.0.0",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-string-replace": "^1.1.2",
-    "gulp-typescript": "^5.0.0",
+    "gulp-typescript": "^5.0.1",
     "gulp-uglify": "^3.0.1",
     "gulp-watch": "^5.0.1",
     "gulp-zip": "^4.2.0",
+    "tsify": "^5.0.4",
+    "typescript": "^4.8.4",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
+    "watchify": "^4.0.0",
     "yargs": "^12.0.5"
   },
   "repository": {
