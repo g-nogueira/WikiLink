@@ -1,3 +1,5 @@
+import { IMessage } from "../types/Interfaces";
+
 export class BackgroundCommunicator {
 	constructor() {}
 
@@ -6,10 +8,4 @@ export class BackgroundCommunicator {
 			chrome.runtime.sendMessage(message, resolve);
 		});
 	}
-}
-
-export interface IMessage {
-	provider: string;
-	request: string;
-	args: any;
 }

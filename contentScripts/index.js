@@ -13,7 +13,7 @@
 (async function () {
 	"use strict";
 
-	const popoverDB = require("../utils/StorageManager");
+	const popoverDB = require("../utils/DEPRECATED_StorageManager");
 	const searcher = require("../utils/SearchManager");
 	const popoverManager = require("../models/popoverManager");
 	const popoverDesigner = require("../models/popoverDesigner");

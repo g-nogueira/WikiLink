@@ -1,5 +1,8 @@
-﻿
-chrome.runtime.onInstalled.addListener(initializeDB);
+﻿import { StorageManager } from "../utils/StorageManager";
+
+export function initializeStorage() {
+	chrome.runtime.onInstalled.addListener(initializeDB);
+}
 
 /**
  * 1: fallBackLanguage: 1: 'en' || 2: 'es' || 3: 'pt' || 4: 'ru'
@@ -17,7 +20,7 @@ async function initializeDB() {
 		5: true,
 	});
 
-	retrieve()
+	StorageManager.retrieve()
 		.then((response) => {
 			if (typeof response !== "object") {
 				chrome.storage.sync.set({ wldt: wikilinkData }, () => {});
@@ -27,22 +30,6 @@ async function initializeDB() {
 			chrome.storage.sync.set({ wldt: wikilinkData }, () => {});
 			chrome.runtime.reload();
 		});
-}
-
-function retrieve(property = "") {
-	return new Promise(async (resolve, reject) => {
-		var dataString = "";
-		try {
-			dataString = await new Promise((resolve) => chrome.storage.sync.get("wldt", (obj) => resolve(obj["wldt"])));
-			var data = JSON.parse(dataString);
-
-			if (property.length > 0) resolve(data[this._encodeProp(property)]);
-			else resolve(data);
-		} catch (error) {
-			console.log("Is on catch block");
-			reject(error);
-		}
-	});
 }
 
 // chrome.contextMenus.create({

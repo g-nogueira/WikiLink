@@ -2,7 +2,7 @@
 	"use strict";
 
 	const franc = require("franc");
-	const popoverDB = require("../utils/StorageManager");
+	const popoverDB = require("../utils/DEPRECATED_StorageManager");
 	const WKAPI = require("@g-nogueira/wikipediaapi");
 
 	/**
