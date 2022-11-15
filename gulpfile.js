@@ -16,6 +16,7 @@ const log = require("fancy-log");
 const watchify = require("watchify");
 const tsify = require("tsify");
 const fancy_log = require("fancy-log");
+const rename = require("gulp-rename");
 
 gulp.task("document", generateDocumentation);
 gulp.task("build", buildProd);
@@ -59,7 +60,7 @@ const filesToCopy = [
 ];
 
 const filesToBundle = [
-	{ src: paths.dev.background + "worker.js", dest: paths.prod.background, browserify: null },
+	{ src: paths.dev.background + "worker.ts", dest: paths.prod.background, browserify: null },
 	{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts, browserify: null },
 	{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage, browserify: null },
 	{ src: paths.dev.action + "index.js", dest: paths.prod.action, browserify: null },
@@ -107,10 +108,8 @@ function bundle() {
 	let optionsArray = filesToBundle;
 
 	let pipeline = optionsArray.map(({ src, dest, browserify }) => {
-		log.info(src);
 		let fileName = path.extname(dest) ? path.basename(dest) : path.basename(src);
 		let destName = path.extname(dest) ? path.dirname(dest) : dest;
-
 		return new Promise((resolve, reject) =>
 			browserify
 				.bundle()
@@ -123,6 +122,7 @@ function bundle() {
 				// .pipe(gulpif(args.debug,
 				// 	minify({ ext: { src: '.js', min: '-min.js' } }),
 				// 	minify({ ext: { src: '-debug.js', min: '.js' }, noSource: true })))
+				.pipe(rename({extname: ".js"}))
 				.pipe(gulp.dest(destName))
 				.on("end", resolve)
 		);
