@@ -1,7 +1,6 @@
 import { IMessage } from "./../types/Interfaces";
-
-const wikiRepo = require("./WikipediaRepo");
-const wiktRepo = require("./WiktionaryRepo");
+import { WikipediaRepoMethodNames, WKRepo } from "./WikipediaRepo";
+import { WiktionaryRepoMethodNames, WTRepo } from "./WiktionaryRepo";
 
 export function initializeMessageListener() {
 	chrome.runtime.onMessage.addListener((request, sender, sendResponde) => {
@@ -14,9 +13,9 @@ async function processRequest(request: IMessage) {
 	let resp = {};
 
 	if (request.provider === "wp") {
-		resp = await wikiRepo[request.request](request.args);
+		resp = await WKRepo[request.request as WikipediaRepoMethodNames](request.args);
 	} else if (request.provider === "wt") {
-		resp = await wiktRepo[request.request](request.args);
+		resp = await WTRepo[request.request as WiktionaryRepoMethodNames](request.args);
 	}
 
 	return resp;

@@ -36,6 +36,13 @@ export interface WikipediaThumbnail {
 	 */
 	image: URL;
 }
+
+export interface Article {
+	title: string,
+	text: string,
+	image: string,
+	url: URL,
+}
 export interface WiktionaryResult {
 	partOfSpeech:
 		| "Abbreviation"
