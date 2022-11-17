@@ -1,2 +1,0 @@
-require("./eventPage")();
-require("./messageManager")();
