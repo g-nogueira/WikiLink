@@ -1,3 +1,27 @@
+export interface WikilinkSchema {
+	fallbackLang: string;
+	popupMode: "shortcut" | "default";
+	shortcut: string[];
+	nlpLangs: string[];
+	isEnabled: boolean;
+}
+
+// {
+// 	"fallbackLang": "en",
+// 	"popupMode": "shortcut",
+// 	"shortcut": [
+// 		"ShiftLeft",
+// 		"AltLeft"
+// 	],
+// 	"nlpLangs": [
+// 		"por",
+// 		"eng",
+// 		"esp",
+// 		"rus"
+// 	],
+// 	"isEnabled": true
+// }
+
 export interface IMessage {
 	provider: string;
 	request: string;
@@ -37,11 +61,28 @@ export interface WikipediaThumbnail {
 	image: URL;
 }
 
+// export interface Article {
+// 	title: string,
+// 	text: string,
+// 	image: string,
+// }
+
 export interface Article {
-	title: string,
-	text: string,
-	image: string,
-	url: URL,
+	title: string;
+	text: string;
+	image: ExternalImage;
+	url: URL;
+
+	// {
+	//     "title": "Npm (software)",
+	//     "text": "npm (originally short for Node Package Manager) is a package manager for the JavaScript programming language maintained by npm, Inc. npm is the default package manager for the JavaScript runtime environment Node.js. It consists of a command line client, also called npm, and an online database of public and paid-for private packages, called the npm registry.",
+	//     "image": {
+	//         "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/250px-Npm-logo.svg.png",
+	//         "width": 250,
+	//         "height": 97
+	//     },
+	//     "url": "https://en.wikipedia.org/wiki/Npm_(software)"
+	// }
 }
 export interface WiktionaryResult {
 	partOfSpeech:

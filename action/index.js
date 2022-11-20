@@ -8,7 +8,7 @@
 	const DOM = elem => document.body.querySelector(elem);
 
 	var mdc = require("@material/snackbar/dist/mdc.snackbar");
-	const popoverDB = require("../utils/DEPRECATED_StorageManager");
+	const popoverDB = require("../utils/StorageManager").StorageManager;
 	const MDCSnackbar = mdc.MDCSnackbar;
 	const MDCSnackbarFoundation = mdc.MDCSnackbarFoundation;
 	mdc.MDCSnackbar.attachTo(DOM('.mdc-snackbar'));
