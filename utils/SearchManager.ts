@@ -1,4 +1,4 @@
-import { ExternalImage, WikipediaThumbnail, WiktionaryResult } from "../types/Interfaces";
+import { Article, ExternalImage, WikipediaThumbnail, WiktionaryResult } from "../types/Interfaces";
 import { BackgroundCommunicator } from "./BackgroundCommunicator";
 
 class SearchManager extends BackgroundCommunicator {
@@ -11,8 +11,8 @@ class SearchManager extends BackgroundCommunicator {
 	 * @param {string} [range] A set of words in the same language as the term.
 	 * @param {string} term The full or partial article title to be searched for.
 	 */
-	async searchTerm(term: string, range: string): Promise<{ pages: WikipediaThumbnail; definitions: { [key: string]: WiktionaryResult[] } }> {
-		let pageList: WikipediaThumbnail = await this.sendMessage({ provider: "wp", request: "getPageList", args: { range, term } });
+	async searchTerm(term: string, range: string): Promise<{ pages: WikipediaThumbnail[]; definitions: { [key: string]: WiktionaryResult[] } }> {
+		let pageList: WikipediaThumbnail[] = await this.sendMessage({ provider: "wp", request: "getPageList", args: { range, term } });
 		let wiktionary: { [key: string]: WiktionaryResult[] } = await this.sendMessage({ provider: "wt", request: "searchTerm", args: term });
 
 		return {
@@ -38,31 +38,14 @@ class SearchManager extends BackgroundCommunicator {
 	 * @summary Searches a given term definition.
 	 * @param {String} obj.term The term to be searched.
 	 */
-	async getDefinitions(term: string): Promise<{ [key: string]: WiktionaryResult[]; }> {
+	async getDefinitions(term: string): Promise<{ [key: string]: WiktionaryResult[] }> {
 		let wiktionary: { [key: string]: WiktionaryResult[] } = await this.sendMessage({ provider: "wt", request: "searchTerm", args: term });
 
-        return wiktionary;
+		return wiktionary;
 	}
 }
 
-interface Article {
-	title: string;
-	text: string;
-	image: ExternalImage;
-	// {
-	//     "title": "Npm (software)",
-	//     "text": "npm (originally short for Node Package Manager) is a package manager for the JavaScript programming language maintained by npm, Inc. npm is the default package manager for the JavaScript runtime environment Node.js. It consists of a command line client, also called npm, and an online database of public and paid-for private packages, called the npm registry.",
-	//     "image": {
-	//         "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/250px-Npm-logo.svg.png",
-	//         "width": 250,
-	//         "height": 97
-	//     },
-	//     "url": "https://en.wikipedia.org/wiki/Npm_(software)"
-	// }
-}
-
-
-module.exports = new SearchManager();
+export const Search = new SearchManager();
 
 // {
 //     "en": [

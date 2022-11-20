@@ -1,3 +1,5 @@
+import { WikilinkSchema } from "../types/Interfaces";
+
 /**
  * Manages and facilitate storage (chrome.storage.sync) requests and watchers.
  */
@@ -55,16 +57,19 @@ class PopoverDB {
 	 * @param {*} objName The name of the object in the storage to listens.
 	 * @returns {Function} A function to pass as an argument the function to execute on event.
 	 */
-	onChanges(fn: Function): void {
+	onChanges(fn: (oldValue : WikilinkSchema, newValue : WikilinkSchema) => void): void {
 		var decodedObj = this._decodeObj;
+		var that = this;
 
 		chrome.storage.onChanged.addListener((changes, areaName) => {
 			//Popover enabled state changed
 			if (changes["wldt"]) {
-				fn(decodedObj(JSON.parse(changes["wldt"].oldValue)), decodedObj(JSON.parse(changes["wldt"].newValue)));
+				fn(decodedObj.apply(that, [JSON.parse(changes["wldt"].oldValue)]), decodedObj.apply(that, [JSON.parse(changes["wldt"].newValue)]));
 			}
 		});
 	}
+
+
 
 	private _decodeProp(propertyName: number) {
 		let props: { [key: number]: string } = {
@@ -100,4 +105,4 @@ class PopoverDB {
 		return decodedObj;
 	}
 }
-export let StorageManager = new PopoverDB();
+export const StorageManager = new PopoverDB();

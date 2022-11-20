@@ -25,4 +25,3 @@ After the user have selected an option (an article), it will be displayed there,
 
 
 <!-- ## Under the hood -->
-Just testing some automations

@@ -61,7 +61,7 @@ const filesToCopy = [
 
 const filesToBundle = [
 	{ src: paths.dev.background + "worker.ts", dest: paths.prod.background, watchedBrowserify: null },
-	{ src: paths.dev.contentScripts + "index.js", dest: paths.prod.contentScripts, watchedBrowserify: null },
+	{ src: paths.dev.contentScripts + "index.ts", dest: paths.prod.contentScripts, watchedBrowserify: null },
 	{ src: paths.dev.optionsPage + "index.js", dest: paths.prod.optionsPage, watchedBrowserify: null },
 	{ src: paths.dev.action + "index.js", dest: paths.prod.action, watchedBrowserify: null },
 ];
